@@ -1,6 +1,11 @@
 <template>
-  <div>
-    <p>Some default layout content shared across all pages</p>
+  <main>
+    <Nav />
     <slot />
-  </div>
+    <Footer />
+  </main>
 </template>
+
+<style scoped>
+
+</style>
