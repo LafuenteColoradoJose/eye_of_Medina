@@ -1,11 +1,12 @@
 <template>
-  <main class="display-flex flex-col justify-between max-h-screen max-w-screen mx-1 ">
+  <main class="display-flex flex-col justify-between max-h-screen max-w-screen mx-1">
     <Nav />
-    <slot />
+    <Transition name="page" mode="out-in">
+      <slot />
+    </Transition>
     <Footer />
   </main>
 </template>
 
 <style scoped>
-
 </style>
