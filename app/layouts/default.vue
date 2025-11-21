@@ -1,5 +1,5 @@
 <template>
-  <main class="display-flex flex-col justify-between max-h-screen max-w-screen mx-1">
+  <main class="flex flex-col justify-between min-h-screen min-w-screen">
     <Nav />
     <Transition name="page" mode="out-in">
       <slot />
@@ -8,5 +8,4 @@
   </main>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
