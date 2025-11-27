@@ -1,9 +1,6 @@
 <template>
-  <section>
-    <h1 class="text-3xl font-bold underline">
-      Login Page
-    </h1>
-
+    <section>
+        <h2 class="text-2xl font-bold">Login</h2>
     <form class="mt-4">
       <div class="mb-4">
         <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
@@ -17,14 +14,4 @@
     </form>
 
     </section>
-    
-  
 </template>
-
-<script lang="ts" setup>
-
-</script>
-
-<style scoped>
-
-</style>
