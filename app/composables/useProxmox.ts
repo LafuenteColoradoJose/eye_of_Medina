@@ -1,5 +1,4 @@
 export const useProxmox = () => {
-  const config = useRuntimeConfig()
   
   // Estado de autenticación
   const authToken = useState<string | null>('proxmox-auth-token', () => null)
@@ -62,52 +61,7 @@ export const useProxmox = () => {
     }
   }
 
-  /**
-   * Login usando API Token (más seguro para aplicaciones)
-   * @param tokenId - Token ID (formato: user@realm!tokenname)
-   * @param tokenSecret - Secret del token
-   * @param proxmoxHost - Host de Proxmox
-   */
-  const loginWithToken = async (tokenId: string, tokenSecret: string, proxmoxHost: string) => {
-    try {
-      // Con tokens API, no necesitamos ticket, usamos el token directamente
-      authToken.value = `PVEAPIToken=${tokenId}=${tokenSecret}`
-      username.value = tokenId.split('!')[0]
-      
-      // Verificar que el token funciona haciendo una petición de prueba
-      const testResponse = await proxmoxRequest('/version', 'GET', proxmoxHost)
-      
-      if (testResponse.success) {
-        if (process.client) {
-          localStorage.setItem('proxmox-auth-token', authToken.value)
-          localStorage.setItem('proxmox-username', username.value)
-          localStorage.setItem('proxmox-host', proxmoxHost)
-        }
-
-        return {
-          success: true,
-          message: 'Login con token exitoso',
-          data: testResponse.data,
-        }
-      }
-
-      return {
-        success: false,
-        message: 'Token inválido',
-      }
-    } catch (error: any) {
-      console.error('Error en login con token:', error)
-      authToken.value = null
-      username.value = null
-      
-      return {
-        success: false,
-        message: error.message || 'Error al autenticar con token',
-        error,
-      }
-    }
-  }
-
+  
   /**
    * Hacer una petición autenticada a la API de Proxmox
    */
@@ -198,7 +152,6 @@ export const useProxmox = () => {
     
     // Métodos
     login,
-    loginWithToken,
     proxmoxRequest,
     logout,
     restoreSession,
