@@ -4,9 +4,11 @@ import Login from '~/components/login.vue';
 </script>
 
 <template>
-    <h1 class="text-3xl font-bold underline">
-        
+  <div class="p-6">
+    <h1 class="text-3xl font-bold underline mb-4">
+      Welcome to Eye of Medina
     </h1>
 
     <Login />
+  </div>
 </template>

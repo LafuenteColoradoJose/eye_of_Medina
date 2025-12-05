@@ -1,9 +1,9 @@
 <template>
-  <nav class="flex flex-col justify-between items-center border-2 border-[#354647] p-2 bg-[#14BBCA] ">
-    <ul class="flex flex-col justify-around items-center gap-4 p-4">
+  <nav class="flex flex-col items-center border-r-2 border-[#354647] p-4 bg-[#14BBCA] min-h-full">
+    <ul class="flex flex-col items-center gap-6 p-4">
       <Logo />
-      <li><NuxtLink to="/">Home</NuxtLink></li>
-      <li><NuxtLink to="/dashboard">Dashboard</NuxtLink></li>
+      <li><NuxtLink to="/" class="hover:underline">Home</NuxtLink></li>
+      <li><NuxtLink to="/dashboard" class="hover:underline">Dashboard</NuxtLink></li>
     </ul>
   </nav>
 </template>

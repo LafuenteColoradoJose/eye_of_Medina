@@ -1,13 +1,15 @@
 <template>
-  <main class="flex flex-col h-4/6">
-    <aside class="flex flex-row justify-start">
+  <div class="flex flex-col min-h-screen">
+    <div class="flex flex-row flex-1">
       <Nav />
-      <Transition name="page" mode="out-in">
-        <slot />
-      </Transition>
-    </aside>
+      <main class="flex-1 overflow-auto">
+        <Transition name="page" mode="out-in">
+          <slot />
+        </Transition>
+      </main>
+    </div>
     <Footer />
-  </main>
+  </div>
 </template>
 
 <style scoped></style>
