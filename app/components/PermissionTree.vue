@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
 const props = defineProps<{ nodes: Array<any> }>()
 const nodes = props.nodes || []
 </script>
