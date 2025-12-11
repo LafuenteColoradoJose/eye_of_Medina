@@ -6,6 +6,8 @@
       <li><NuxtLink to="/dashboard" class="hover:underline">Dashboard</NuxtLink></li>
       <li><NuxtLink to="/users" class="hover:underline">Usuarios</NuxtLink></li>
       <li><NuxtLink to="/groups" class="hover:underline">Grupos</NuxtLink></li>
+      <li><NuxtLink to="/roles" class="hover:underline">Roles</NuxtLink></li>
+      <li><NuxtLink to="/permissions" class="hover:underline">Permisos</NuxtLink></li>
     </ul>
   </nav>
 </template>

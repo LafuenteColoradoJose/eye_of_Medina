@@ -213,6 +213,33 @@ export const useProxmox = () => {
     deleteGroup: async (groupid: string) => {
       return await proxmoxRequest(`/access/groups/${encodeURIComponent(groupid)}`, 'DELETE')
     },
+    // Role management
+    listRoles: async () => {
+      return await proxmoxRequest('/access/roles', 'GET')
+    },
+    createRole: async (roleid: string, privs?: string) => {
+      // privs: comma-separated privileges
+      return await proxmoxRequest('/access/roles', 'POST', undefined, { roleid, privs })
+    },
+    deleteRole: async (roleid: string) => {
+      return await proxmoxRequest(`/access/roles/${encodeURIComponent(roleid)}`, 'DELETE')
+    },
+
+    // ACL / Permissions management
+    listACLs: async () => {
+      return await proxmoxRequest('/access/acl', 'GET')
+    },
+    createACL: async (path: string, role: string, options?: Record<string, any>) => {
+      // options may include userid, groupid, poolid, vmid, propagate
+      const body: any = { path, role, ...options }
+      return await proxmoxRequest('/access/acl', 'POST', undefined, body)
+    },
+    deleteACL: async (path: string, role?: string, options?: Record<string, any>) => {
+      const body: any = { path }
+      if (role) body.role = role
+      if (options) Object.assign(body, options)
+      return await proxmoxRequest('/access/acl', 'DELETE', undefined, body)
+    },
     logout,
     restoreSession,
   }
