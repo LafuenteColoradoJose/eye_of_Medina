@@ -10,22 +10,37 @@ export const useProxmox = () => {
    * Login a Proxmox usando usuario y contraseña
    * @param user - Usuario (formato: username@realm, ej: root@pam)
    * @param password - Contraseña
-   * @param proxmoxHost - Host de Proxmox (ej: https://192.168.1.100:8006)
+   * @param proxmoxHost - Host de Proxmox (ej: https://192.168.8.2400:8006)
    */
   const login = async (user: string, password: string, proxmoxHost: string) => {
     try {
-      const response = await $fetch(`${proxmoxHost}/api2/json/access/ticket`, {
-        method: 'POST',
-        body: {
-          username: user,
-          password: password,
-        },
-        // Importante: Proxmox usa certificados auto-firmados
-        // En producción, deberías usar certificados válidos
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      })
+      // Enviar como form-urlencoded (Proxmox espera form data)
+      const form = new URLSearchParams()
+      form.append('username', user)
+      form.append('password', password)
+
+      let response: any
+
+      // Si estamos en el cliente, hacemos la petición al endpoint local que actúa
+      // como proxy para evitar problemas de CORS y certificados autofirmados.
+      if (typeof window !== 'undefined') {
+        response = await $fetch('/api/proxmox/login', {
+          method: 'POST',
+          body: {
+            username: user,
+            password,
+            host: proxmoxHost,
+          },
+        })
+      } else {
+        response = await $fetch(`${proxmoxHost}/api2/json/access/ticket`, {
+          method: 'POST',
+          body: form,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        })
+      }
 
       if (response && response.data) {
         authToken.value = response.data.ticket
@@ -66,7 +81,7 @@ export const useProxmox = () => {
    * Hacer una petición autenticada a la API de Proxmox
    */
   const proxmoxRequest = async (endpoint: string, method: string = 'GET', host?: string, body?: any) => {
-    const proxmoxHost = host || (process.client ? localStorage.getItem('proxmox-host') : null)
+    const proxmoxHost = host || (typeof window !== 'undefined' ? localStorage.getItem('proxmox-host') : null)
     
     if (!proxmoxHost) {
       throw new Error('Host de Proxmox no configurado')
@@ -90,11 +105,26 @@ export const useProxmox = () => {
         headers['Authorization'] = authToken.value
       }
 
-      const response = await $fetch(`${proxmoxHost}/api2/json${endpoint}`, {
-        method,
-        headers,
-        body,
-      })
+      let response: any
+
+      // If in browser, use server proxy to avoid CORS and TLS issues
+      if (typeof window !== 'undefined') {
+        response = await $fetch('/api/proxmox/request', {
+          method: 'POST',
+          body: {
+            endpoint,
+            method,
+            host: proxmoxHost,
+            data: body,
+          },
+        })
+      } else {
+        response = await $fetch(`${proxmoxHost}/api2/json${endpoint}`, {
+          method: method as any,
+          headers,
+          body,
+        })
+      }
 
       return {
         success: true,

@@ -11,7 +11,7 @@
           type="text" 
           id="proxmox-host" 
           v-model="proxmoxHost"
-          placeholder="https://192.168.1.100:8006"
+          placeholder="https://192.168.8.240:8006"
           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" 
         />
       </div>
@@ -75,7 +75,7 @@ const router = useRouter();
 const { login } = useProxmox();
 
 // Estado del formulario
-const proxmoxHost = ref('https://192.168.1.100:8006');
+const proxmoxHost = ref('https://192.168.8.240:8006');
 const username = ref('root');
 const realm = ref('pam');
 const password = ref('');

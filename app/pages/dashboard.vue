@@ -27,6 +27,37 @@
 
     <!-- Contenido del dashboard cuando está autenticado -->
     <div v-else class="space-y-6">
+      <div class="flex gap-4">
+        <button @click="getUsers" :disabled="loading" class="bg-indigo-500 text-white px-3 py-2 rounded">{{ loading ? 'Cargando...' : 'Usuarios' }}</button>
+        <button @click="getVMs" :disabled="loading" class="bg-indigo-500 text-white px-3 py-2 rounded">{{ loading ? 'Cargando...' : 'Máquinas (VMs)' }}</button>
+        <button @click="getPools" :disabled="loading" class="bg-indigo-500 text-white px-3 py-2 rounded">{{ loading ? 'Cargando...' : 'Pools' }}</button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded shadow">
+          <h3 class="font-bold mb-2">Usuarios</h3>
+          <div v-if="users.length === 0" class="text-sm text-gray-500">No hay usuarios cargados.</div>
+          <ul v-else class="space-y-2 text-sm">
+            <li v-for="u in users" :key="u.userid">{{ u.userid }} — {{ u.email || u.comment || '' }}</li>
+          </ul>
+        </div>
+
+        <div class="bg-white p-4 rounded shadow">
+          <h3 class="font-bold mb-2">Máquinas (VMs)</h3>
+          <div v-if="vms.length === 0" class="text-sm text-gray-500">No hay VMs cargadas.</div>
+          <ul v-else class="space-y-2 text-sm">
+            <li v-for="vm in vms" :key="vm.vmid">{{ vm.name || vm.vmid }} — Nodo: {{ vm.node }} — Status: {{ vm.status }}</li>
+          </ul>
+        </div>
+
+        <div class="bg-white p-4 rounded shadow">
+          <h3 class="font-bold mb-2">Pools</h3>
+          <div v-if="pools.length === 0" class="text-sm text-gray-500">No hay pools cargados.</div>
+          <ul v-else class="space-y-2 text-sm">
+            <li v-for="p in pools" :key="p.poolid">{{ p.poolid }} — {{ p.comment || '' }}</li>
+          </ul>
+        </div>
+      </div>
       <!-- Botón para obtener versión de Proxmox -->
       <div class="bg-white p-6 rounded-lg shadow">
         <h2 class="text-xl font-bold mb-4">Información del Servidor</h2>
@@ -106,6 +137,57 @@ const getVersion = async () => {
     error.value = result.message || 'Error al obtener la versión';
   }
 };
+
+// Obtener usuarios
+const users = ref<any[]>([])
+const getUsers = async () => {
+  loading.value = true
+  error.value = ''
+  users.value = []
+
+  const result = await proxmoxRequest('/access/users', 'GET')
+  loading.value = false
+
+  if (result.success) {
+    users.value = result.data || []
+  } else {
+    error.value = result.message || 'Error al obtener usuarios'
+  }
+}
+
+// Obtener VMs (cluster resources type=vm)
+const vms = ref<any[]>([])
+const getVMs = async () => {
+  loading.value = true
+  error.value = ''
+  vms.value = []
+
+  const result = await proxmoxRequest('/cluster/resources?type=vm', 'GET')
+  loading.value = false
+
+  if (result.success) {
+    vms.value = result.data || []
+  } else {
+    error.value = result.message || 'Error al obtener VMs'
+  }
+}
+
+// Obtener pools
+const pools = ref<any[]>([])
+const getPools = async () => {
+  loading.value = true
+  error.value = ''
+  pools.value = []
+
+  const result = await proxmoxRequest('/pools', 'GET')
+  loading.value = false
+
+  if (result.success) {
+    pools.value = result.data || []
+  } else {
+    error.value = result.message || 'Error al obtener pools'
+  }
+}
 
 // Obtener lista de nodos
 const getNodes = async () => {
