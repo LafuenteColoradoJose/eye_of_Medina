@@ -8,6 +8,7 @@
       <li><NuxtLink to="/groups" class="hover:underline">Grupos</NuxtLink></li>
       <li><NuxtLink to="/roles" class="hover:underline">Roles</NuxtLink></li>
       <li><NuxtLink to="/permissions" class="hover:underline">Permisos</NuxtLink></li>
+      <li><NuxtLink to="/permissions-tree" class="hover:underline">Árbol permisos</NuxtLink></li>
     </ul>
   </nav>
 </template>
