@@ -4,6 +4,8 @@
       <Logo />
       <li><NuxtLink to="/" class="hover:underline">Home</NuxtLink></li>
       <li><NuxtLink to="/dashboard" class="hover:underline">Dashboard</NuxtLink></li>
+      <li><NuxtLink to="/users" class="hover:underline">Usuarios</NuxtLink></li>
+      <li><NuxtLink to="/groups" class="hover:underline">Grupos</NuxtLink></li>
     </ul>
   </nav>
 </template>

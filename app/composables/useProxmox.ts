@@ -185,6 +185,34 @@ export const useProxmox = () => {
     // Métodos
     login,
     proxmoxRequest,
+    // CRUD helpers
+    createUser: async (userid: string, password: string, realm = 'pam', comment?: string) => {
+      // userid should be like 'user' (without @realm) per Proxmox API expects userid and realm separately
+      const fullUser = `${userid}@${realm}`
+      // Proxmox expects form-encoded fields: userid, password, comment
+      return await proxmoxRequest('/access/users', 'POST', undefined, { userid: fullUser, password, comment })
+    },
+    deleteUser: async (userid: string) => {
+      // DELETE /access/users/{userid}
+      return await proxmoxRequest(`/access/users/${encodeURIComponent(userid)}`, 'DELETE')
+    },
+    updateUser: async (userid: string, data: Record<string, any>) => {
+      // PUT /access/users/{userid} with form data (e.g., comment)
+      return await proxmoxRequest(`/access/users/${encodeURIComponent(userid)}`, 'PUT', undefined, data)
+    },
+    // Group management
+    listGroups: async () => {
+      return await proxmoxRequest('/access/groups', 'GET')
+    },
+    createGroup: async (groupid: string, comment?: string) => {
+      return await proxmoxRequest('/access/groups', 'POST', undefined, { groupid, comment })
+    },
+    updateGroup: async (groupid: string, data: Record<string, any>) => {
+      return await proxmoxRequest(`/access/groups/${encodeURIComponent(groupid)}`, 'PUT', undefined, data)
+    },
+    deleteGroup: async (groupid: string) => {
+      return await proxmoxRequest(`/access/groups/${encodeURIComponent(groupid)}`, 'DELETE')
+    },
     logout,
     restoreSession,
   }

@@ -32,7 +32,23 @@ export default defineEventHandler(async (event) => {
       headers,
     }
 
-    if (method !== 'GET' && body.data !== undefined) fetchOptions.body = body.data
+    // If sending data and the endpoint expects form-encoded (common in Proxmox),
+    // convert plain object to URLSearchParams. We treat POST requests and when
+    // body.data is a plain object (not string/Buffer).
+    if (method !== 'GET' && body.data !== undefined) {
+      if (body.data && typeof body.data === 'object' && !(body.data instanceof String)) {
+        // Use form encoding for compatibility with Proxmox endpoints
+        const params = new URLSearchParams()
+        for (const key of Object.keys(body.data)) {
+          const val = body.data[key]
+          if (val !== undefined && val !== null) params.append(key, String(val))
+        }
+        fetchOptions.body = params
+        fetchOptions.headers = { ...(fetchOptions.headers || {}), 'Content-Type': 'application/x-www-form-urlencoded' }
+      } else {
+        fetchOptions.body = body.data
+      }
+    }
 
     const res = await $fetch(`${host}/api2/json${endpoint}`, fetchOptions)
 
