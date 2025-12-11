@@ -116,6 +116,8 @@ export const useProxmox = () => {
             method,
             host: proxmoxHost,
             data: body,
+            authToken: authToken.value,
+            csrfToken: csrfToken.value,
           },
         })
       } else {
