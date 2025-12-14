@@ -1,4 +1,6 @@
 export const useProxmox = () => {
+  const runtimeConfig = useRuntimeConfig()
+  const defaultHost = runtimeConfig.public?.proxmoxHost || (process.server ? runtimeConfig.proxmoxHost : '')
   
   // Estado de autenticación
   const authToken = useState<string | null>('proxmox-auth-token', () => null)
@@ -14,6 +16,12 @@ export const useProxmox = () => {
    */
   const login = async (user: string, password: string, proxmoxHost: string) => {
     try {
+      const hostToUse = proxmoxHost || defaultHost
+
+      if (!hostToUse) {
+        throw new Error('Host de Proxmox no configurado')
+      }
+
       // Enviar como form-urlencoded (Proxmox espera form data)
       const form = new URLSearchParams()
       form.append('username', user)
@@ -29,11 +37,11 @@ export const useProxmox = () => {
           body: {
             username: user,
             password,
-            host: proxmoxHost,
+            host: hostToUse,
           },
         })
       } else {
-        response = await $fetch(`${proxmoxHost}/api2/json/access/ticket`, {
+        response = await $fetch(`${hostToUse}/api2/json/access/ticket`, {
           method: 'POST',
           body: form,
           headers: {
@@ -52,7 +60,7 @@ export const useProxmox = () => {
           localStorage.setItem('proxmox-auth-token', response.data.ticket)
           localStorage.setItem('proxmox-csrf-token', response.data.CSRFPreventionToken)
           localStorage.setItem('proxmox-username', response.data.username)
-          localStorage.setItem('proxmox-host', proxmoxHost)
+          localStorage.setItem('proxmox-host', hostToUse)
         }
 
         return {
@@ -81,7 +89,7 @@ export const useProxmox = () => {
    * Hacer una petición autenticada a la API de Proxmox
    */
   const proxmoxRequest = async (endpoint: string, method: string = 'GET', host?: string, body?: any) => {
-    const proxmoxHost = host || (typeof window !== 'undefined' ? localStorage.getItem('proxmox-host') : null)
+    const proxmoxHost = host || (typeof window !== 'undefined' ? localStorage.getItem('proxmox-host') : null) || defaultHost
     
     if (!proxmoxHost) {
       throw new Error('Host de Proxmox no configurado')

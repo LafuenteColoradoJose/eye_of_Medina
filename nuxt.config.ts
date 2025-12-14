@@ -10,6 +10,12 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/test-utils'
   ],
+  runtimeConfig: {
+    proxmoxHost: process.env.PROXMOX_HOST || process.env.NUXT_PUBLIC_PROXMOX_HOST || 'https://your-proxmox-host:8006',
+    public: {
+      proxmoxHost: process.env.NUXT_PUBLIC_PROXMOX_HOST || process.env.PROXMOX_HOST || 'https://your-proxmox-host:8006',
+    },
+  },
   vite: {
     plugins: [tailwindcss()]
   },

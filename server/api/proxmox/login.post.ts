@@ -3,7 +3,14 @@ import { readBody, setResponseStatus } from 'h3'
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event) as { username: string; password: string; host?: string }
-    const host = body.host || 'https://192.168.8.240:8006'
+    const runtimeConfig = useRuntimeConfig()
+    const defaultHost = runtimeConfig.proxmoxHost || runtimeConfig.public?.proxmoxHost
+    const host = body.host || defaultHost
+
+    if (!host) {
+      setResponseStatus(event, 400)
+      return { success: false, message: 'Host de Proxmox no configurado' }
+    }
 
     const form = new URLSearchParams()
     form.append('username', body.username)

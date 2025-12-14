@@ -11,7 +11,7 @@
           type="text" 
           id="proxmox-host" 
           v-model="proxmoxHost"
-          placeholder="https://192.168.8.240:8006"
+          :placeholder="defaultHost"
           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" 
         />
       </div>
@@ -73,9 +73,11 @@ import { ref } from 'vue';
 
 const router = useRouter();
 const { login } = useProxmox();
+const runtimeConfig = useRuntimeConfig();
+const defaultHost = runtimeConfig.public.proxmoxHost || 'https://your-proxmox-host:8006';
 
 // Estado del formulario
-const proxmoxHost = ref('https://192.168.8.240:8006');
+const proxmoxHost = ref(defaultHost);
 const username = ref('root');
 const realm = ref('pam');
 const password = ref('');

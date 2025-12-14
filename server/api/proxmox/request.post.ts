@@ -5,7 +5,14 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event) as { endpoint: string; method?: string; host?: string; data?: any; authToken?: string; csrfToken?: string }
     const endpoint = body.endpoint || '/'
     const method = (body.method || 'GET').toUpperCase()
-    const host = body.host || 'https://192.168.8.240:8006'
+    const runtimeConfig = useRuntimeConfig()
+    const defaultHost = runtimeConfig.proxmoxHost || runtimeConfig.public?.proxmoxHost
+    const host = body.host || defaultHost
+
+    if (!host) {
+      setResponseStatus(event, 400)
+      return { success: false, message: 'Host de Proxmox no configurado' }
+    }
 
     // Allow insecure TLS in development only
     if (process.env.NODE_ENV !== 'production' && host.startsWith('https')) {
