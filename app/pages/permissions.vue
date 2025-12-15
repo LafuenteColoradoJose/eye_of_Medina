@@ -105,23 +105,26 @@ const loadACLs = async () => {
 
 const handleAssign = async () => {
   if (!form.value.path || !form.value.role || !form.value.subjectId) return alert('Completa los campos')
-  const opts: any = {}
-  if (form.value.subjectType === 'user') opts.userid = form.value.subjectId
-  if (form.value.subjectType === 'group') opts.group = form.value.subjectId
-  if (form.value.subjectType === 'pool') opts.pool = form.value.subjectId
-  if (form.value.subjectType === 'vm') opts.vmid = form.value.subjectId
+  const trimmedPath = form.value.path.trim()
+  const path = trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`
+  const subject = form.value.subjectId.trim()
+  if (!subject) return alert('El ID del sujeto está vacío')
+
+  const opts: any = { propagate: 1 }
+  if (form.value.subjectType === 'user') opts.users = subject
+  if (form.value.subjectType === 'group') opts.groups = subject
 
   loading.value = true
-  const res = await createACL(form.value.path, form.value.role, opts)
+  const res = await createACL(path, form.value.role, opts)
   loading.value = false
-  if (res.success === false) return alert('Error: ' + (res.message || JSON.stringify(res)))
+  if (res.success === false) return alert('Error: ' + (res.message || '') + (res.details ? ` | Detalles: ${JSON.stringify(res.details)}` : ''))
   await loadACLs()
 }
 
 const removeACL = async (a: any) => {
   if (!confirm('Eliminar ACL en ' + a.path + ' role ' + a.role + '?')) return
   loading.value = true
-  const res = await deleteACL(a.path, a.role, { userid: a.userid, group: a.group, pool: a.pool })
+  const res = await deleteACL(a.path, a.role, { users: a.userid, groups: a.group })
   loading.value = false
   if (res.success === false) return alert('Error: ' + (res.message || JSON.stringify(res)))
   await loadACLs()

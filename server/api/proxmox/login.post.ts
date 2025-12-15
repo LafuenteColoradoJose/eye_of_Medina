@@ -37,8 +37,8 @@ export default defineEventHandler(async (event) => {
   } catch (err: any) {
     // Log server-side for debugging
     console.error('Error proxying to Proxmox:', err && err.stack ? err.stack : err)
-    // Return a controlled error response with 502 Bad Gateway
-    setResponseStatus(event, 502)
-    return { success: false, message: err?.message || String(err) }
+    const status = err?.response?.status || err?.statusCode || 502
+    setResponseStatus(event, status)
+    return { success: false, message: err?.message || String(err), details: err?.data || err?.response?.statusMessage }
   }
 })

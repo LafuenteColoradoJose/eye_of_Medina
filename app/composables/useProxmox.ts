@@ -144,7 +144,8 @@ export const useProxmox = () => {
       console.error('Error en petición Proxmox:', error)
       return {
         success: false,
-        message: error.message || 'Error en la petición',
+        message: error?.data?.message || error.message || 'Error en la petición',
+        details: error?.data?.errors || error?.details || error?.data,
         error,
       }
     }
@@ -238,15 +239,62 @@ export const useProxmox = () => {
       return await proxmoxRequest('/access/acl', 'GET')
     },
     createACL: async (path: string, role: string, options?: Record<string, any>) => {
-      // options may include userid, groupid, poolid, vmid, propagate
-      const body: any = { path, role, ...options }
-      return await proxmoxRequest('/access/acl', 'POST', undefined, body)
+      // Proxmox ACL API expects PUT with roles and users/groups/pool/vmid
+      const cleanPath = (path || '').trim()
+      let normalizedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`
+      // Normalizar paths de pool escritos como "/pool1" -> "/pool/pool1"
+      const poolMatch = normalizedPath.match(/^\/pool([^/]+)$/)
+      if (poolMatch) normalizedPath = `/pool/${poolMatch[1]}`
+
+      const body: any = { path: normalizedPath, roles: role }
+
+      // Propagate por defecto activado salvo que se indique 0/false
+      if (options && 'propagate' in options) {
+        body.propagate = options.propagate ? 1 : 0
+      } else {
+        body.propagate = 1
+      }
+
+      // Normalizar claves permitidas por Proxmox
+      if (options) {
+        if (options.user) body.users = options.user
+        if (options.users) body.users = options.users
+        if (options.group) body.groups = options.group
+        if (options.groups) body.groups = options.groups
+        if (options.tokens) body.tokens = options.tokens
+      }
+
+      if (!body.users && !body.groups && !body.tokens) {
+        throw new Error('Debes especificar al menos un usuario o grupo para la ACL')
+      }
+
+      // Quitar undefined/null
+      Object.keys(body).forEach((k) => {
+        if (body[k] === undefined || body[k] === null || body[k] === '') delete body[k]
+      })
+
+      return await proxmoxRequest('/access/acl', 'PUT', undefined, body)
     },
     deleteACL: async (path: string, role?: string, options?: Record<string, any>) => {
-      const body: any = { path }
-      if (role) body.role = role
-      if (options) Object.assign(body, options)
-      return await proxmoxRequest('/access/acl', 'DELETE', undefined, body)
+      const cleanPath = (path || '').trim()
+      let normalizedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`
+      const poolMatch = normalizedPath.match(/^\/pool([^/]+)$/)
+      if (poolMatch) normalizedPath = `/pool/${poolMatch[1]}`
+      const body: any = { path: normalizedPath, delete: 1 }
+      if (role) body.roles = role
+
+      if (options) {
+        if (options.user) body.users = options.user
+        if (options.users) body.users = options.users
+        if (options.group) body.groups = options.group
+        if (options.groups) body.groups = options.groups
+      }
+
+      Object.keys(body).forEach((k) => {
+        if (body[k] === undefined || body[k] === null || body[k] === '') delete body[k]
+      })
+
+      return await proxmoxRequest('/access/acl', 'PUT', undefined, body)
     },
     logout,
     restoreSession,

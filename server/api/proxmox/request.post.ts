@@ -62,7 +62,16 @@ export default defineEventHandler(async (event) => {
     return res
   } catch (err: any) {
     console.error('Error proxying Proxmox request:', err && err.stack ? err.stack : err)
-    setResponseStatus(event, 502)
-    return { success: false, message: err?.message || String(err) }
+    const status = err?.response?.status || err?.statusCode || 502
+    setResponseStatus(event, status)
+
+    // Extraer mensaje de Proxmox (errors object o statusMessage)
+    const proxmoxDetails = err?.data?.errors || err?.data || err?.response?.statusMessage
+
+    return {
+      success: false,
+      message: err?.message || String(err),
+      details: proxmoxDetails,
+    }
   }
 })
