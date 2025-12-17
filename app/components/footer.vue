@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
         <footer class="flex flex-row justify-between items-center px-4 py-2 w-full">
                 <h2 class="text-center">

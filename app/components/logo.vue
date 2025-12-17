@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <article class="flex flex-col justify-center items-center border-2 rounded-lg p-2 gap-2">
 
