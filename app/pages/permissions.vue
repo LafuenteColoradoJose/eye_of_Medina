@@ -57,11 +57,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="a in acls" :key="a.path + a.role" class="border-b">
+          <tr v-for="a in acls" :key="a.path + a.roleid + a.ugid" class="border-b">
             <td class="p-2">{{ a.path }}</td>
-            <td class="p-2">{{ a.role }}</td>
-            <td class="p-2">{{ a.userid ? 'user' : (a.group ? 'group' : (a.pool ? 'pool' : 'other')) }}</td>
-            <td class="p-2">{{ a.userid || a.group || a.pool || '-' }}</td>
+            <td class="p-2">{{ a.roleid || a.role || '-' }}</td>
+            <td class="p-2">{{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</td>
+            <td class="p-2">{{ a.ugid || '-' }}</td>
             <td class="p-2">
               <button @click="removeACL(a)" class="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>
             </td>
@@ -106,7 +106,12 @@ const loadACLs = async () => {
 const handleAssign = async () => {
   if (!form.value.path || !form.value.role || !form.value.subjectId) return alert('Completa los campos')
   const trimmedPath = form.value.path.trim()
-  const path = trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`
+  let path = trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`
+
+  // Si el usuario escribe "pool1", normalizamos a "/pool/pool1"
+  const poolMatch = path.match(/^\/pool([^/]+)$/)
+  if (poolMatch) path = `/pool/${poolMatch[1]}`
+
   const subject = form.value.subjectId.trim()
   if (!subject) return alert('El ID del sujeto está vacío')
 
@@ -124,7 +129,7 @@ const handleAssign = async () => {
 const removeACL = async (a: any) => {
   if (!confirm('Eliminar ACL en ' + a.path + ' role ' + a.role + '?')) return
   loading.value = true
-  const res = await deleteACL(a.path, a.role, { users: a.userid, groups: a.group })
+  const res = await deleteACL(a.path, a.roleid || a.role, { users: a.userid || a.ugid, groups: a.group })
   loading.value = false
   if (res.success === false) return alert('Error: ' + (res.message || JSON.stringify(res)))
   await loadACLs()

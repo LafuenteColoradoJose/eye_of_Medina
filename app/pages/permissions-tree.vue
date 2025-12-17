@@ -92,9 +92,9 @@ function buildResourceTree() {
 
   acls.value.forEach((acl: any) => {
     const path = acl.path || '/'
-    const role = acl.role || 'unknown'
-    const subject = acl.userid || acl.group || acl.pool || acl.vmid || null
-    const subjectType = acl.userid ? 'user' : acl.group ? 'group' : acl.pool ? 'pool' : acl.vmid ? 'vm' : 'other'
+    const role = acl.roleid || acl.role || 'unknown'
+    const subject = acl.ugid || acl.userid || acl.group || acl.pool || acl.vmid || null
+    const subjectType = acl.type || (acl.userid ? 'user' : acl.group ? 'group' : acl.pool ? 'pool' : acl.vmid ? 'vm' : 'other')
 
     const resNode = ensureNode(resMap, path, () => ({ id: 'res:' + path, label: path, meta: '', children: [] }))
     const roleKey = path + '::' + role
@@ -124,12 +124,13 @@ function buildSubjectsTree() {
 
   acls.value.forEach((acl: any) => {
     const path = acl.path || '/'
-    const role = acl.role || 'unknown'
-    const subject = acl.userid || acl.group || acl.pool || acl.vmid || null
-    const subjectType = acl.userid ? 'user' : acl.group ? 'group' : acl.pool ? 'pool' : acl.vmid ? 'vm' : 'other'
-    const subjKey = (subjectType || 'other') + '::' + (subject || 'unknown')
+    const role = acl.roleid || acl.role || 'unknown'
+    const subject = acl.ugid || acl.userid || acl.group || acl.pool || acl.vmid || null
+    const subjectType = acl.type || (acl.userid ? 'user' : acl.group ? 'group' : acl.pool ? 'pool' : acl.vmid ? 'vm' : 'other')
+    const subjLabel = subject || 'unknown'
+    const subjKey = (subjectType || 'other') + '::' + (subjLabel || 'unknown')
 
-    const subjNode = ensureNode(subMap, subjKey, () => ({ id: 'sub:' + subjKey, label: `${subject || 'unknown'} (${subjectType})`, children: [] }))
+    const subjNode = ensureNode(subMap, subjKey, () => ({ id: 'sub:' + subjKey, label: `${subjLabel} (${subjectType})`, children: [] }))
 
     const roleKey = subjKey + '::' + role
     const roleNode = ensureNode(new Map(subjNode.__roleMap = subjNode.__roleMap || new Map()), roleKey, () => ({ id: 'srole:' + roleKey, label: role, children: [] }))
