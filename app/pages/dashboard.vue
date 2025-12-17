@@ -6,6 +6,7 @@
         <p v-if="username" class="muted">Bienvenido, {{ username }}</p>
       </div>
       <button 
+        v-if="isAuthenticated"
         @click="handleLogout"
         class="px-4 py-2 rounded-md btn-danger"
       >

@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   // Devtools desactivado temporalmente para evitar overlay errors (html.replace)
-  devtools: { enabled: false },
+  devtools: { enabled: true },
   css: ['./app/assets/css/main.css'],
   modules: [
     '@nuxt/eslint',
@@ -18,7 +18,17 @@ export default defineNuxtConfig({
     },
   },
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    server: {
+      hmr: {
+        overlay: false,
+        port: 24680,
+      },
+    },
+    // Deshabilita overlay de errores en cliente
+    css: {
+      devSourcemap: false,
+    },
   },
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
