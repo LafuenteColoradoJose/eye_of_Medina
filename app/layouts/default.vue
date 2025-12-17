@@ -8,7 +8,6 @@
         </Transition>
       </main>
     </div>
-    <Footer />
   </div>
 </template>
 

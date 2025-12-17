@@ -39,7 +39,7 @@ export default defineNuxtConfig({
       meta: [
         { name: 'description', content: 'Eye of Medina - Monitoring and gestion of Proxmox' }
       ],
-      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }]
+      link: [{ rel: 'icon', type: 'image/png', href: '/Logo_Eye_of_Azahara.svg' }]
     }
   },
 })
