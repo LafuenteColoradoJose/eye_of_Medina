@@ -116,11 +116,45 @@ const loading = ref(false);
 const error = ref('');
 const versionInfo = ref<any>(null);
 const nodes = ref<any[]>([]);
+const hasLoaded = ref(false);
 
 // Restaurar sesión al montar el componente
 onMounted(() => {
   restoreSession();
+  if (isAuthenticated.value) loadAllDashboard();
 });
+
+watch(isAuthenticated, (val) => {
+  if (val && !hasLoaded.value) loadAllDashboard();
+});
+
+// Carga inicial para evitar clicks manuales
+const loadAllDashboard = async () => {
+  if (hasLoaded.value) return;
+  loading.value = true;
+  error.value = '';
+
+  const [usersRes, vmsRes, poolsRes, nodesRes, versionRes] = await Promise.all([
+    proxmoxRequest('/access/users', 'GET'),
+    proxmoxRequest('/cluster/resources?type=vm', 'GET'),
+    proxmoxRequest('/pools', 'GET'),
+    proxmoxRequest('/nodes', 'GET'),
+    proxmoxRequest('/version', 'GET'),
+  ]);
+
+  if (usersRes.success) users.value = usersRes.data || [];
+  if (vmsRes.success) vms.value = vmsRes.data || [];
+  if (poolsRes.success) pools.value = poolsRes.data || [];
+  if (nodesRes.success) nodes.value = nodesRes.data || [];
+  if (versionRes.success) versionInfo.value = versionRes.data || null;
+
+  if (!usersRes.success || !vmsRes.success || !poolsRes.success || !nodesRes.success || !versionRes.success) {
+    error.value = 'Algunos datos no se pudieron cargar. Intenta refrescar.';
+  }
+
+  hasLoaded.value = true;
+  loading.value = false;
+};
 
 // Obtener versión de Proxmox
 const getVersion = async () => {
