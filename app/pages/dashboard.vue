@@ -3,23 +3,23 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h1 class="text-3xl font-bold mb-2">Dashboard</h1>
-        <p v-if="username" class="text-gray-600">Bienvenido, {{ username }}</p>
+        <p v-if="username" class="muted">Bienvenido, {{ username }}</p>
       </div>
       <button 
         @click="handleLogout"
-        class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+        class="px-4 py-2 rounded-md btn-danger"
       >
         Cerrar Sesión
       </button>
     </div>
 
     <!-- Verificar si está autenticado -->
-    <div v-if="!isAuthenticated" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+    <div v-if="!isAuthenticated" class="alert p-4 mb-4">
       <p class="font-bold">No estás autenticado</p>
       <p>Por favor, inicia sesión primero.</p>
       <button 
         @click="router.push('/')"
-        class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+        class="mt-2 px-4 py-2 rounded-md btn-primary"
       >
         Ir al Login
       </button>
@@ -28,63 +28,63 @@
     <!-- Contenido del dashboard cuando está autenticado -->
     <div v-else class="space-y-6">
       <div class="flex gap-4">
-        <button @click="getUsers" :disabled="loading" class="bg-indigo-500 text-white px-3 py-2 rounded">{{ loading ? 'Cargando...' : 'Usuarios' }}</button>
-        <button @click="getVMs" :disabled="loading" class="bg-indigo-500 text-white px-3 py-2 rounded">{{ loading ? 'Cargando...' : 'Máquinas (VMs)' }}</button>
-        <button @click="getPools" :disabled="loading" class="bg-indigo-500 text-white px-3 py-2 rounded">{{ loading ? 'Cargando...' : 'Pools' }}</button>
+        <button @click="getUsers" :disabled="loading" class="px-3 py-2 rounded btn-primary">{{ loading ? 'Cargando...' : 'Usuarios' }}</button>
+        <button @click="getVMs" :disabled="loading" class="px-3 py-2 rounded btn-primary">{{ loading ? 'Cargando...' : 'Máquinas (VMs)' }}</button>
+        <button @click="getPools" :disabled="loading" class="px-3 py-2 rounded btn-primary">{{ loading ? 'Cargando...' : 'Pools' }}</button>
       </div>
 
       <div class="grid grid-cols-3 gap-4">
-        <div class="bg-white p-4 rounded shadow">
+        <div class="section-card p-4 rounded shadow">
           <h3 class="font-bold mb-2">Usuarios</h3>
-          <div v-if="users.length === 0" class="text-sm text-gray-500">No hay usuarios cargados.</div>
+          <div v-if="users.length === 0" class="text-sm muted">No hay usuarios cargados.</div>
           <ul v-else class="space-y-2 text-sm">
             <li v-for="u in users" :key="u.userid">{{ u.userid }} — {{ u.email || u.comment || '' }}</li>
           </ul>
         </div>
 
-        <div class="bg-white p-4 rounded shadow">
+        <div class="section-card p-4 rounded shadow">
           <h3 class="font-bold mb-2">Máquinas (VMs)</h3>
-          <div v-if="vms.length === 0" class="text-sm text-gray-500">No hay VMs cargadas.</div>
+          <div v-if="vms.length === 0" class="text-sm muted">No hay VMs cargadas.</div>
           <ul v-else class="space-y-2 text-sm">
             <li v-for="vm in vms" :key="vm.vmid">{{ vm.name || vm.vmid }} — Nodo: {{ vm.node }} — Status: {{ vm.status }}</li>
           </ul>
         </div>
 
-        <div class="bg-white p-4 rounded shadow">
+        <div class="section-card p-4 rounded shadow">
           <h3 class="font-bold mb-2">Pools</h3>
-          <div v-if="pools.length === 0" class="text-sm text-gray-500">No hay pools cargados.</div>
+          <div v-if="pools.length === 0" class="text-sm muted">No hay pools cargados.</div>
           <ul v-else class="space-y-2 text-sm">
             <li v-for="p in pools" :key="p.poolid">{{ p.poolid }} — {{ p.comment || '' }}</li>
           </ul>
         </div>
       </div>
       <!-- Botón para obtener versión de Proxmox -->
-      <div class="bg-white p-6 rounded-lg shadow">
+      <div class="section-card p-6 rounded-lg shadow">
         <h2 class="text-xl font-bold mb-4">Información del Servidor</h2>
         <button 
           @click="getVersion"
           :disabled="loading"
-          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-gray-400 mb-4"
+          class="px-4 py-2 rounded-md btn-primary mb-4"
         >
           {{ loading ? 'Cargando...' : 'Obtener Versión de Proxmox' }}
         </button>
 
-        <div v-if="versionInfo" class="bg-gray-50 p-4 rounded-md">
+        <div v-if="versionInfo" class="p-4 rounded-md section-card">
           <pre class="text-sm">{{ JSON.stringify(versionInfo, null, 2) }}</pre>
         </div>
 
-        <div v-if="error" class="bg-red-100 text-red-700 p-4 rounded-md mt-4">
+        <div v-if="error" class="status-error p-4 rounded-md mt-4">
           {{ error }}
         </div>
       </div>
 
       <!-- Ejemplo de listado de nodos -->
-      <div class="bg-white p-6 rounded-lg shadow">
+      <div class="section-card p-6 rounded-lg shadow">
         <h2 class="text-xl font-bold mb-4">Nodos Proxmox</h2>
         <button 
           @click="getNodes"
           :disabled="loading"
-          class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:bg-gray-400 mb-4"
+          class="px-4 py-2 rounded-md btn-positive mb-4"
         >
           {{ loading ? 'Cargando...' : 'Listar Nodos' }}
         </button>
@@ -93,12 +93,12 @@
           <div 
             v-for="node in nodes" 
             :key="node.node"
-            class="bg-gray-50 p-4 rounded-md"
+            class="p-4 rounded-md section-card"
           >
             <h3 class="font-bold">{{ node.node }}</h3>
-            <p class="text-sm text-gray-600">Status: {{ node.status }}</p>
-            <p class="text-sm text-gray-600">Memoria: {{ formatBytes(node.mem) }} / {{ formatBytes(node.maxmem) }}</p>
-            <p class="text-sm text-gray-600">CPU: {{ (node.cpu * 100).toFixed(2) }}%</p>
+            <p class="text-sm muted">Status: {{ node.status }}</p>
+            <p class="text-sm muted">Memoria: {{ formatBytes(node.mem) }} / {{ formatBytes(node.maxmem) }}</p>
+            <p class="text-sm muted">CPU: {{ (node.cpu * 100).toFixed(2) }}%</p>
           </div>
         </div>
       </div>

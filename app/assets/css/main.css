@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
-#CA1468  #CA1714 #CA14C4 #14CA23 #14BBCA
-
-
+/* Palette reference: #213448 #547792 #94B4C1 #EAE0CF */
 
 :root {
-  
+  --bg: #EAE0CF;
+  --card: #ffffff;
+  --border: rgba(148, 180, 193, 0.35);
+  --muted-surface: #f4efe4;
+  --text: #213448;
+  --text-muted: #547792;
+  --primary: #547792;
+  --primary-strong: #213448;
+  --accent: #94B4C1;
+  --text-on-strong: #ffffff;
+  --positive: #5c9f87;
+  --positive-strong: #3f7a63;
+  --positive-soft: #d8ece4;
+  --warning: #c3a04b;
+  --warning-strong: #9d7d2e;
+  --warning-soft: #f5e9c8;
+  --danger: #b85c5c;
+  --danger-strong: #923d3d;
+  --danger-soft: #f3d6d6;
+  --overlay: rgba(33, 52, 72, 0.4);
   font-family: 'System', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 body {
-  background-color: antiquewhite;
-
+  background-color: var(--bg);
+  color: var(--text);
   display: flex;
   flex-direction: column;
   width: 100vw;
   height: 100vh;
-
   padding: 0;
   margin: 0;
   overflow-x: hidden;
-  
 }
 
 #__nuxt {
@@ -29,7 +44,273 @@ body {
 }
 
 h1 {
-  color: #CA1468;
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Utilidades semánticas para colores controlados aquí */
+.muted { color: var(--text-muted); }
+.muted-strong { color: var(--text); }
+.muted-secondary { color: rgba(84, 119, 146, 0.75); }
+
+.section-card {
+  background-color: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.overlay-backdrop { background-color: var(--overlay); }
+
+.status-success {
+  background-color: var(--positive-soft);
+  color: var(--positive-strong);
+}
+
+.status-error {
+  background-color: var(--danger-soft);
+  color: var(--danger-strong);
+}
+
+.alert {
+  background-color: var(--warning-soft);
+  color: var(--warning-strong);
+  border-left: 4px solid var(--warning-strong);
+}
+
+.code-surface {
+  background-color: var(--primary-strong);
+  color: var(--text-on-strong);
+}
+
+button,
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--text-on-strong);
+  border: 1px solid var(--primary-strong);
+}
+
+button:hover,
+.btn-primary:hover {
+  background-color: var(--primary-strong);
+}
+
+.btn-positive {
+  background-color: var(--positive);
+  color: var(--text-on-strong);
+  border: 1px solid var(--positive-strong);
+}
+
+.btn-positive:hover { background-color: var(--positive-strong); }
+
+.btn-warning {
+  background-color: var(--warning);
+  color: var(--text-on-strong);
+  border: 1px solid var(--warning-strong);
+}
+
+.btn-warning:hover { background-color: var(--warning-strong); }
+
+.btn-danger {
+  background-color: var(--danger);
+  color: var(--text-on-strong);
+  border: 1px solid var(--danger-strong);
+}
+
+.btn-danger:hover { background-color: var(--danger-strong); }
+
+.btn-muted {
+  background-color: var(--muted-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-muted:hover {
+  background-color: var(--border);
+}
+
+/* Reemplazos de utilidades Tailwind para centralizar color en main.css */
+.bg-white,
+.bg-gray-50 {
+  background-color: var(--card) !important;
+  color: var(--text);
+}
+
+.bg-gray-200 {
+  background-color: var(--muted-surface) !important;
+  color: var(--text);
+}
+
+.bg-gray-400,
+.disabled\:bg-gray-400:disabled {
+  background-color: var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+.bg-black {
+  background-color: #000 !important;
+  color: #fff;
+}
+
+.bg-black\/40 {
+  background-color: var(--overlay) !important;
+}
+
+.border-gray-300 {
+  border-color: var(--border) !important;
+}
+
+.border-yellow-500 {
+  border-color: var(--warning-strong) !important;
+}
+
+.text-gray-700,
+.text-gray-600 {
+  color: var(--text) !important;
+}
+
+.text-gray-500,
+.text-gray-400 {
+  color: var(--text-muted) !important;
+}
+
+.text-red-700 {
+  color: var(--danger-strong) !important;
+}
+
+.text-green-700 {
+  color: var(--positive-strong) !important;
+}
+
+.text-yellow-700 {
+  color: var(--warning-strong) !important;
+}
+
+.bg-blue-500,
+.bg-blue-600,
+.bg-indigo-500,
+.bg-indigo-600 {
+  background-color: var(--primary-strong) !important;
+  color: var(--text-on-strong) !important;
+}
+
+.hover\:bg-blue-600:hover,
+.hover\:bg-indigo-600:hover {
+  background-color: var(--primary) !important;
+}
+
+.bg-green-500 {
+  background-color: var(--positive) !important;
+  color: var(--text-on-strong) !important;
+}
+
+.hover\:bg-green-600:hover {
+  background-color: var(--positive-strong) !important;
+}
+
+.bg-green-100 {
+  background-color: var(--positive-soft) !important;
+  color: var(--positive-strong) !important;
+}
+
+.bg-red-500 {
+  background-color: var(--danger) !important;
+  color: var(--text-on-strong) !important;
+}
+
+.hover\:bg-red-600:hover {
+  background-color: var(--danger-strong) !important;
+}
+
+.bg-red-100 {
+  background-color: var(--danger-soft) !important;
+  color: var(--danger-strong) !important;
+}
+
+.bg-yellow-100 {
+  background-color: var(--warning-soft) !important;
+  color: var(--warning-strong) !important;
+}
+
+.bg-yellow-400 {
+  background-color: var(--warning) !important;
+  color: var(--text-on-strong) !important;
+}
+
+.text-white {
+  color: var(--text-on-strong) !important;
+}
+
+/* Colores globales para contenedores y superficies */
+.sidebar-nav {
+  background-color: var(--primary-strong) !important;
+  color: var(--text-on-strong) !important;
+  border-right: 1px solid var(--primary);
+  width: 200px;
+}
+
+.sidebar-nav a {
+  color: var(--text-on-strong) !important;
+}
+
+.sidebar-nav a:hover {
+  color: var(--accent) !important;
+}
+
+footer {
+  background-color: var(--primary-strong);
+  color: var(--text-on-strong);
+  border-top: 1px solid var(--primary);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+footer a {
+  color: var(--text-on-strong);
+}
+
+footer a:hover {
+  color: var(--accent);
+}
+
+main, section, article {
+  background-color: var(--card);
+  color: var(--text);
+}
+
+/* Entradas de formulario */
+input, select, textarea {
+  border: 1px solid var(--border);
+  background-color: #fff;
+  color: var(--text);
+}
+
+/* Botones base */
+button {
+  background-color: var(--primary);
+  color: #fff;
+  border: 1px solid var(--primary-strong);
+}
+
+button:hover {
+  background-color: var(--primary-strong);
+}
+
+button:disabled {
+  background-color: var(--border);
+  color: var(--text-muted);
 }
 
 

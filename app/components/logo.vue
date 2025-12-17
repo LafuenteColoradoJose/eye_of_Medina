@@ -1,5 +1,5 @@
 <template>
-  <article class="flex flex-col justify-center items-center">
+  <article class="flex flex-col justify-center items-center border-2 rounded-lg p-2 gap-2">
 
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
       <path fill="#CA1468"

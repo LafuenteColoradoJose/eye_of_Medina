@@ -2,7 +2,7 @@
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Gestión de Usuarios</h1>
 
-    <section class="mb-6 bg-white p-4 rounded shadow">
+    <section class="mb-6 section-card p-4 rounded shadow">
       <h2 class="font-bold mb-2">Crear usuario</h2>
       <form @submit.prevent="handleCreate" class="grid grid-cols-2 gap-4">
         <div>
@@ -34,13 +34,13 @@
         </div>
 
         <div class="col-span-2 flex gap-2 justify-end">
-          <button type="submit" :disabled="loading" class="bg-green-500 text-white px-4 py-2 rounded">Crear</button>
-          <button type="button" @click="resetForm" class="bg-gray-200 px-4 py-2 rounded">Limpiar</button>
+          <button type="submit" :disabled="loading" class="px-4 py-2 rounded btn-positive">Crear</button>
+          <button type="button" @click="resetForm" class="px-4 py-2 rounded btn-muted">Limpiar</button>
         </div>
       </form>
     </section>
 
-    <section class="bg-white p-4 rounded shadow">
+    <section class="section-card p-4 rounded shadow">
       <div class="flex justify-between items-center mb-4">
         <h2 class="font-bold">Lista de usuarios</h2>
         <div class="flex gap-2">
@@ -54,11 +54,11 @@
             <option value="alumno">Alumno</option>
             <option value="profesor">Profesor</option>
           </select>
-          <button @click="loadUsers" class="bg-blue-500 text-white px-3 py-2 rounded">Refrescar</button>
+          <button @click="loadUsers" class="px-3 py-2 rounded btn-primary">Refrescar</button>
         </div>
       </div>
 
-      <div v-if="users.length === 0" class="text-sm text-gray-500">No hay usuarios.</div>
+      <div v-if="users.length === 0" class="text-sm muted">No hay usuarios.</div>
 
       <table v-else class="w-full text-sm">
         <thead>
@@ -75,8 +75,8 @@
             <td class="p-2">{{ realmOf(u.userid) }}</td>
             <td class="p-2">{{ getRole(u.userid) || '-' }}</td>
             <td class="p-2">
-              <button @click="editUser(u)" class="bg-yellow-400 px-2 py-1 rounded mr-2">Editar</button>
-              <button @click="removeUser(u)" class="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>
+              <button @click="editUser(u)" class="px-2 py-1 rounded mr-2 btn-warning">Editar</button>
+              <button @click="removeUser(u)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -84,8 +84,8 @@
     </section>
 
     <!-- Modal simple de edición -->
-    <div v-if="editing" class="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div class="bg-white p-6 rounded shadow w-1/2">
+    <div v-if="editing" class="fixed inset-0 overlay-backdrop flex items-center justify-center">
+      <div class="section-card p-6 rounded shadow w-1/2">
         <h3 class="font-bold mb-2">Editar usuario {{ editing.userid }}</h3>
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -102,8 +102,8 @@
         </div>
 
         <div class="mt-4 flex justify-end gap-2">
-          <button @click="applyEdit" class="bg-green-500 text-white px-4 py-2 rounded">Guardar</button>
-          <button @click="cancelEdit" class="bg-gray-200 px-4 py-2 rounded">Cancelar</button>
+          <button @click="applyEdit" class="px-4 py-2 rounded btn-positive">Guardar</button>
+          <button @click="cancelEdit" class="px-4 py-2 rounded btn-muted">Cancelar</button>
         </div>
       </div>
     </div>

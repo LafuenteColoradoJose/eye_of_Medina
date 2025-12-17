@@ -2,7 +2,7 @@
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Gestión de Pools</h1>
 
-    <section class="mb-6 bg-white p-4 rounded shadow">
+    <section class="mb-6 section-card p-4 rounded shadow">
       <h2 class="font-bold mb-2">Crear pool</h2>
       <form @submit.prevent="handleCreate" class="grid grid-cols-2 gap-4">
         <div>
@@ -15,22 +15,22 @@
         </div>
 
         <div class="col-span-2 flex gap-2 justify-end">
-          <button type="submit" :disabled="loading" class="bg-green-500 text-white px-4 py-2 rounded">Crear</button>
+          <button type="submit" :disabled="loading" class="px-4 py-2 rounded btn-positive">Crear</button>
         </div>
       </form>
     </section>
 
-    <section class="bg-white p-4 rounded shadow">
+    <section class="section-card p-4 rounded shadow">
       <div class="flex justify-between items-center mb-4">
         <h2 class="font-bold">Pools existentes</h2>
         <div class="flex gap-2">
-          <button @click="loadPools" class="bg-blue-500 text-white px-3 py-2 rounded">Refrescar</button>
+          <button @click="loadPools" class="px-3 py-2 rounded btn-primary">Refrescar</button>
         </div>
       </div>
 
-      <div v-if="loading" class="text-sm text-gray-500">Cargando...</div>
+      <div v-if="loading" class="text-sm muted">Cargando...</div>
       <div v-else>
-        <div v-if="pools.length === 0" class="text-sm text-gray-500">No hay pools.</div>
+        <div v-if="pools.length === 0" class="text-sm muted">No hay pools.</div>
         <table v-else class="w-full text-sm">
           <thead>
             <tr class="text-left border-b">
@@ -44,7 +44,7 @@
               <td class="p-2">{{ p.poolid }}</td>
               <td class="p-2">{{ p.comment || '-' }}</td>
               <td class="p-2">
-                <button @click="deletePool(p.poolid)" class="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>
+                <button @click="deletePool(p.poolid)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
               </td>
             </tr>
           </tbody>

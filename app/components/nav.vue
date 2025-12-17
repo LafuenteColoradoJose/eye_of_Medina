@@ -1,5 +1,5 @@
 <template>
-  <nav class="flex flex-col items-center border-r-2 border-[#354647] p-4 bg-[#14BBCA] min-h-full">
+  <nav class="flex flex-col items-center border-r-2 min-h-full sidebar-nav">
     <ul class="flex flex-col items-center gap-6 p-4">
       <Logo />
       <li><NuxtLink to="/" class="hover:underline">Home</NuxtLink></li>

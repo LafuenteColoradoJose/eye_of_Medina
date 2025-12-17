@@ -2,7 +2,7 @@
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Asignación de Permisos (ACL)</h1>
 
-    <section class="mb-6 bg-white p-4 rounded shadow">
+    <section class="mb-6 section-card p-4 rounded shadow">
       <h2 class="font-bold mb-2">Crear permiso</h2>
       <form @submit.prevent="handleAssign" class="grid grid-cols-2 gap-4">
         <div>
@@ -31,20 +31,20 @@
         </div>
 
         <div class="col-span-2 flex gap-2 justify-end">
-          <button type="submit" :disabled="loading" class="bg-green-500 text-white px-4 py-2 rounded">Asignar</button>
+          <button type="submit" :disabled="loading" class="px-4 py-2 rounded btn-positive">Asignar</button>
         </div>
       </form>
     </section>
 
-    <section class="bg-white p-4 rounded shadow">
+    <section class="section-card p-4 rounded shadow">
       <div class="flex justify-between items-center mb-4">
         <h2 class="font-bold">ACLs actuales</h2>
         <div class="flex gap-2">
-          <button @click="loadACLs" class="bg-blue-500 text-white px-3 py-2 rounded">Refrescar</button>
+          <button @click="loadACLs" class="px-3 py-2 rounded btn-primary">Refrescar</button>
         </div>
       </div>
 
-      <div v-if="acls.length === 0" class="text-sm text-gray-500">No hay entradas ACL.</div>
+      <div v-if="acls.length === 0" class="text-sm muted">No hay entradas ACL.</div>
 
       <table v-else class="w-full text-sm">
         <thead>
@@ -63,7 +63,7 @@
             <td class="p-2">{{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</td>
             <td class="p-2">{{ a.ugid || '-' }}</td>
             <td class="p-2">
-              <button @click="removeACL(a)" class="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>
+              <button @click="removeACL(a)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
             </td>
           </tr>
         </tbody>
