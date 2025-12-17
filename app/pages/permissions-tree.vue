@@ -1,32 +1,35 @@
 <template>
-  <div class="p-6">
+  <div class="p-4 md:p-6 max-w-full overflow-x-hidden">
     <div v-if="!isAuthenticated" class="alert p-4 mb-4">
       <p class="font-bold">No estás autenticado</p>
       <p>Por favor, inicia sesión primero.</p>
       <button @click="router.push('/')" class="mt-2 px-4 py-2 rounded-md btn-primary">Ir al Login</button>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="section-card p-4 rounded shadow">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
+      <div class="section-card p-4 rounded shadow w-full overflow-hidden">
         <h1 class="text-xl font-bold mb-3">Árbol por Recursos</h1>
         <p class="text-sm muted mb-4">Explora recursos (pools, VMs, nodes) y ve qué sujetos tienen roles asignados.</p>
         <div v-if="loading" class="text-sm muted">Cargando...</div>
         <PermissionTree v-else :nodes="resourcesTree" />
       </div>
 
-      <div class="section-card p-4 rounded shadow">
+      <div class="section-card p-4 rounded shadow w-full overflow-hidden">
         <h1 class="text-xl font-bold mb-3">Árbol por Sujetos</h1>
         <p class="text-sm muted mb-4">Explora usuarios y grupos y ve a qué recursos están asignados.</p>
         <div v-if="loading" class="text-sm muted">Cargando...</div>
         <PermissionTree v-else :nodes="subjectsTree" />
       </div>
 
-      <div class="col-span-2 mt-2 flex gap-2">
-        <button @click="reloadAll" class="px-3 py-2 rounded btn-primary">Refrescar</button>
-        <button @click="showRaw" class="px-3 py-2 rounded btn-muted">Ver raw ACLs</button>
+      <div class="col-span-1 md:col-span-2 mt-2 flex flex-col sm:flex-row gap-2">
+        <button @click="reloadAll" class="px-3 py-2 rounded btn-primary w-full sm:w-auto">Refrescar</button>
+        <button @click="showRaw" class="px-3 py-2 rounded btn-muted w-full sm:w-auto">Ver raw ACLs</button>
       </div>
 
-      <pre v-if="raw" class="col-span-2 mt-2 code-surface p-2 rounded max-h-64 overflow-auto text-xs">{{ JSON.stringify(acls, null, 2) }}</pre>
+      <pre
+        v-if="raw"
+        class="col-span-1 md:col-span-2 mt-2 code-surface p-2 rounded max-h-64 overflow-auto text-xs whitespace-pre-wrap break-words"
+      >{{ JSON.stringify(acls, null, 2) }}</pre>
     </div>
   </div>
 </template>

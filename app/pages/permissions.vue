@@ -11,7 +11,7 @@
     <div v-else>
       <section class="mb-6 section-card p-4 rounded shadow">
         <h2 class="font-bold mb-2">Crear permiso</h2>
-        <form @submit.prevent="handleAssign" class="grid grid-cols-2 gap-4">
+        <form @submit.prevent="handleAssign" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm">Path (ej. /vms/100 o /pool/my-pool)</label>
             <input v-model="form.path" class="w-full p-2 border rounded" />
@@ -37,7 +37,7 @@
             <input v-model="form.subjectId" class="w-full p-2 border rounded" />
           </div>
 
-          <div class="col-span-2 flex gap-2 justify-end">
+          <div class="col-span-1 md:col-span-2 flex gap-2 justify-end">
             <button type="submit" :disabled="loading" class="px-4 py-2 rounded btn-positive">Asignar</button>
           </div>
         </form>
@@ -53,28 +53,46 @@
 
         <div v-if="acls.length === 0" class="text-sm muted">No hay entradas ACL.</div>
 
-        <table v-else class="w-full text-sm">
-          <thead>
-            <tr class="text-left border-b">
-              <th class="p-2">Path</th>
-              <th class="p-2">Role</th>
-              <th class="p-2">Type</th>
-              <th class="p-2">ID</th>
-              <th class="p-2">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="a in acls" :key="a.path + a.roleid + a.ugid" class="border-b">
-              <td class="p-2">{{ a.path }}</td>
-              <td class="p-2">{{ a.roleid || a.role || '-' }}</td>
-              <td class="p-2">{{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</td>
-              <td class="p-2">{{ a.ugid || '-' }}</td>
-              <td class="p-2">
-                <button @click="removeACL(a)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div v-else>
+          <!-- Vista en tarjetas para móvil -->
+          <div class="md:hidden space-y-3">
+            <div v-for="a in acls" :key="a.path + a.roleid + a.ugid" class="p-3 rounded border section-card">
+              <div class="text-sm"><span class="font-semibold">Path:</span> {{ a.path }}</div>
+              <div class="text-sm"><span class="font-semibold">Role:</span> {{ a.roleid || a.role || '-' }}</div>
+              <div class="text-sm"><span class="font-semibold">Type:</span> {{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</div>
+              <div class="text-sm"><span class="font-semibold">ID:</span> {{ a.ugid || '-' }}</div>
+              <div class="mt-2 flex justify-end">
+                <button @click="removeACL(a)" class="px-3 py-1 rounded btn-danger">Eliminar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla para escritorio -->
+          <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-sm min-w-full table-fixed">
+              <thead>
+                <tr class="text-left border-b">
+                  <th class="p-2">Path</th>
+                  <th class="p-2">Role</th>
+                  <th class="p-2">Type</th>
+                  <th class="p-2">ID</th>
+                  <th class="p-2">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="a in acls" :key="a.path + a.roleid + a.ugid" class="border-b">
+                  <td class="p-2 break-words">{{ a.path }}</td>
+                  <td class="p-2 break-words">{{ a.roleid || a.role || '-' }}</td>
+                  <td class="p-2 break-words">{{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</td>
+                  <td class="p-2 break-words">{{ a.ugid || '-' }}</td>
+                  <td class="p-2">
+                    <button @click="removeACL(a)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
     </div>
   </div>

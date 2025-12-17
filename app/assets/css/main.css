@@ -95,6 +95,11 @@ textarea:focus-visible {
   color: var(--text-on-strong);
 }
 
+.bg-surface {
+  background-color: var(--card);
+  color: var(--text);
+}
+
 button,
 .btn-primary {
   background-color: var(--primary);
