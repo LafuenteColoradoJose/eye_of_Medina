@@ -14,7 +14,7 @@
       <section class="mb-6 section-card p-4 rounded shadow">
         <h2 class="font-bold mb-2">Crear usuario</h2>
         <p class="text-sm muted mb-3">Solo se pueden crear usuarios en el realm <code class="font-mono">pve</code>. Para <code class="font-mono">pam</code>, crea primero el usuario en el sistema y luego asígnale permisos.</p>
-        <form @submit.prevent="handleCreate" class="grid grid-cols-2 gap-4">
+        <form @submit.prevent="handleCreate" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm">ID (sin realm)</label>
             <input v-model="form.userid" class="w-full p-2 border rounded" />
@@ -22,12 +22,6 @@
           <div>
             <label class="block text-sm">Password</label>
             <input v-model="form.password" type="password" class="w-full p-2 border rounded" />
-          </div>
-          <div>
-            <label class="block text-sm">Realm</label>
-            <select v-model="form.realm" class="w-full p-2 border rounded" disabled>
-              <option value="pve">pve (Proxmox)</option>
-            </select>
           </div>
           <div>
             <label class="block text-sm">Rol</label>
