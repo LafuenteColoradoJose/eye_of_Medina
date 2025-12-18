@@ -1,3 +1,6 @@
+<!-- eslint-disable vue/attributes-order -->
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <template>
   <div class="p-4 md:p-6 max-w-full overflow-x-hidden">
     <div v-if="!isAuthenticated" class="alert p-4 mb-4">
@@ -28,7 +31,7 @@
 
       <pre
         v-if="raw"
-        class="col-span-1 md:col-span-2 mt-2 code-surface p-2 rounded max-h-64 overflow-auto text-xs whitespace-pre-wrap break-words"
+        class="col-span-1 md:col-span-2 mt-2 code-surface p-2 rounded max-h-64 overflow-auto text-xs whitespace-pre-wrap wrap-break-word"
       >{{ JSON.stringify(acls, null, 2) }}</pre>
     </div>
   </div>

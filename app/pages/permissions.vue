@@ -1,4 +1,7 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
+<!-- eslint-disable vue/html-self-closing -->
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <!-- eslint-disable vue/attributes-order -->
 <template>
   <div class="p-6">
@@ -83,10 +86,10 @@
               </thead>
               <tbody>
                 <tr v-for="a in acls" :key="a.path + a.roleid + a.ugid" class="border-b">
-                  <td class="p-2 break-words">{{ a.path }}</td>
-                  <td class="p-2 break-words">{{ a.roleid || a.role || '-' }}</td>
-                  <td class="p-2 break-words">{{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</td>
-                  <td class="p-2 break-words">{{ a.ugid || '-' }}</td>
+                  <td class="p-2 wrap-break-word">{{ a.path }}</td>
+                  <td class="p-2 wrap-break-word">{{ a.roleid || a.role || '-' }}</td>
+                  <td class="p-2 wrap-break-word">{{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</td>
+                  <td class="p-2 wrap-break-word">{{ a.ugid || '-' }}</td>
                   <td class="p-2">
                     <button @click="removeACL(a)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
                   </td>
