@@ -5,13 +5,6 @@
         <h1 class="text-3xl font-bold mb-2">Dashboard</h1>
         <p v-if="username" class="muted">Bienvenido, {{ username }}</p>
       </div>
-      <button 
-        v-if="isAuthenticated"
-        @click="handleLogout"
-        class="px-4 py-2 rounded-md btn-danger"
-      >
-        Cerrar Sesión
-      </button>
     </div>
 
     <!-- Verificar si está autenticado -->
@@ -109,7 +102,7 @@
 
 <script lang="ts" setup>
 const router = useRouter();
-const { username, isAuthenticated, logout, proxmoxRequest, restoreSession } = useProxmox();
+const { username, isAuthenticated, proxmoxRequest, restoreSession } = useProxmox();
 
 // Estado
 const loading = ref(false);
@@ -239,12 +232,6 @@ const getNodes = async () => {
   } else {
     error.value = result.message || 'Error al obtener los nodos';
   }
-};
-
-// Cerrar sesión
-const handleLogout = () => {
-  logout();
-  router.push('/');
 };
 
 // Formatear bytes

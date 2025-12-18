@@ -21,7 +21,7 @@
     <div class="flex-1 flex flex-col">
       <ul
         :class="[
-          'flex flex-col md:flex md:flex-col md:items-center gap-4 px-4 pb-4 md:pb-0 transition-all duration-200',
+          'flex flex-col md:flex md:flex-col md:items-center gap-3 md:gap-5 px-4 pb-4 md:pb-0 transition-all duration-200',
           isOpen ? 'flex' : 'hidden md:flex'
         ]"
       >
@@ -35,6 +35,16 @@
           </NuxtLink>
         </li>
       </ul>
+
+      <div
+        v-if="isAuthenticated"
+        :class="[
+          'px-4 pb-4 md:pb-6 flex md:mt-4',
+          isOpen ? 'flex' : 'hidden md:flex'
+        ]"
+      >
+        <button class="btn-warning w-full py-2 rounded" @click="handleLogout">Cerrar sesión</button>
+      </div>
 
       <div
         :class="[
@@ -58,6 +68,8 @@
 
 <script lang="ts" setup>
 const route = useRoute()
+const router = useRouter()
+const { logout, isAuthenticated } = useProxmox()
 const isOpen = ref(false)
 
 const items = [
@@ -77,6 +89,11 @@ const toggle = () => {
 
 const closeOnNavigate = () => {
   if (window.innerWidth < 768) isOpen.value = false
+}
+
+const handleLogout = () => {
+  logout()
+  router.push('/')
 }
 
 watch(
