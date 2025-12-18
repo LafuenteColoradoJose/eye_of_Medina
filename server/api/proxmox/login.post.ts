@@ -20,12 +20,18 @@ export default defineEventHandler(async (event) => {
     // respetará la verificación TLS. Para ignorarlo en local se puede usar
     // NODE_TLS_REJECT_UNAUTHORIZED=0 al iniciar el proceso (no recomendado en prod).
 
-    // Si estamos en desarrollo y el host usa HTTPS con certificado autofirmado,
-    // permitir conexiones inseguras temporalmente para facilitar pruebas locales.
-    // ADVERTENCIA: esto solo debe usarse en desarrollo.
-    if (process.env.NODE_ENV !== 'production' && host.startsWith('https')) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-    }
+    // Nota: anteriormente se deshabilitaba la verificación TLS global con
+    // `process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'` para facilitar pruebas
+    // con certificados autofirmados. Eso genera la advertencia de Node y es
+    // inseguro porque afecta a todas las conexiones TLS del proceso.
+    //
+    // Alternativas seguras:
+    // - Añadir el certificado CA autofirmado al sistema o usar
+    //   `NODE_EXTRA_CA_CERTS=/path/to/ca.pem` en desarrollo.
+    // - Crear un https.Agent con la CA y usar una petición dirigida desde
+    //   aquí en lugar de deshabilitar la verificación global.
+    //
+    // No establecemos `NODE_TLS_REJECT_UNAUTHORIZED` desde el código.
 
     const res = await $fetch(`${host}/api2/json/access/ticket`, {
       method: 'POST',

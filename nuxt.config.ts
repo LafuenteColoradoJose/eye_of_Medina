@@ -3,7 +3,6 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  // Devtools desactivado temporalmente para evitar overlay errors (html.replace)
   devtools: { enabled: true },
   css: ['./app/assets/css/main.css'],
   modules: [
