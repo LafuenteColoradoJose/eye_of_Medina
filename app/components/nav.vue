@@ -1,8 +1,9 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <!-- eslint-disable vue/html-self-closing -->
 <!-- eslint-disable vue/attributes-order -->
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <nav class="sidebar-nav border-b md:border-b-0 md:border-r-2 w-full md:w-64 bg-surface flex-shrink-0 flex flex-col">
+  <nav class="sidebar-nav border-b md:border-b-0 md:border-r-2 w-full md:w-64 bg-surface shrink-0 flex flex-col">
     <div class="flex items-center justify-between p-4 md:flex-col md:gap-4">
       <Logo />
       <button
