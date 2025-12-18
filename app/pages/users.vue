@@ -1,3 +1,5 @@
+<!-- eslint-disable vue/html-self-closing -->
+<!-- eslint-disable vue/attributes-order -->
 <template>
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Gestión de Usuarios</h1>
@@ -121,17 +123,46 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+
+type Realm = 'pam' | 'pve'
+type Role = 'alumno' | 'profesor'
+
+type User = {
+  userid: string
+  comment?: string
+}
+
+type ProxmoxResponse<T> = {
+  success?: boolean
+  data?: T
+  message?: string
+}
+
+type FormState = {
+  userid: string
+  password: string
+  realm: Realm
+  role: Role
+  comment?: string
+}
+
+type EditableUser = {
+  userid: string
+  comment: string
+  role: Role
+}
+
 const router = useRouter()
 const { proxmoxRequest, createUser, deleteUser, updateUser, restoreSession, isAuthenticated } = useProxmox()
 
-const loading = ref(false)
-const users = ref<any[]>([])
+const loading = ref<boolean>(false)
+const users = ref<User[]>([])
 
-const form = ref({ userid: '', password: '', realm: 'pve', role: 'alumno', comment: '' })
-const filterRealm = ref('all')
-const filterRole = ref('all')
+const form = ref<FormState>({ userid: '', password: '', realm: 'pve', role: 'alumno', comment: '' })
+const filterRealm = ref<'all' | Realm>('all')
+const filterRole = ref<'all' | Role>('all')
 
-const editing = ref<any | null>(null)
+const editing = ref<EditableUser | null>(null)
 
 onMounted(() => {
   restoreSession()
@@ -142,40 +173,46 @@ watch(isAuthenticated, (val) => {
   if (val && users.value.length === 0) loadUsers()
 })
 
-const realmOf = (userid: string) => {
+const realmOf = (userid: string): Realm | '' => {
   const parts = userid.split('@')
-  return parts[1] || ''
+  return (parts[1] as Realm) || ''
 }
 
 // store role mapping locally (for demo purposes). In production use a persistent store.
 const ROLE_KEY = 'app:userRoles:v1'
-const loadRoles = () => {
+const loadRoles = (): Record<string, Role> => {
   try {
     const raw = localStorage.getItem(ROLE_KEY)
     return raw ? JSON.parse(raw) : {}
-  } catch (e) { return {} }
+  } catch {
+    return {}
+  }
 }
-const saveRoles = (map: Record<string,string>) => localStorage.setItem(ROLE_KEY, JSON.stringify(map))
+const saveRoles = (map: Record<string, Role>) => localStorage.setItem(ROLE_KEY, JSON.stringify(map))
 
-const getRole = (userid: string) => {
+const getRole = (userid: string): Role | undefined => {
   const map = loadRoles()
   return map[userid]
 }
-const setRole = (userid: string, role: string) => {
+const setRole = (userid: string, role: Role) => {
   const map = loadRoles(); map[userid] = role; saveRoles(map)
 }
-const removeRole = (userid: string) => { const map = loadRoles(); delete map[userid]; saveRoles(map) }
+const removeRole = (userid: string) => {
+  const map = loadRoles()
+  const { [userid]: _removed, ...rest } = map
+  saveRoles(rest)
+}
 
-const loadUsers = async () => {
+const loadUsers = async (): Promise<void> => {
   loading.value = true
   users.value = []
-  const res = await proxmoxRequest('/access/users', 'GET')
+  const res = await proxmoxRequest('/access/users', 'GET') as ProxmoxResponse<User[]>
   loading.value = false
   if (res.success) users.value = res.data || []
 }
 
-const filteredUsers = computed(() => {
-  return users.value.filter(u => {
+const filteredUsers = computed<User[]>(() => {
+  return users.value.filter((u) => {
     const realm = realmOf(u.userid)
     if (filterRealm.value !== 'all' && realm !== filterRealm.value) return false
     const role = getRole(u.userid)
@@ -186,11 +223,11 @@ const filteredUsers = computed(() => {
 
 const resetForm = () => { form.value = { userid: '', password: '', realm: 'pve', role: 'alumno', comment: '' } }
 
-const handleCreate = async () => {
+const handleCreate = async (): Promise<void> => {
   if (!form.value.userid || !form.value.password) return alert('Userid y password son requeridos')
   loading.value = true
   const useridFull = `${form.value.userid}@${form.value.realm}`
-  const r = await createUser(form.value.userid, form.value.password, form.value.realm, form.value.comment)
+  const r = await createUser(form.value.userid, form.value.password, form.value.realm, form.value.comment) as ProxmoxResponse<unknown>
   loading.value = false
   if (r.success === false) return alert('Error: ' + (r.message || JSON.stringify(r)))
   // save role locally
@@ -199,15 +236,15 @@ const handleCreate = async () => {
   await loadUsers()
 }
 
-const editUser = (u: any) => {
+const editUser = (u: User) => {
   editing.value = { userid: u.userid, comment: u.comment || '', role: getRole(u.userid) || 'alumno' }
 }
 
-const applyEdit = async () => {
+const applyEdit = async (): Promise<void> => {
   if (!editing.value) return
   loading.value = true
   const userid = editing.value.userid
-  const res = await updateUser(userid, { comment: editing.value.comment })
+  const res = await updateUser(userid, { comment: editing.value.comment }) as ProxmoxResponse<unknown>
   loading.value = false
   if (res.success === false) return alert('Error: ' + (res.message || JSON.stringify(res)))
   setRole(userid, editing.value.role)
@@ -217,10 +254,10 @@ const applyEdit = async () => {
 
 const cancelEdit = () => { editing.value = null }
 
-const removeUser = async (u: any) => {
+const removeUser = async (u: User): Promise<void> => {
   if (!confirm('Eliminar usuario ' + u.userid + '?')) return
   loading.value = true
-  const res = await deleteUser(u.userid)
+  const res = await deleteUser(u.userid) as ProxmoxResponse<unknown>
   loading.value = false
   if (res.success === false) return alert('Error: ' + (res.message || JSON.stringify(res)))
   removeRole(u.userid)
