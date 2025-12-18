@@ -1,10 +1,12 @@
 import { readBody, setResponseStatus } from 'h3'
+import { Agent } from 'undici'
 
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event) as { username: string; password: string; host?: string }
     const runtimeConfig = useRuntimeConfig()
     const defaultHost = runtimeConfig.proxmoxHost || runtimeConfig.public?.proxmoxHost
+    const allowInsecure = runtimeConfig.allowInsecureTLS === true
     const host = body.host || defaultHost
 
     if (!host) {
@@ -33,14 +35,17 @@ export default defineEventHandler(async (event) => {
     //
     // No establecemos `NODE_TLS_REJECT_UNAUTHORIZED` desde el código.
 
+    const dispatcher = allowInsecure ? new Agent({ connect: { rejectUnauthorized: false } }) : undefined
+
     const res = await $fetch(`${host}/api2/json/access/ticket`, {
       method: 'POST',
       body: form,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      dispatcher,
     })
 
     return res
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Log server-side for debugging
     console.error('Error proxying to Proxmox:', err && err.stack ? err.stack : err)
     const status = err?.response?.status || err?.statusCode || 502

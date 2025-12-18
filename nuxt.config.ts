@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   css: ['./app/assets/css/main.css'],
   modules: [
     '@nuxt/eslint',
@@ -12,6 +12,7 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     proxmoxHost: process.env.PROXMOX_HOST || process.env.NUXT_PUBLIC_PROXMOX_HOST || 'https://your-proxmox-host:8006',
+    allowInsecureTLS: process.env.ALLOW_INSECURE_TLS === 'true',
     public: {
       proxmoxHost: process.env.NUXT_PUBLIC_PROXMOX_HOST || process.env.PROXMOX_HOST || 'https://your-proxmox-host:8006',
     },

@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <!-- eslint-disable vue/attributes-order -->
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
@@ -39,23 +40,46 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+
+type SubjectType = 'user' | 'group' | 'pool' | 'vm' | 'other'
+
+interface ACL {
+  path?: string
+  roleid?: string
+  role?: string
+  ugid?: string
+  userid?: string
+  group?: string
+  pool?: string
+  vmid?: string
+  type?: SubjectType
+}
+
+interface TreeNode {
+  id: string
+  label: string
+  meta?: string
+  children: TreeNode[]
+  __roleMap?: Map<string, TreeNode>
+}
+
 const router = useRouter()
 // `PermissionTree` está en `app/components` y Nuxt importa componentes automáticamente.
 // Usamos `proxmoxRequest` para peticiones que no tienen helper directo.
 const { listACLs, listRoles, listGroups, proxmoxRequest, restoreSession, isAuthenticated } = useProxmox()
 
-const loading = ref(true)
-const acls = ref<any[]>([])
-const roles = ref<any[]>([])
-const users = ref<any[]>([])
-const groups = ref<any[]>([])
-const pools = ref<any[]>([])
-const vms = ref<any[]>([])
+const loading = ref<boolean>(true)
+const acls = ref<ACL[]>([])
+const roles = ref<Record<string, unknown>[]>([])
+const users = ref<Record<string, unknown>[]>([])
+const groups = ref<Record<string, unknown>[]>([])
+const pools = ref<Record<string, unknown>[]>([])
+const vms = ref<Record<string, unknown>[]>([])
 
 const raw = ref(false)
 
-const resourcesTree = ref<any[]>([])
-const subjectsTree = ref<any[]>([])
+const resourcesTree = ref<TreeNode[]>([])
+const subjectsTree = ref<TreeNode[]>([])
 
 onMounted(async () => {
   restoreSession()
@@ -69,16 +93,11 @@ watch(isAuthenticated, async (val) => {
 const reloadAll = async () => await loadAll()
 const showRaw = () => (raw.value = !raw.value)
 
-function addChild(parent: any, child: any) {
-  parent.children = parent.children || []
-  parent.children.push(child)
-}
-
-function ensureNode(map: Map<string, any>, key: string, nodeFactory: () => any) {
+function ensureNode<T>(map: Map<string, T>, key: string, nodeFactory: () => T): T {
   if (!map.has(key)) {
     map.set(key, nodeFactory())
   }
-  return map.get(key)
+  return map.get(key) as T
 }
 
 async function loadAll() {
@@ -107,22 +126,23 @@ async function loadAll() {
 
 function buildResourceTree() {
   // resource -> role -> [subjects]
-  const resMap = new Map<string, any>()
+  const resMap = new Map<string, TreeNode>()
 
-  acls.value.forEach((acl: any) => {
+  acls.value.forEach((acl) => {
     const path = acl.path || '/'
     const role = acl.roleid || acl.role || 'unknown'
     const subject = acl.ugid || acl.userid || acl.group || acl.pool || acl.vmid || null
-    const subjectType = acl.type || (acl.userid ? 'user' : acl.group ? 'group' : acl.pool ? 'pool' : acl.vmid ? 'vm' : 'other')
+    const subjectType: SubjectType = acl.type || (acl.userid ? 'user' : acl.group ? 'group' : acl.pool ? 'pool' : acl.vmid ? 'vm' : 'other')
 
     const resNode = ensureNode(resMap, path, () => ({ id: 'res:' + path, label: path, meta: '', children: [] }))
+    resNode.__roleMap = resNode.__roleMap || new Map<string, TreeNode>()
     const roleKey = path + '::' + role
-    const roleNode = ensureNode(new Map(resNode.__roleMap = resNode.__roleMap || new Map()), roleKey, () => ({ id: 'role:' + roleKey, label: role, meta: '', children: [] }))
+    const roleNode = ensureNode(resNode.__roleMap, roleKey, () => ({ id: 'role:' + roleKey, label: role, meta: '', children: [] }))
 
     // add subject under role
     if (subject) {
       const subjLabel = `${subject} (${subjectType})`
-      roleNode.children.push({ id: 'subj:' + roleKey + ':' + subjLabel, label: subjLabel, meta: subjectType })
+      roleNode.children.push({ id: 'subj:' + roleKey + ':' + subjLabel, label: subjLabel, meta: subjectType, children: [] })
     }
 
     // ensure the role node is attached to resource node's children only once
@@ -130,8 +150,7 @@ function buildResourceTree() {
   })
 
   // convert map to array
-  resourcesTree.value = Array.from(resMap.values()).map((n: any) => {
-    // clean internal maps
+  resourcesTree.value = Array.from(resMap.values()).map((n) => {
     if (n.__roleMap) delete n.__roleMap
     return n
   })
@@ -139,27 +158,28 @@ function buildResourceTree() {
 
 function buildSubjectsTree() {
   // subject -> role -> [resources]
-  const subMap = new Map<string, any>()
+  const subMap = new Map<string, TreeNode>()
 
-  acls.value.forEach((acl: any) => {
+  acls.value.forEach((acl) => {
     const path = acl.path || '/'
     const role = acl.roleid || acl.role || 'unknown'
     const subject = acl.ugid || acl.userid || acl.group || acl.pool || acl.vmid || null
-    const subjectType = acl.type || (acl.userid ? 'user' : acl.group ? 'group' : acl.pool ? 'pool' : acl.vmid ? 'vm' : 'other')
+    const subjectType: SubjectType = acl.type || (acl.userid ? 'user' : acl.group ? 'group' : acl.pool ? 'pool' : acl.vmid ? 'vm' : 'other')
     const subjLabel = subject || 'unknown'
     const subjKey = (subjectType || 'other') + '::' + (subjLabel || 'unknown')
 
     const subjNode = ensureNode(subMap, subjKey, () => ({ id: 'sub:' + subjKey, label: `${subjLabel} (${subjectType})`, children: [] }))
+    subjNode.__roleMap = subjNode.__roleMap || new Map<string, TreeNode>()
 
     const roleKey = subjKey + '::' + role
-    const roleNode = ensureNode(new Map(subjNode.__roleMap = subjNode.__roleMap || new Map()), roleKey, () => ({ id: 'srole:' + roleKey, label: role, children: [] }))
+    const roleNode = ensureNode(subjNode.__roleMap, roleKey, () => ({ id: 'srole:' + roleKey, label: role, children: [] }))
 
-    roleNode.children.push({ id: 'r:' + roleKey + ':' + path, label: path })
+    roleNode.children.push({ id: 'r:' + roleKey + ':' + path, label: path, children: [] })
 
     if (!subjNode.children.includes(roleNode)) subjNode.children.push(roleNode)
   })
 
-  subjectsTree.value = Array.from(subMap.values()).map((n: any) => {
+  subjectsTree.value = Array.from(subMap.values()).map((n) => {
     if (n.__roleMap) delete n.__roleMap
     return n
   })

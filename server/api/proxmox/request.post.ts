@@ -1,31 +1,39 @@
 import { readBody, setResponseStatus } from 'h3'
+import { Agent } from 'undici'
+
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
+
+type ProxmoxRequestBody = {
+  endpoint: string
+  method?: HttpMethod
+  host?: string
+  data?: Record<string, unknown> | string | URLSearchParams
+  authToken?: string
+  csrfToken?: string
+}
+
+type FetchErrorLike = {
+  response?: { status?: number; statusMessage?: string }
+  statusCode?: number
+  message?: string
+  data?: unknown
+  stack?: string
+}
 
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody(event) as { endpoint: string; method?: string; host?: string; data?: any; authToken?: string; csrfToken?: string }
+    const body = (await readBody(event)) as ProxmoxRequestBody
     const endpoint = body.endpoint || '/'
-    const method = (body.method || 'GET').toUpperCase()
+    const method: HttpMethod = (body.method?.toUpperCase() as HttpMethod) || 'GET'
     const runtimeConfig = useRuntimeConfig()
     const defaultHost = runtimeConfig.proxmoxHost || runtimeConfig.public?.proxmoxHost
+    const allowInsecure = runtimeConfig.allowInsecureTLS === true
     const host = body.host || defaultHost
 
     if (!host) {
       setResponseStatus(event, 400)
       return { success: false, message: 'Host de Proxmox no configurado' }
     }
-
-    // Nota: anteriormente se deshabilitaba la verificación TLS global con
-    // `process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'` para facilitar pruebas
-    // con certificados autofirmados. Eso genera la advertencia de Node y es
-    // inseguro porque afecta a todas las conexiones TLS del proceso.
-    //
-    // Alternativas seguras:
-    // - Añadir el certificado CA autofirmado al sistema o usar
-    //   `NODE_EXTRA_CA_CERTS=/path/to/ca.pem` en desarrollo.
-    // - Crear un https.Agent con la CA y usar una petición dirigida desde
-    //   aquí en lugar de deshabilitar la verificación global.
-    //
-    // No establecemos `NODE_TLS_REJECT_UNAUTHORIZED` desde el código.
 
     const headers: Record<string, string> = {}
 
@@ -42,8 +50,12 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const fetchOptions: any = {
-      method: method as any,
+    const fetchOptions: {
+      method: HttpMethod
+      headers: Record<string, string>
+      body?: string | URLSearchParams
+    } = {
+      method,
       headers,
     }
 
@@ -51,34 +63,38 @@ export default defineEventHandler(async (event) => {
     // convert plain object to URLSearchParams. We treat POST requests and when
     // body.data is a plain object (not string/Buffer).
     if (method !== 'GET' && body.data !== undefined) {
-      if (body.data && typeof body.data === 'object' && !(body.data instanceof String)) {
-        // Use form encoding for compatibility with Proxmox endpoints
+      if (body.data && typeof body.data === 'object' && !(body.data instanceof String) && !(body.data instanceof URLSearchParams)) {
         const params = new URLSearchParams()
-        for (const key of Object.keys(body.data)) {
-          const val = body.data[key]
+        for (const [key, val] of Object.entries(body.data)) {
           if (val !== undefined && val !== null) params.append(key, String(val))
         }
         fetchOptions.body = params
         fetchOptions.headers = { ...(fetchOptions.headers || {}), 'Content-Type': 'application/x-www-form-urlencoded' }
       } else {
-        fetchOptions.body = body.data
+        fetchOptions.body = body.data as string | URLSearchParams
       }
     }
 
-    const res = await $fetch(`${host}/api2/json${endpoint}`, fetchOptions)
+    const dispatcher = allowInsecure ? new Agent({ connect: { rejectUnauthorized: false } }) : undefined
+
+    const res = await $fetch(`${host}/api2/json${endpoint}`, {
+      ...fetchOptions,
+      dispatcher,
+    })
 
     return res
-  } catch (err: any) {
-    console.error('Error proxying Proxmox request:', err && err.stack ? err.stack : err)
-    const status = err?.response?.status || err?.statusCode || 502
+  } catch (err: unknown) {
+    const e = err as FetchErrorLike
+    console.error('Error proxying Proxmox request:', e?.stack ?? e)
+    const status = e?.response?.status ?? e?.statusCode ?? 502
     setResponseStatus(event, status)
 
     // Extraer mensaje de Proxmox (errors object o statusMessage)
-    const proxmoxDetails = err?.data?.errors || err?.data || err?.response?.statusMessage
+    const proxmoxDetails = e?.data?.errors ?? e?.data ?? e?.response?.statusMessage
 
     return {
       success: false,
-      message: err?.message || String(err),
+      message: e?.message ?? String(err),
       details: proxmoxDetails,
     }
   }

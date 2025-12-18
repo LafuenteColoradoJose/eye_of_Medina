@@ -11,6 +11,7 @@
     <div v-else>
       <section class="mb-6 section-card p-4 rounded shadow">
         <h2 class="font-bold mb-2">Crear usuario</h2>
+        <p class="text-sm muted mb-3">Solo se pueden crear usuarios en el realm <code class="font-mono">pve</code>. Para <code class="font-mono">pam</code>, crea primero el usuario en el sistema y luego asígnale permisos.</p>
         <form @submit.prevent="handleCreate" class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm">ID (sin realm)</label>
@@ -22,8 +23,7 @@
           </div>
           <div>
             <label class="block text-sm">Realm</label>
-            <select v-model="form.realm" class="w-full p-2 border rounded">
-              <option value="pam">pam (Sistema)</option>
+            <select v-model="form.realm" class="w-full p-2 border rounded" disabled>
               <option value="pve">pve (Proxmox)</option>
             </select>
           </div>
@@ -127,7 +127,7 @@ const { proxmoxRequest, createUser, deleteUser, updateUser, restoreSession, isAu
 const loading = ref(false)
 const users = ref<any[]>([])
 
-const form = ref({ userid: '', password: '', realm: 'pam', role: 'alumno', comment: '' })
+const form = ref({ userid: '', password: '', realm: 'pve', role: 'alumno', comment: '' })
 const filterRealm = ref('all')
 const filterRole = ref('all')
 
@@ -184,7 +184,7 @@ const filteredUsers = computed(() => {
   })
 })
 
-const resetForm = () => { form.value = { userid: '', password: '', realm: 'pam', role: 'alumno', comment: '' } }
+const resetForm = () => { form.value = { userid: '', password: '', realm: 'pve', role: 'alumno', comment: '' } }
 
 const handleCreate = async () => {
   if (!form.value.userid || !form.value.password) return alert('Userid y password son requeridos')

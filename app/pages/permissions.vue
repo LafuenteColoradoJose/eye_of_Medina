@@ -108,11 +108,32 @@ import { ref, onMounted, watch } from 'vue'
 const router = useRouter()
 const { listRoles, listACLs, createACL, deleteACL, restoreSession, isAuthenticated } = useProxmox()
 
-const loading = ref(false)
-const roles = ref<any[]>([])
-const acls = ref<any[]>([])
+type SubjectType = 'user' | 'group' | 'pool' | 'vm' | 'other'
 
-const form = ref({ path: '', role: '', subjectType: 'user', subjectId: '' })
+interface Role { roleid: string }
+
+interface ACL {
+  path: string
+  roleid?: string
+  role?: string
+  type?: SubjectType
+  ugid?: string
+  userid?: string
+  group?: string
+}
+
+interface FormState {
+  path: string
+  role: string
+  subjectType: SubjectType
+  subjectId: string
+}
+
+const loading = ref<boolean>(false)
+const roles = ref<Role[]>([])
+const acls = ref<ACL[]>([])
+
+const form = ref<FormState>({ path: '', role: '', subjectType: 'user', subjectId: '' })
 
 onMounted(() => {
   restoreSession()
@@ -126,9 +147,9 @@ watch(isAuthenticated, (val) => {
 const loadRolesAndACLs = async () => {
   loading.value = true
   const r = await listRoles()
-  if (r.success) roles.value = r.data || []
+  if (r.success) roles.value = (r.data as Role[]) || []
   const a = await listACLs()
-  if (a.success) acls.value = a.data || []
+  if (a.success) acls.value = (a.data as ACL[]) || []
   loading.value = false
 }
 
@@ -136,7 +157,7 @@ const loadACLs = async () => {
   loading.value = true
   const res = await listACLs()
   loading.value = false
-  if (res.success) acls.value = res.data || []
+  if (res.success) acls.value = (res.data as ACL[]) || []
 }
 
 const handleAssign = async () => {
@@ -151,7 +172,7 @@ const handleAssign = async () => {
   const subject = form.value.subjectId.trim()
   if (!subject) return alert('El ID del sujeto está vacío')
 
-  const opts: any = { propagate: 1 }
+  const opts: { propagate: number; users?: string; groups?: string } = { propagate: 1 }
   if (form.value.subjectType === 'user') opts.users = subject
   if (form.value.subjectType === 'group') opts.groups = subject
 
@@ -162,7 +183,7 @@ const handleAssign = async () => {
   await loadACLs()
 }
 
-const removeACL = async (a: any) => {
+const removeACL = async (a: ACL) => {
   if (!confirm('Eliminar ACL en ' + a.path + ' role ' + a.role + '?')) return
   loading.value = true
   const res = await deleteACL(a.path, a.roleid || a.role, { users: a.userid || a.ugid, groups: a.group })
