@@ -8,8 +8,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const { isAuthenticated, username } = useProxmox()
   if (!isAuthenticated.value) return navigateTo('/')
 
-  // root@pam tiene acceso completo a todas las vistas
-  if (username.value === 'root@pam') return
+  // root@pam y miembros del grupo Profesores tienen acceso completo
+  // Nota: en Proxmox los grupos se reflejan en el username como userid@realm (no incluye grupo),
+  // así que para efectos prácticos de la UI tratamos a "profesor" (pve o pam) como superuser.
+  const isProfessor = username.value?.startsWith('Profesor') || username.value?.includes('@profesores')
+  if (username.value === 'root@pam' || isProfessor) return
 
   // Rutas con requisitos de privilegios mínimos
   const routeNeeds: Record<string, string[]> = {

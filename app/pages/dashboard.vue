@@ -104,6 +104,9 @@
 const router = useRouter();
 const { username, isAuthenticated, proxmoxRequest, restoreSession } = useProxmox();
 
+const isProfessor = computed(() => username.value?.startsWith('profesor') || username.value?.includes('@profesores'));
+const isSuperUser = computed(() => username.value === 'root@pam' || isProfessor.value);
+
 // Estado
 const loading = ref(false);
 const error = ref('');

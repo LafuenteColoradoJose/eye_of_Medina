@@ -184,9 +184,17 @@ const handleAssign = async () => {
 }
 
 const removeACL = async (a: ACL) => {
-  if (!confirm('Eliminar ACL en ' + a.path + ' role ' + a.role + '?')) return
+  const role = a.roleid || a.role
+  if (!role) return alert('No se pudo determinar el rol de la ACL a eliminar')
+
+  const isUser = a.type === 'user' || (a.ugid && a.ugid.includes('@'))
+  const opts: { users?: string; groups?: string } = {}
+  if (isUser && a.ugid) opts.users = a.ugid
+  else if (!isUser && (a.ugid || a.group)) opts.groups = a.ugid || a.group
+
+  if (!confirm(`Eliminar ACL en ${a.path} con rol ${role}?`)) return
   loading.value = true
-  const res = await deleteACL(a.path, a.roleid || a.role, { users: a.userid || a.ugid, groups: a.group })
+  const res = await deleteACL(a.path, role, opts)
   loading.value = false
   if (res.success === false) return alert('Error: ' + (res.message || JSON.stringify(res)))
   await loadACLs()
