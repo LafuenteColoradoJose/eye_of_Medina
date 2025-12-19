@@ -1,6 +1,14 @@
 import { readBody, setResponseStatus } from 'h3'
 import { Agent } from 'undici'
 
+type FetchErrorLike = {
+  stack?: string
+  message?: string
+  response?: { status?: number; statusMessage?: string }
+  statusCode?: number
+  data?: unknown
+}
+
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event) as { username: string; password: string; host?: string }
@@ -18,23 +26,6 @@ export default defineEventHandler(async (event) => {
     form.append('username', body.username)
     form.append('password', body.password)
 
-    // En entorno de desarrollo, si el certificado es autofirmado, el servidor Node
-    // respetará la verificación TLS. Para ignorarlo en local se puede usar
-    // NODE_TLS_REJECT_UNAUTHORIZED=0 al iniciar el proceso (no recomendado en prod).
-
-    // Nota: anteriormente se deshabilitaba la verificación TLS global con
-    // `process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'` para facilitar pruebas
-    // con certificados autofirmados. Eso genera la advertencia de Node y es
-    // inseguro porque afecta a todas las conexiones TLS del proceso.
-    //
-    // Alternativas seguras:
-    // - Añadir el certificado CA autofirmado al sistema o usar
-    //   `NODE_EXTRA_CA_CERTS=/path/to/ca.pem` en desarrollo.
-    // - Crear un https.Agent con la CA y usar una petición dirigida desde
-    //   aquí en lugar de deshabilitar la verificación global.
-    //
-    // No establecemos `NODE_TLS_REJECT_UNAUTHORIZED` desde el código.
-
     const dispatcher = allowInsecure ? new Agent({ connect: { rejectUnauthorized: false } }) : undefined
 
     const res = await $fetch(`${host}/api2/json/access/ticket`, {
@@ -46,10 +37,14 @@ export default defineEventHandler(async (event) => {
 
     return res
   } catch (err: unknown) {
-    // Log server-side for debugging
-    console.error('Error proxying to Proxmox:', err && err.stack ? err.stack : err)
-    const status = err?.response?.status || err?.statusCode || 502
+    const error = err as FetchErrorLike
+    console.error('Error proxying to Proxmox:', error.stack ?? error)
+    const status = error.response?.status ?? error.statusCode ?? 502
     setResponseStatus(event, status)
-    return { success: false, message: err?.message || String(err), details: err?.data || err?.response?.statusMessage }
+    return {
+      success: false,
+      message: error.message ?? String(err),
+      details: error.data ?? error.response?.statusMessage,
+    }
   }
 })
