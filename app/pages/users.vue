@@ -24,11 +24,11 @@
             <input v-model="form.password" type="password" class="w-full p-2 border rounded" />
           </div>
           <div>
-            <label class="block text-sm">Rol</label>
-            <select v-model="form.role" class="w-full p-2 border rounded">
-              <option value="alumno">Alumno</option>
-              <option value="profesor">Profesor</option>
+            <label class="block text-sm">Grupos</label>
+            <select v-model="form.groups" multiple class="w-full p-2 border rounded min-h-[2.5rem]">
+              <option v-for="g in groupsOptions" :key="g" :value="g">{{ g }}</option>
             </select>
+            <p class="text-xs muted mt-1">Ctrl/⌘+clic para elegir varios</p>
           </div>
 
           <div class="col-span-2">
@@ -52,10 +52,9 @@
               <option value="pam">pam</option>
               <option value="pve">pve</option>
             </select>
-            <select v-model="filterRole" class="p-2 border rounded">
-              <option value="all">Todos los roles</option>
-              <option value="alumno">Alumno</option>
-              <option value="profesor">Profesor</option>
+            <select v-model="filterGroup" class="p-2 border rounded">
+              <option value="all">Todos los grupos</option>
+              <option v-for="g in groupsOptions" :key="g" :value="g">{{ g }}</option>
             </select>
             <button @click="loadUsers" class="px-3 py-2 rounded btn-primary">Refrescar</button>
           </div>
@@ -68,7 +67,7 @@
             <tr class="text-left border-b">
               <th class="p-2">Usuario</th>
               <th class="p-2">Realm</th>
-              <th class="p-2">Rol</th>
+              <th class="p-2">Grupos</th>
               <th class="p-2">Acciones</th>
             </tr>
           </thead>
@@ -76,7 +75,7 @@
             <tr v-for="u in filteredUsers" :key="u.userid" class="border-b">
               <td class="p-2">{{ u.userid }}</td>
               <td class="p-2">{{ realmOf(u.userid) }}</td>
-              <td class="p-2">{{ getRole(u.userid) || '-' }}</td>
+              <td class="p-2">{{ groupsOf(u) }}</td>
               <td class="p-2">
                 <button @click="editUser(u)" class="px-2 py-1 rounded mr-2 btn-warning">Editar</button>
                 <button @click="removeUser(u)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
@@ -95,12 +94,12 @@
               <label class="block text-sm">Comentario</label>
               <input v-model="editing.comment" class="w-full p-2 border rounded" />
             </div>
-            <div>
-              <label class="block text-sm">Rol</label>
-              <select v-model="editing.role" class="w-full p-2 border rounded">
-                <option value="alumno">Alumno</option>
-                <option value="profesor">Profesor</option>
+            <div class="col-span-2">
+              <label class="block text-sm">Grupos</label>
+              <select v-model="editing.groups" multiple class="w-full p-2 border rounded min-h-[2.5rem]">
+                <option v-for="g in groupsOptions" :key="g" :value="g">{{ g }}</option>
               </select>
+              <p class="text-xs muted mt-1">Ctrl/⌘+clic para elegir varios</p>
             </div>
           </div>
 
@@ -119,11 +118,10 @@
 import { ref, computed, onMounted, watch } from 'vue'
 
 type Realm = 'pam' | 'pve'
-type Role = 'alumno' | 'profesor'
-
 type User = {
   userid: string
   comment?: string
+  groups?: string[]
 }
 
 type ProxmoxResponse<T> = {
@@ -136,35 +134,40 @@ type FormState = {
   userid: string
   password: string
   realm: Realm
-  role: Role
   comment?: string
+  groups: string[]
 }
 
 type EditableUser = {
   userid: string
   comment: string
-  role: Role
+  groups: string[]
 }
 
 const router = useRouter()
-const { proxmoxRequest, createUser, deleteUser, updateUser, restoreSession, isAuthenticated } = useProxmox()
+const { proxmoxRequest, createUser, deleteUser, updateUser, restoreSession, isAuthenticated, listGroups } = useProxmox()
 
 const loading = ref<boolean>(false)
 const users = ref<User[]>([])
+const groupsOptions = ref<string[]>([])
 
-const form = ref<FormState>({ userid: '', password: '', realm: 'pve', role: 'alumno', comment: '' })
+const form = ref<FormState>({ userid: '', password: '', realm: 'pve', comment: '', groups: [] })
 const filterRealm = ref<'all' | Realm>('all')
-const filterRole = ref<'all' | Role>('all')
+const filterGroup = ref<'all' | string>('all')
 
 const editing = ref<EditableUser | null>(null)
 
 onMounted(() => {
   restoreSession()
-  if (isAuthenticated.value) loadUsers()
+  if (isAuthenticated.value) {
+    loadUsers()
+    loadGroups()
+  }
 })
 
 watch(isAuthenticated, (val) => {
   if (val && users.value.length === 0) loadUsers()
+  if (val && groupsOptions.value.length === 0) loadGroups()
 })
 
 const realmOf = (userid: string): Realm | '' => {
@@ -173,28 +176,25 @@ const realmOf = (userid: string): Realm | '' => {
 }
 
 // store role mapping locally (for demo purposes). In production use a persistent store.
-const ROLE_KEY = 'app:userRoles:v1'
-const loadRoles = (): Record<string, Role> => {
+// Persistencia local de grupos (para filtros y edición rápida)
+const GROUPS_KEY = 'app:userGroups:v1'
+const loadGroupsLocal = (): Record<string, string[]> => {
   try {
-    const raw = localStorage.getItem(ROLE_KEY)
+    const raw = localStorage.getItem(GROUPS_KEY)
     return raw ? JSON.parse(raw) : {}
   } catch {
     return {}
   }
 }
-const saveRoles = (map: Record<string, Role>) => localStorage.setItem(ROLE_KEY, JSON.stringify(map))
+const saveGroupsLocal = (map: Record<string, string[]>) => localStorage.setItem(GROUPS_KEY, JSON.stringify(map))
 
-const getRole = (userid: string): Role | undefined => {
-  const map = loadRoles()
-  return map[userid]
+const _setGroupsLocal = (userid: string, groups: string[]) => {
+  const map = loadGroupsLocal(); map[userid] = groups; saveGroupsLocal(map)
 }
-const setRole = (userid: string, role: Role) => {
-  const map = loadRoles(); map[userid] = role; saveRoles(map)
-}
-const removeRole = (userid: string) => {
-  const map = loadRoles()
+const _removeGroupsLocal = (userid: string) => {
+  const map = loadGroupsLocal()
   const { [userid]: _removed, ...rest } = map
-  saveRoles(rest)
+  saveGroupsLocal(rest)
 }
 
 const loadUsers = async (): Promise<void> => {
@@ -205,43 +205,67 @@ const loadUsers = async (): Promise<void> => {
   if (res.success) users.value = res.data || []
 }
 
+const loadGroups = async (): Promise<void> => {
+  try {
+    const res = await listGroups()
+    if (res.success && res.data) {
+      groupsOptions.value = (res.data as { groupid: string }[]).map((g) => g.groupid)
+    }
+  } catch (error) {
+    console.error('Error cargando grupos', error)
+  }
+}
+
 const filteredUsers = computed<User[]>(() => {
   return users.value.filter((u) => {
     const realm = realmOf(u.userid)
     if (filterRealm.value !== 'all' && realm !== filterRealm.value) return false
-    const role = getRole(u.userid)
-    if (filterRole.value !== 'all' && role !== filterRole.value) return false
+    if (filterGroup.value !== 'all') {
+      const inGroup = (u.groups || []).includes(filterGroup.value)
+      if (!inGroup) return false
+    }
     return true
   })
 })
 
-const resetForm = () => { form.value = { userid: '', password: '', realm: 'pve', role: 'alumno', comment: '' } }
+const resetForm = () => { form.value = { userid: '', password: '', realm: 'pve', comment: '', groups: [] } }
+
+const groupsOf = (u: User): string => (u.groups && u.groups.length > 0 ? u.groups.join(', ') : '-')
 
 const handleCreate = async (): Promise<void> => {
   if (!form.value.userid || !form.value.password) return alert('Userid y password son requeridos')
   loading.value = true
-  const useridFull = `${form.value.userid}@${form.value.realm}`
-  const r = await createUser(form.value.userid, form.value.password, form.value.realm, form.value.comment) as ProxmoxResponse<unknown>
+  const r = await createUser(
+    form.value.userid,
+    form.value.password,
+    form.value.realm,
+    form.value.comment,
+    form.value.groups
+  ) as ProxmoxResponse<unknown>
   loading.value = false
   if (r.success === false) return alert('Error: ' + (r.message || JSON.stringify(r)))
-  // save role locally
-  setRole(useridFull, form.value.role)
   resetForm()
   await loadUsers()
 }
 
 const editUser = (u: User) => {
-  editing.value = { userid: u.userid, comment: u.comment || '', role: getRole(u.userid) || 'alumno' }
+  editing.value = {
+    userid: u.userid,
+    comment: u.comment || '',
+    groups: u.groups || [],
+  }
 }
 
 const applyEdit = async (): Promise<void> => {
   if (!editing.value) return
   loading.value = true
   const userid = editing.value.userid
-  const res = await updateUser(userid, { comment: editing.value.comment }) as ProxmoxResponse<unknown>
+  const res = await updateUser(userid, {
+    comment: editing.value.comment,
+    groups: editing.value.groups?.length ? editing.value.groups.join(',') : undefined,
+  }) as ProxmoxResponse<unknown>
   loading.value = false
   if (res.success === false) return alert('Error: ' + (res.message || JSON.stringify(res)))
-  setRole(userid, editing.value.role)
   editing.value = null
   await loadUsers()
 }
@@ -254,7 +278,6 @@ const removeUser = async (u: User): Promise<void> => {
   const res = await deleteUser(u.userid) as ProxmoxResponse<unknown>
   loading.value = false
   if (res.success === false) return alert('Error: ' + (res.message || JSON.stringify(res)))
-  removeRole(u.userid)
   await loadUsers()
 }
 </script>

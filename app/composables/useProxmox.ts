@@ -195,11 +195,16 @@ export const useProxmox = () => {
     login,
     proxmoxRequest,
     // CRUD helpers
-    createUser: async (userid: string, password: string, realm = 'pam', comment?: string) => {
+    createUser: async (userid: string, password: string, realm = 'pam', comment?: string, groups?: string[]) => {
       // userid should be like 'user' (without @realm) per Proxmox API expects userid and realm separately
       const fullUser = `${userid}@${realm}`
-      // Proxmox expects form-encoded fields: userid, password, comment
-      return await proxmoxRequest('/access/users', 'POST', undefined, { userid: fullUser, password, comment })
+      // Proxmox expects form-encoded fields: userid, password, comment, groups (comma-separated)
+      return await proxmoxRequest('/access/users', 'POST', undefined, {
+        userid: fullUser,
+        password,
+        comment,
+        groups: groups && groups.length ? groups.join(',') : undefined,
+      })
     },
     deleteUser: async (userid: string) => {
       // DELETE /access/users/{userid}
