@@ -2,7 +2,7 @@
 <template>
   <article class="flex flex-col justify-center items-center border-2 rounded-lg p-2 gap-2">
 
-   <NuxtImg src="/Logo_Eye_of_Azahara.svg" alt="Eye of Medina Logo" width="50" height="50" />
+   <NuxtImg src="/Logo_Eye_of_Medina.svg" alt="Eye of Medina Logo" width="50" height="50" />
 
 
   </article>
