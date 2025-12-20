@@ -21,6 +21,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     '/groups': ['Sys.Audit'],
     '/users': ['User.Audit', 'Sys.Audit'],
     '/pools': ['Pool.Audit'],
+    '/machines': ['VM.Audit'],
   }
 
   // Caso especial: solo root@pam puede ver árbol de permisos

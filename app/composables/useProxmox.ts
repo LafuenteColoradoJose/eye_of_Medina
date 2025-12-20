@@ -1,6 +1,6 @@
 export const useProxmox = () => {
   const runtimeConfig = useRuntimeConfig()
-  const defaultHost = runtimeConfig.public?.proxmoxHost || (process.server ? runtimeConfig.proxmoxHost : '')
+  const defaultHost = runtimeConfig.public?.proxmoxHost || (import.meta.server ? runtimeConfig.proxmoxHost : '')
   
   // Estado de autenticación
   const authToken = useState<string | null>('proxmox-auth-token', () => null)
@@ -14,6 +14,13 @@ export const useProxmox = () => {
    * @param password - Contraseña
    * @param proxmoxHost - Host de Proxmox (ej: https://192.168.8.2400:8006)
    */
+  type ProxmoxLoginResponse = {
+    data?: {
+      ticket: string
+      CSRFPreventionToken: string
+      username: string
+    }
+  }
   const login = async (user: string, password: string, proxmoxHost: string) => {
     try {
       const hostToUse = proxmoxHost || defaultHost
@@ -27,7 +34,7 @@ export const useProxmox = () => {
       form.append('username', user)
       form.append('password', password)
 
-      let response: any
+      let response: ProxmoxLoginResponse
 
       // Si estamos en el cliente, hacemos la petición al endpoint local que actúa
       // como proxy para evitar problemas de CORS y certificados autofirmados.
@@ -56,7 +63,7 @@ export const useProxmox = () => {
         username.value = response.data.username
         
         // Guardar en localStorage para persistencia
-        if (process.client) {
+        if (import.meta.client) {
           localStorage.setItem('proxmox-auth-token', response.data.ticket)
           localStorage.setItem('proxmox-csrf-token', response.data.CSRFPreventionToken)
           localStorage.setItem('proxmox-username', response.data.username)
@@ -74,11 +81,12 @@ export const useProxmox = () => {
         success: false,
         message: 'Error en la respuesta del servidor',
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error en login de Proxmox:', error)
+      const message = error instanceof Error ? error.message : 'Error al conectar con Proxmox'
       return {
         success: false,
-        message: error.message || 'Error al conectar con Proxmox',
+        message,
         error,
       }
     }
@@ -88,7 +96,12 @@ export const useProxmox = () => {
   /**
    * Hacer una petición autenticada a la API de Proxmox
    */
-  const proxmoxRequest = async (endpoint: string, method: string = 'GET', host?: string, body?: any) => {
+  const proxmoxRequest = async (
+    endpoint: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' = 'GET',
+    host?: string,
+    body?: BodyInit | Record<string, unknown> | null
+  ) => {
     const proxmoxHost = host || (typeof window !== 'undefined' ? localStorage.getItem('proxmox-host') : null) || defaultHost
     
     if (!proxmoxHost) {
@@ -113,7 +126,7 @@ export const useProxmox = () => {
         headers['Authorization'] = authToken.value
       }
 
-      let response: any
+      let response: { data?: unknown }
 
       // If in browser, use server proxy to avoid CORS and TLS issues
       if (typeof window !== 'undefined') {
@@ -130,7 +143,7 @@ export const useProxmox = () => {
         })
       } else {
         response = await $fetch(`${proxmoxHost}/api2/json${endpoint}`, {
-          method: method as any,
+          method,
           headers,
           body,
         })
@@ -140,12 +153,20 @@ export const useProxmox = () => {
         success: true,
         data: response.data,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error en petición Proxmox:', error)
+
+      const maybeError = error as { data?: { message?: string; errors?: unknown }; details?: unknown }
+      const message =
+        (maybeError.data && typeof maybeError.data.message === 'string' && maybeError.data.message) ||
+        (error instanceof Error ? error.message : 'Error en la petición')
+
+      const details = maybeError.data?.errors ?? maybeError.details ?? maybeError.data
+
       return {
         success: false,
-        message: error?.data?.message || error.message || 'Error en la petición',
-        details: error?.data?.errors || error?.details || error?.data,
+        message,
+        details,
         error,
       }
     }
@@ -159,7 +180,7 @@ export const useProxmox = () => {
     csrfToken.value = null
     username.value = null
 
-    if (process.client) {
+    if (import.meta.client) {
       localStorage.removeItem('proxmox-auth-token')
       localStorage.removeItem('proxmox-csrf-token')
       localStorage.removeItem('proxmox-username')
@@ -171,7 +192,7 @@ export const useProxmox = () => {
    * Restaurar sesión desde localStorage
    */
   const restoreSession = () => {
-    if (process.client) {
+    if (import.meta.client) {
       const token = localStorage.getItem('proxmox-auth-token')
       const csrf = localStorage.getItem('proxmox-csrf-token')
       const user = localStorage.getItem('proxmox-username')
@@ -210,7 +231,7 @@ export const useProxmox = () => {
       // DELETE /access/users/{userid}
       return await proxmoxRequest(`/access/users/${encodeURIComponent(userid)}`, 'DELETE')
     },
-    updateUser: async (userid: string, data: Record<string, any>) => {
+    updateUser: async (userid: string, data: Record<string, unknown>) => {
       // PUT /access/users/{userid} with form data (e.g., comment)
       return await proxmoxRequest(`/access/users/${encodeURIComponent(userid)}`, 'PUT', undefined, data)
     },
@@ -221,12 +242,40 @@ export const useProxmox = () => {
     createGroup: async (groupid: string, comment?: string) => {
       return await proxmoxRequest('/access/groups', 'POST', undefined, { groupid, comment })
     },
-    updateGroup: async (groupid: string, data: Record<string, any>) => {
+    updateGroup: async (groupid: string, data: Record<string, unknown>) => {
       return await proxmoxRequest(`/access/groups/${encodeURIComponent(groupid)}`, 'PUT', undefined, data)
     },
     deleteGroup: async (groupid: string) => {
       return await proxmoxRequest(`/access/groups/${encodeURIComponent(groupid)}`, 'DELETE')
     },
+    // Pool management
+    listPools: async () => proxmoxRequest('/pools', 'GET'),
+
+    // Nodes and VM/CT resources
+    listNodes: async () => proxmoxRequest('/nodes', 'GET'),
+    listVMResources: async () => proxmoxRequest('/cluster/resources?type=vm', 'GET'),
+
+    // VM/CT config helpers
+    updateMachineConfig: async (
+      node: string,
+      type: 'qemu' | 'lxc',
+      vmid: number | string,
+      data: Record<string, unknown>
+    ) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/${type}/${vmid}/config`, 'PUT', undefined, data),
+
+    deleteMachine: async (node: string, type: 'qemu' | 'lxc', vmid: number | string) =>
+      proxmoxRequest(`/nodes/${encodeURIComponent(node)}/${type}/${vmid}`, 'DELETE'),
+
+    cloneMachine: async (
+      node: string,
+      type: 'qemu' | 'lxc',
+      vmid: number | string,
+      data: Record<string, unknown>
+    ) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/${type}/${vmid}/clone`, 'POST', undefined, data),
+
+    // Pool membership helpers
+    addVmToPool: async (poolid: string, vmid: number | string) =>
+      proxmoxRequest(`/pools/${encodeURIComponent(poolid)}`, 'PUT', undefined, { vms: String(vmid) }),
     // Role management
     listRoles: async () => {
       return await proxmoxRequest('/access/roles', 'GET')
@@ -243,7 +292,7 @@ export const useProxmox = () => {
     listACLs: async () => {
       return await proxmoxRequest('/access/acl', 'GET')
     },
-    createACL: async (path: string, role: string, options?: Record<string, any>) => {
+    createACL: async (path: string, role: string, options?: Record<string, unknown>) => {
       // Proxmox ACL API expects PUT with roles and users/groups/pool/vmid
       const cleanPath = (path || '').trim()
       let normalizedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`
@@ -251,7 +300,7 @@ export const useProxmox = () => {
       const poolMatch = normalizedPath.match(/^\/pool([^/]+)$/)
       if (poolMatch) normalizedPath = `/pool/${poolMatch[1]}`
 
-      const body: any = { path: normalizedPath, roles: role }
+      const body: Record<string, unknown> = { path: normalizedPath, roles: role }
 
       // Propagate por defecto activado salvo que se indique 0/false
       if (options && 'propagate' in options) {
@@ -274,18 +323,18 @@ export const useProxmox = () => {
       }
 
       // Quitar undefined/null
-      Object.keys(body).forEach((k) => {
-        if (body[k] === undefined || body[k] === null || body[k] === '') delete body[k]
-      })
+      const cleanedBody = Object.fromEntries(
+        Object.entries(body).filter(([, v]) => v !== undefined && v !== null && v !== '')
+      )
 
-      return await proxmoxRequest('/access/acl', 'PUT', undefined, body)
+      return await proxmoxRequest('/access/acl', 'PUT', undefined, cleanedBody)
     },
-    deleteACL: async (path: string, role?: string, options?: Record<string, any>) => {
+    deleteACL: async (path: string, role?: string, options?: Record<string, unknown>) => {
       const cleanPath = (path || '').trim()
       let normalizedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`
       const poolMatch = normalizedPath.match(/^\/pool([^/]+)$/)
       if (poolMatch) normalizedPath = `/pool/${poolMatch[1]}`
-      const body: any = { path: normalizedPath, delete: 1 }
+      const body: Record<string, unknown> = { path: normalizedPath, delete: 1 }
       if (role) body.roles = role
 
       if (options) {
@@ -295,11 +344,11 @@ export const useProxmox = () => {
         if (options.groups) body.groups = options.groups
       }
 
-      Object.keys(body).forEach((k) => {
-        if (body[k] === undefined || body[k] === null || body[k] === '') delete body[k]
-      })
+      const cleanedBody = Object.fromEntries(
+        Object.entries(body).filter(([, value]) => value !== undefined && value !== null && value !== '')
+      )
 
-      return await proxmoxRequest('/access/acl', 'PUT', undefined, body)
+      return await proxmoxRequest('/access/acl', 'PUT', undefined, cleanedBody)
     },
     logout,
     restoreSession,
