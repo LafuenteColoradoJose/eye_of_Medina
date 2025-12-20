@@ -1,75 +1,39 @@
-# Nuxt Minimal Starter
+# Eye of Medina
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Panel Nuxt 4 para monitoreo y gestion de Proxmox VE: dashboard con graficas, control de pools/grupos/roles/ACL y operaciones sobre VMs y contenedores.
 
-## Setup
+## Caracteristicas
+- Dashboard con KPI, distribucion por pools, top CPU/RAM, salud de nodos y ultimas tareas/eventos.
+- Listado de VMs/CTs con filtros, clonado con seleccion de pool, renombrado/hostname, cambio de pool y eliminacion.
+- Gestion de pools, grupos, usuarios, roles y ACL alineada con permisos de Proxmox; vista arbol de permisos.
+- Autenticacion via token o usuario/clave; proxy seguro a Proxmox desde el backend Nuxt.
 
-Make sure to install dependencies:
+## Requisitos
+- Node.js 20+.
+- Acceso HTTPS al host de Proxmox (puerto 8006).
+- Variables de entorno basicas:
+	- `PROXMOX_HOST` o `NUXT_PUBLIC_PROXMOX_HOST`: URL base de Proxmox (ej: https://pve.local:8006).
+	- `ALLOW_INSECURE_TLS=true` si aceptas certificado autofirmado en desarrollo.
 
+## Instalacion
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
+## Desarrollo
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
+Abre http://localhost:3000.
 
-## Production
-
-Build the application for production:
-
+## Produccion
 ```bash
-# npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+npm run preview  # para probar el build localmente
 ```
 
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Notas de arquitectura
+- Configuracion y metadatos en [nuxt.config.ts](nuxt.config.ts); CSS principal en [app/assets/css/main.css](app/assets/css/main.css).
+- API proxy a Proxmox en [server/api/proxmox/login.post.ts](server/api/proxmox/login.post.ts) y [server/api/proxmox/request.post.ts](server/api/proxmox/request.post.ts).
+- Dashboard y modulos principales en [app/pages](app/pages), composables en [app/composables](app/composables).
+- Documentacion funcional en [Eye_of_Medina.md](Eye_of_Medina.md).
