@@ -161,6 +161,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
+import type { ApexOptions } from 'apexcharts'
 
 type VmResource = {
   vmid: number
@@ -255,10 +256,10 @@ const chartVmState = computed(() => {
     series: totalVms.value ? [running, stopped] : [],
     options: {
       labels: ['Running', 'Paradas'],
-      legend: { position: 'bottom' },
+      legend: { position: 'bottom' as const },
       colors: ['#10b981', '#f97316'],
       dataLabels: { enabled: true, formatter: (val: number) => `${val.toFixed(1)}%` },
-    },
+    } satisfies ApexOptions,
   }
 })
 
@@ -273,7 +274,7 @@ const chartNodeCpu = computed(() => {
       dataLabels: { enabled: false },
       plotOptions: { bar: { distributed: true, borderRadius: 4 } },
       colors: ['#0ea5e9', '#6366f1', '#f97316', '#10b981', '#ef4444'],
-    },
+    } satisfies ApexOptions,
   }
 })
 
@@ -292,10 +293,10 @@ const chartPool = computed(() => {
     series: entries.map(([, count]) => count),
     options: {
       labels: entries.map(([name]) => name),
-      legend: { position: 'bottom' },
+      legend: { position: 'bottom' as const },
       colors: ['#6366f1', '#0ea5e9', '#10b981', '#f97316', '#ef4444', '#8b5cf6'],
       dataLabels: { enabled: true, formatter: (val: number) => `${val.toFixed(1)}%` },
-    },
+    } satisfies ApexOptions,
   }
 })
 
