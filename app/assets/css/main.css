@@ -6,42 +6,37 @@
 */
 @theme {
   /* Colors */
-  --color-bg: #F4F4FC;
-  /* Light Lavender/White */
+  --color-bg: #f8fafc;
+  /* Slate 50 */
   --color-card: #ffffff;
-  --color-border: rgba(36, 45, 64, 0.15);
-  --color-muted-surface: #eef2f6;
+  --color-border: rgba(148, 163, 184, 0.2);
+  --color-muted-surface: #f1f5f9;
 
-  --color-text: #242443;
-  /* Dark Indigo */
+  --color-text: #0f172a;
+  /* Slate 900 */
   --color-text-muted: #64748b;
   --color-text-on-strong: #ffffff;
-  --color-text-on-warning: #242443;
-  /* Dark text on yellow warning */
+  --color-text-on-warning: #0f172a;
 
-  --color-primary: #1371C2;
-  /* Strong Blue (Accessibile) */
-  --color-primary-strong: #242443;
-  /* Dark Indigo (Sidebar) */
-  --color-accent: #D85676;
-  /* Raspberry */
+  --color-primary: #7c3aed;
+  /* Violet 600 */
+  --color-primary-strong: #0f172a;
+  --color-accent: #0d9488;
+  /* Teal 600 */
 
-  --color-positive: #4FA866;
-  /* Medium Green */
-  --color-positive-strong: #2e663d;
-  --color-positive-soft: rgba(79, 168, 102, 0.15);
+  --color-positive: #16a34a;
+  --color-positive-strong: #14532d;
+  --color-positive-soft: rgba(22, 163, 74, 0.1);
 
-  --color-warning: #ffd900;
-  /* Bright Yellow */
-  --color-warning-strong: #665200;
-  --color-warning-soft: rgba(255, 217, 0, 0.2);
+  --color-warning: #ca8a04;
+  --color-warning-strong: #713f12;
+  --color-warning-soft: rgba(202, 138, 4, 0.1);
 
-  --color-danger: #D85676;
-  /* Raspberry Red */
-  --color-danger-strong: #8c2a42;
-  --color-danger-soft: rgba(216, 86, 118, 0.15);
+  --color-danger: #dc2626;
+  --color-danger-strong: #7f1d1d;
+  --color-danger-soft: rgba(220, 38, 38, 0.1);
 
-  --color-overlay: rgba(36, 45, 64, 0.5);
+  --color-overlay: rgba(15, 23, 42, 0.6);
 
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -72,45 +67,44 @@
 }
 
 /* 
-  DARK MODE OVERRIDES
+  DARK MODE OVERRIDES (Cyber)
 */
 :root.dark {
-  --color-bg: #242D40;
-  /* Dark Blue-Gray */
-  --color-card: #2f3a4f;
-  /* Lighter Blue-Gray */
-  --color-border: #445168;
-  --color-muted-surface: #38425a;
+  --color-bg: #0f1016;
+  /* Deep Obsidian */
+  --color-card: #191c26;
+  /* Dark Slate Card */
+  --color-border: #2d3748;
+  --color-muted-surface: #232736;
 
-  --color-text: #F4F4FC;
-  /* Light Lavender/White */
-  --color-text-muted: #9ca3af;
+  --color-text: #e2e8f0;
+  /* Slate 200 */
+  --color-text-muted: #94a3b8;
   --color-text-on-strong: #ffffff;
-  --color-text-on-warning: #242443;
-  /* Dark text on Yellow */
+  --color-text-on-warning: #0f1016;
 
-  --color-primary: #3D8AEA;
-  /* Bright Blue (Lighter for Dark Mode) */
-  --color-primary-strong: #1a2233;
-  /* Darker Navy */
-  --color-accent: #D85676;
+  --color-primary: #a855f7;
+  /* Neon Purple */
+  --color-primary-strong: #0f1016;
+  --color-accent: #2dd4bf;
+  /* Neon Teal */
 
-  --color-positive: #4FA866;
-  --color-positive-strong: #CCE315;
-  /* Lime Green (Pop!) */
-  --color-positive-soft: rgba(204, 227, 21, 0.15);
+  --color-positive: #4ade80;
+  /* Neon Green */
+  --color-positive-strong: #4ade80;
+  --color-positive-soft: rgba(74, 222, 128, 0.15);
 
-  --color-warning: #ffd900;
-  --color-warning-strong: #ffd900;
-  /* Yellow Text */
-  --color-warning-soft: rgba(255, 230, 0, 0.15);
+  --color-warning: #facc15;
+  /* Neon Yellow */
+  --color-warning-strong: #facc15;
+  --color-warning-soft: rgba(250, 204, 21, 0.15);
 
-  --color-danger: #D85676;
-  --color-danger-strong: #ea8ea5;
-  /* Lighter Pink for text */
-  --color-danger-soft: rgba(216, 86, 118, 0.2);
+  --color-danger: #f87171;
+  /* Neon Red */
+  --color-danger-strong: #f87171;
+  --color-danger-soft: rgba(248, 113, 113, 0.15);
 
-  --color-overlay: rgba(0, 0, 0, 0.8);
+  --color-overlay: rgba(0, 0, 0, 0.9);
 
   color-scheme: dark;
 }
@@ -272,29 +266,4 @@ input,
 select,
 textarea {
   @apply border border-border bg-card text-text p-2 rounded;
-}
-
-/* Watermark Corner */
-body::after {
-  content: "";
-  position: fixed;
-  right: 32px;
-  bottom: 32px;
-  width: 100%;
-  height: 100%;
-  background-image: url("/Logo_Eye_of_Medina.svg");
-  background-repeat: no-repeat;
-  background-position: bottom right;
-  background-size: 120px;
-  opacity: 0.03;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  z-index: 5;
-  transition: opacity 0.3s, filter 0.3s;
-}
-
-:root.dark body::after {
-  mix-blend-mode: normal;
-  opacity: 0.05;
-  filter: grayscale(1) invert(1);
 }
