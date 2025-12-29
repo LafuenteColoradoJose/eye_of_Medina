@@ -6,7 +6,8 @@
   <nav class="sidebar-nav border-b md:border-b-0 md:border-r-2 w-full md:w-64 bg-surface shrink-0 flex flex-col">
     <div class="flex items-center justify-between p-4 md:flex-col md:gap-4">
       <Logo />
-      <button class="hamburger-btn md:hidden inline-flex flex-col items-center justify-center w-11 h-11 rounded border"
+      <button
+        class="btn-hamburger md:hidden inline-flex flex-col items-center justify-center w-11 h-11 rounded hover:bg-white/10 transition-colors"
         @click="toggle" :aria-expanded="isOpen" aria-label="Abrir menú">
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
@@ -142,26 +143,26 @@ watch(
   min-height: auto;
 }
 
-@media (min-width: 768px) {
-  .sidebar-nav {
-    min-height: 100%;
-  }
-}
-
-.hamburger-btn {
-  background-color: var(--card);
-  color: var(--text);
-}
-
 .hamburger-line {
   display: block;
-  width: 1.5rem;
+  width: 24px;
   height: 2px;
-  background-color: currentColor;
+  background-color: #ffffff;
   border-radius: 9999px;
 }
 
 .hamburger-line+.hamburger-line {
-  margin-top: 5px;
+  margin-top: 6px;
+}
+
+@media (min-width: 768px) {
+  .sidebar-nav {
+    min-height: 100%;
+  }
+
+  /* Force hide hamburger on desktop to prevent interactions */
+  .btn-hamburger {
+    display: none !important;
+  }
 }
 </style>
