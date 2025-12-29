@@ -1,6 +1,19 @@
 <script setup lang="ts">
 import Login from '~/components/login.vue';
 
+const { isAuthenticated, restoreSession } = useProxmox();
+const router = useRouter();
+
+onMounted(() => {
+  restoreSession();
+  if (isAuthenticated.value) {
+    router.replace('/dashboard');
+  }
+});
+
+watch(isAuthenticated, (isAuth) => {
+  if (isAuth) router.replace('/dashboard');
+});
 </script>
 
 <template>
