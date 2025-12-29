@@ -1,42 +1,74 @@
 @import "tailwindcss";
 
-/* Palette reference: #213448 #547792 #94B4C1 #EAE0CF */
+@theme {
+  /* Define the custom color palette as first-class Tailwind variables */
+  --color-bg: #EAE0CF;
+  --color-card: #ffffff;
+  --color-border: rgba(148, 180, 193, 0.35);
+  --color-muted-surface: #f4efe4;
 
-:root {
-  --bg: #EAE0CF;
-  --card: #ffffff;
-  --border: rgba(148, 180, 193, 0.35);
-  --muted-surface: #f4efe4;
-  --text: #213448;
-  --text-muted: #547792;
-  --primary: #547792;
-  --primary-strong: #213448;
-  --accent: #94B4C1;
-  --text-on-strong: #ffffff;
-  --positive: #5c9f87;
-  --positive-strong: #3f7a63;
-  --positive-soft: #d8ece4;
-  --warning: #c3a04b;
-  --warning-strong: #9d7d2e;
-  --warning-soft: #f5e9c8;
-  --danger: #b85c5c;
-  --danger-strong: #923d3d;
-  --danger-soft: #f3d6d6;
-  --overlay: rgba(33, 52, 72, 0.4);
-  font-family: 'System', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --color-text: #213448;
+  --color-text-muted: #547792;
+  --color-text-on-strong: #ffffff;
+
+  --color-primary: #547792;
+  --color-primary-strong: #213448;
+  --color-accent: #94B4C1;
+
+  --color-positive: #5c9f87;
+  --color-positive-strong: #3f7a63;
+  --color-positive-soft: #d8ece4;
+
+  --color-warning: #c3a04b;
+  --color-warning-strong: #9d7d2e;
+  --color-warning-soft: #f5e9c8;
+
+  --color-danger: #b85c5c;
+  --color-danger-strong: #923d3d;
+  --color-danger-soft: #f3d6d6;
+
+  --color-overlay: rgba(33, 52, 72, 0.4);
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Overriding specific standard palette keys to match the previous design intent strictly where needed 
+     This avoids usage of !important while keeping backward compatibility with existing class usage */
+  --color-gray-50: var(--color-card);
+  --color-gray-200: var(--color-muted-surface);
+  --color-gray-300: var(--color-border);
+  --color-gray-400: var(--color-text-muted);
+  --color-gray-500: var(--color-text-muted);
+  --color-gray-600: var(--color-text);
+  --color-gray-700: var(--color-text);
+
+  --color-red-700: var(--color-danger-strong);
+  --color-red-500: var(--color-danger);
+  --color-red-100: var(--color-danger-soft);
+
+  --color-green-700: var(--color-positive-strong);
+  --color-green-500: var(--color-positive);
+  --color-green-100: var(--color-positive-soft);
+
+  --color-yellow-700: var(--color-warning-strong);
+  --color-yellow-400: var(--color-warning);
+  --color-yellow-100: var(--color-warning-soft);
+
+  --color-blue-600: var(--color-primary);
+  --color-blue-500: var(--color-primary-strong);
 }
 
+/* Global Reset & Base Styles */
 body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   display: flex;
   flex-direction: column;
   width: 100vw;
   height: 100vh;
-  padding: 0;
-  margin: 0;
   overflow-x: hidden;
   position: relative;
+  font-family: var(--font-sans);
 }
 
 #__nuxt {
@@ -46,7 +78,7 @@ body {
   z-index: 1;
 }
 
-
+/* Background Logo Watermark */
 body::before {
   content: "";
   position: fixed;
@@ -60,287 +92,121 @@ body::before {
   z-index: 0;
 }
 
-h1 {
-  color: var(--text);
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--accent);
+/* Focus States */
+:is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
-/* Utilidades semánticas para colores controlados aquí */
-.muted { color: var(--text-muted); }
-.muted-strong { color: var(--text); }
-.muted-secondary { color: rgba(84, 119, 146, 0.75); }
-
-.section-card {
-  background-color: var(--card);
-  color: var(--text);
-  border: 1px solid var(--border);
+/* Semantic Utility Classes */
+.muted {
+  color: var(--color-text-muted);
 }
 
-.overlay-backdrop { background-color: var(--overlay); }
+.muted-strong {
+  color: var(--color-text);
+}
+
+.muted-secondary {
+  color: rgba(84, 119, 146, 0.75);
+}
+
+.section-card {
+  @apply bg-card text-text border border-border;
+}
+
+.overlay-backdrop {
+  background-color: var(--color-overlay);
+}
 
 .status-success {
-  background-color: var(--positive-soft);
-  color: var(--positive-strong);
+  @apply bg-positive-soft text-positive-strong;
 }
 
 .status-error {
-  background-color: var(--danger-soft);
-  color: var(--danger-strong);
+  @apply bg-danger-soft text-danger-strong;
 }
 
 .alert {
-  background-color: var(--warning-soft);
-  color: var(--warning-strong);
-  border-left: 4px solid var(--warning-strong);
+  @apply bg-warning-soft text-warning-strong border-l-4 border-warning-strong;
 }
 
 .code-surface {
-  background-color: var(--primary-strong);
-  color: var(--text-on-strong);
+  @apply bg-primary-strong text-text-on-strong;
 }
 
 .bg-surface {
-  background-color: var(--card);
-  color: var(--text);
+  @apply bg-card text-text;
 }
 
-button,
-.btn-primary {
-  background-color: var(--primary);
-  color: var(--text-on-strong);
-  border: 1px solid var(--primary-strong);
+/* Buttons */
+.btn-base {
+  @apply px-4 py-2 rounded transition-colors duration-200 font-medium border cursor-pointer flex items-center justify-center gap-2;
 }
 
-button:hover,
-.btn-primary:hover {
-  background-color: var(--primary-strong);
+button {
+  @apply cursor-pointer;
+}
+
+.btn-primary,
+button:not([class*="btn-"]) {
+  @apply btn-base bg-primary text-text-on-strong border-primary-strong hover:bg-primary-strong;
 }
 
 .btn-positive {
-  background-color: var(--positive);
-  color: var(--text-on-strong);
-  border: 1px solid var(--positive-strong);
+  @apply btn-base bg-positive text-text-on-strong border-positive-strong hover:bg-positive-strong;
 }
-
-.btn-positive:hover { background-color: var(--positive-strong); }
 
 .btn-warning {
-  background-color: var(--warning);
-  color: var(--text-on-strong);
-  border: 1px solid var(--warning-strong);
+  @apply btn-base bg-warning text-text-on-strong border-warning-strong hover:bg-warning-strong;
 }
-
-.btn-warning:hover { background-color: var(--warning-strong); }
 
 .btn-danger {
-  background-color: var(--danger);
-  color: var(--text-on-strong);
-  border: 1px solid var(--danger-strong);
+  @apply btn-base bg-danger text-text-on-strong border-danger-strong hover:bg-danger-strong;
 }
-
-.btn-danger:hover { background-color: var(--danger-strong); }
 
 .btn-muted {
-  background-color: var(--muted-surface);
-  color: var(--text);
-  border: 1px solid var(--border);
+  @apply btn-base bg-muted-surface text-text border-border hover:bg-border;
 }
 
-.btn-muted:hover {
-  background-color: var(--border);
-}
-
-/* Reemplazos de utilidades Tailwind para centralizar color en main.css */
-.bg-white,
-.bg-gray-50 {
-  background-color: var(--card) !important;
-  color: var(--text);
-}
-
-.bg-gray-200 {
-  background-color: var(--muted-surface) !important;
-  color: var(--text);
-}
-
-.bg-gray-400,
-.disabled\:bg-gray-400:disabled {
-  background-color: var(--border) !important;
-  color: var(--text-muted) !important;
-}
-
-.bg-black {
-  background-color: #000 !important;
-  color: #fff;
-}
-
-.bg-black\/40 {
-  background-color: var(--overlay) !important;
-}
-
-.border-gray-300 {
-  border-color: var(--border) !important;
-}
-
-.border-yellow-500 {
-  border-color: var(--warning-strong) !important;
-}
-
-.text-gray-700,
-.text-gray-600 {
-  color: var(--text) !important;
-}
-
-.text-gray-500,
-.text-gray-400 {
-  color: var(--text-muted) !important;
-}
-
-.text-red-700 {
-  color: var(--danger-strong) !important;
-}
-
-.text-green-700 {
-  color: var(--positive-strong) !important;
-}
-
-.text-yellow-700 {
-  color: var(--warning-strong) !important;
-}
-
-.bg-blue-500,
-.bg-blue-600,
-.bg-indigo-500,
-.bg-indigo-600 {
-  background-color: var(--primary-strong) !important;
-  color: var(--text-on-strong) !important;
-}
-
-.hover\:bg-blue-600:hover,
-.hover\:bg-indigo-600:hover {
-  background-color: var(--primary) !important;
-}
-
-.bg-green-500 {
-  background-color: var(--positive) !important;
-  color: var(--text-on-strong) !important;
-}
-
-.hover\:bg-green-600:hover {
-  background-color: var(--positive-strong) !important;
-}
-
-.bg-green-100 {
-  background-color: var(--positive-soft) !important;
-  color: var(--positive-strong) !important;
-}
-
-.bg-red-500 {
-  background-color: var(--danger) !important;
-  color: var(--text-on-strong) !important;
-}
-
-.hover\:bg-red-600:hover {
-  background-color: var(--danger-strong) !important;
-}
-
-.bg-red-100 {
-  background-color: var(--danger-soft) !important;
-  color: var(--danger-strong) !important;
-}
-
-.bg-yellow-100 {
-  background-color: var(--warning-soft) !important;
-  color: var(--warning-strong) !important;
-}
-
-.bg-yellow-400 {
-  background-color: var(--warning) !important;
-  color: var(--text-on-strong) !important;
-}
-
-.text-white {
-  color: var(--text-on-strong) !important;
-}
-
-/* Colores globales para contenedores y superficies */
+/* Layout Specifics */
 .sidebar-nav {
-  background-color: var(--primary-strong) !important;
-  color: var(--text-on-strong) !important;
-  border-right: 1px solid var(--primary);
-  width: 200px;
+  @apply bg-primary-strong text-text-on-strong border-r border-primary w-[200px];
 }
 
 .sidebar-nav a {
-  color: var(--text-on-strong) !important;
-}
-
-.sidebar-nav a:hover {
-  color: var(--accent) !important;
+  @apply text-text-on-strong hover:text-accent transition-colors;
 }
 
 footer {
-  background-color: var(--primary-strong);
-  color: var(--text-on-strong);
-  border-top: 1px solid var(--primary);
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  @apply bg-primary-strong text-text-on-strong border-t border-primary py-4;
 }
 
 footer a {
-  color: var(--text-on-strong);
+  @apply text-text-on-strong hover:text-accent transition-colors;
 }
 
-footer a:hover {
-  color: var(--accent);
+/* Forms */
+input,
+select,
+textarea {
+  @apply border border-border bg-white text-text p-2 rounded;
 }
 
-main, section, article {
-  background-color: var(--card);
-  color: var(--text);
-}
-
-/* Entradas de formulario */
-input, select, textarea {
-  border: 1px solid var(--border);
-  background-color: #fff;
-  color: var(--text);
-}
-
-/* Botones base */
-button {
-  background-color: var(--primary);
-  color: #fff;
-  border: 1px solid var(--primary-strong);
-}
-
-body::before {
+/* Watermark Corner */
+body::after {
   content: "";
   position: fixed;
   right: 32px;
   bottom: 32px;
-  width: full;
-  height: full;
+  width: 100%;
+  height: 100%;
   background-image: url("/Logo_Eye_of_Medina.svg");
   background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+  background-position: bottom right;
+  background-size: 120px;
   opacity: 0.03;
   mix-blend-mode: multiply;
   pointer-events: none;
   z-index: 5;
 }
-
-

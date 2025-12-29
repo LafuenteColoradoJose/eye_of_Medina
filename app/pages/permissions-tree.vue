@@ -15,14 +15,14 @@
         <h1 class="text-xl font-bold mb-3">Árbol por Recursos</h1>
         <p class="text-sm muted mb-4">Explora recursos (pools, VMs, nodes) y ve qué sujetos tienen roles asignados.</p>
         <div v-if="loading" class="text-sm muted">Cargando...</div>
-        <PermissionTree v-else :nodes="resourcesTree" />
+        <PermissionTree v-else :nodes="resourcesTree" is-root />
       </div>
 
       <div class="section-card p-4 rounded shadow w-full overflow-hidden">
         <h1 class="text-xl font-bold mb-3">Árbol por Sujetos</h1>
         <p class="text-sm muted mb-4">Explora usuarios y grupos y ve a qué recursos están asignados.</p>
         <div v-if="loading" class="text-sm muted">Cargando...</div>
-        <PermissionTree v-else :nodes="subjectsTree" />
+        <PermissionTree v-else :nodes="subjectsTree" is-root />
       </div>
 
       <div class="col-span-1 md:col-span-2 mt-2 flex flex-col sm:flex-row gap-2">
@@ -30,10 +30,8 @@
         <button @click="showRaw" class="px-3 py-2 rounded btn-muted w-full sm:w-auto">Ver raw ACLs</button>
       </div>
 
-      <pre
-        v-if="raw"
-        class="col-span-1 md:col-span-2 mt-2 code-surface p-2 rounded max-h-64 overflow-auto text-xs whitespace-pre-wrap wrap-break-word"
-      >{{ JSON.stringify(acls, null, 2) }}</pre>
+      <pre v-if="raw"
+        class="col-span-1 md:col-span-2 mt-2 code-surface p-2 rounded max-h-64 overflow-auto text-xs whitespace-pre-wrap wrap-break-word">{{ JSON.stringify(acls, null, 2) }}</pre>
     </div>
   </div>
 </template>
@@ -111,12 +109,12 @@ async function loadAll() {
     proxmoxRequest('/cluster/resources?type=vm', 'GET'),
   ])
 
-  acls.value = rACLs.success ? rACLs.data || [] : []
-  roles.value = rRoles.success ? rRoles.data || [] : []
-  users.value = rUsers.success ? rUsers.data || [] : []
-  groups.value = rGroups.success ? rGroups.data || [] : []
-  pools.value = rPools.success ? rPools.data || [] : []
-  vms.value = rVMs.success ? rVMs.data || [] : []
+  acls.value = rACLs.success ? (rACLs.data as ACL[]) || [] : []
+  roles.value = rRoles.success ? (rRoles.data as Record<string, unknown>[]) || [] : []
+  users.value = rUsers.success ? (rUsers.data as Record<string, unknown>[]) || [] : []
+  groups.value = rGroups.success ? (rGroups.data as Record<string, unknown>[]) || [] : []
+  pools.value = rPools.success ? (rPools.data as Record<string, unknown>[]) || [] : []
+  vms.value = rVMs.success ? (rVMs.data as Record<string, unknown>[]) || [] : []
 
   buildResourceTree()
   buildSubjectsTree()
