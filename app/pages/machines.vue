@@ -15,7 +15,8 @@
         <div class="flex items-start justify-between gap-4 flex-col md:flex-row">
           <div>
             <h2 class="font-bold mb-1">Clonar VM/CT existente</h2>
-            <p class="text-sm muted">Clona una VM (QEMU) o contenedor (LXC) existente. Debes indicar nodo y VMID origen, y un nuevo VMID.</p>
+            <p class="text-sm muted">Clona una VM (QEMU) o contenedor (LXC) existente. Debes indicar nodo y VMID origen,
+              y un nuevo VMID.</p>
           </div>
           <button @click="loadMachines" class="px-3 py-2 rounded btn-primary">Refrescar lista</button>
         </div>
@@ -37,7 +38,8 @@
           </div>
           <div>
             <label class="block text-sm">VMID origen (plantilla/base)</label>
-            <input v-model.number="cloneForm.sourceId" type="number" min="1" class="w-full p-2 border rounded" required />
+            <input v-model.number="cloneForm.sourceId" type="number" min="1" class="w-full p-2 border rounded"
+              required />
           </div>
           <div>
             <label class="block text-sm">Nuevo VMID</label>
@@ -97,7 +99,8 @@
         </div>
 
         <div v-if="loadingList" class="text-sm muted">Cargando...</div>
-        <div v-else-if="filteredMachines.length === 0" class="text-sm muted">No hay máquinas que coincidan con el filtro.</div>
+        <div v-else-if="filteredMachines.length === 0" class="text-sm muted">No hay máquinas que coincidan con el
+          filtro.</div>
         <table v-else class="w-full text-sm">
           <thead>
             <tr class="text-left border-b">
@@ -156,6 +159,7 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Máquinas' })
 import { ref, computed, onMounted, watch } from 'vue'
 
 type Machine = {

@@ -13,7 +13,8 @@
     <div v-else>
       <section class="mb-6 section-card p-4 rounded shadow">
         <h2 class="font-bold mb-2">Crear usuario</h2>
-        <p class="text-sm muted mb-3">Solo se pueden crear usuarios en el realm <code class="font-mono">pve</code>. Para <code class="font-mono">pam</code>, crea primero el usuario en el sistema y luego asígnale permisos.</p>
+        <p class="text-sm muted mb-3">Solo se pueden crear usuarios en el realm <code class="font-mono">pve</code>. Para
+          <code class="font-mono">pam</code>, crea primero el usuario en el sistema y luego asígnale permisos.</p>
         <form @submit.prevent="handleCreate" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm">ID (sin realm)</label>
@@ -115,6 +116,7 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Usuarios' })
 import { ref, computed, onMounted, watch } from 'vue'
 
 type Realm = 'pam' | 'pve'

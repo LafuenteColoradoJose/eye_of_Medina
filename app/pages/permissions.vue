@@ -64,7 +64,8 @@
             <div v-for="a in acls" :key="a.path + a.roleid + a.ugid" class="p-3 rounded border section-card">
               <div class="text-sm"><span class="font-semibold">Path:</span> {{ a.path }}</div>
               <div class="text-sm"><span class="font-semibold">Role:</span> {{ a.roleid || a.role || '-' }}</div>
-              <div class="text-sm"><span class="font-semibold">Type:</span> {{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</div>
+              <div class="text-sm"><span class="font-semibold">Type:</span> {{ a.type || (a.ugid?.includes('@') ? 'user'
+                : (a.ugid ? 'group' : 'other')) }}</div>
               <div class="text-sm"><span class="font-semibold">ID:</span> {{ a.ugid || '-' }}</div>
               <div class="mt-2 flex justify-end">
                 <button @click="removeACL(a)" class="px-3 py-1 rounded btn-danger">Eliminar</button>
@@ -88,7 +89,8 @@
                 <tr v-for="a in acls" :key="a.path + a.roleid + a.ugid" class="border-b">
                   <td class="p-2 wrap-break-word">{{ a.path }}</td>
                   <td class="p-2 wrap-break-word">{{ a.roleid || a.role || '-' }}</td>
-                  <td class="p-2 wrap-break-word">{{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' : 'other')) }}</td>
+                  <td class="p-2 wrap-break-word">{{ a.type || (a.ugid?.includes('@') ? 'user' : (a.ugid ? 'group' :
+                    'other')) }}</td>
                   <td class="p-2 wrap-break-word">{{ a.ugid || '-' }}</td>
                   <td class="p-2">
                     <button @click="removeACL(a)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
@@ -104,6 +106,7 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Permisos' })
 import { ref, onMounted, watch } from 'vue'
 const router = useRouter()
 const { listRoles, listACLs, createACL, deleteACL, restoreSession, isAuthenticated } = useProxmox()

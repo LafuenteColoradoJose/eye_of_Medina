@@ -179,7 +179,7 @@
                   <div class="flex flex-col">
                     <span class="font-medium text-sm text-text group-hover:text-primary transition-colors">{{
                       vmDisplay(vm)
-                    }}</span>
+                      }}</span>
                     <span class="text-xs text-text-muted">{{ vm.node }}</span>
                   </div>
                 </div>
@@ -205,7 +205,7 @@
                   <div class="flex flex-col">
                     <span class="font-medium text-sm text-text group-hover:text-primary transition-colors">{{
                       vmDisplay(vm)
-                    }}</span>
+                      }}</span>
                     <span class="text-xs text-text-muted">{{ vm.node }}</span>
                   </div>
                 </div>
@@ -214,7 +214,7 @@
                     <div class="h-full bg-accent" :style="{ width: toPercent(vm.mem || 0, vm.maxmem || 1) }"></div>
                   </div>
                   <span class="text-xs font-bold text-accent w-10 text-right">{{ toPercent(vm.mem || 0, vm.maxmem || 1)
-                  }}</span>
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -268,6 +268,7 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Dashboard' })
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import type { ApexOptions } from 'apexcharts'
 import StatsCard from '~/components/StatsCard.vue'

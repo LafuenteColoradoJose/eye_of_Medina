@@ -1,4 +1,5 @@
 <script setup lang="ts">
+useHead({ title: 'Acceso' })
 import Login from '~/components/login.vue';
 
 const { isAuthenticated, restoreSession } = useProxmox();
