@@ -6,38 +6,47 @@
 */
 @theme {
   /* Colors */
-  --color-bg: #EAE0CF;
+  --color-bg: #F4F4FC;
+  /* Light Lavender/White */
   --color-card: #ffffff;
-  --color-border: rgba(148, 180, 193, 0.35);
-  --color-muted-surface: #f4efe4;
+  --color-border: rgba(36, 45, 64, 0.15);
+  --color-muted-surface: #eef2f6;
 
-  --color-text: #213448;
-  --color-text-muted: #547792;
+  --color-text: #242443;
+  /* Dark Indigo */
+  --color-text-muted: #64748b;
   --color-text-on-strong: #ffffff;
-  --color-text-on-warning: #ffffff;
+  --color-text-on-warning: #242443;
+  /* Dark text on yellow warning */
 
-  --color-primary: #547792;
-  --color-primary-strong: #213448;
-  --color-accent: #94B4C1;
+  --color-primary: #1371C2;
+  /* Strong Blue (Accessibile) */
+  --color-primary-strong: #242443;
+  /* Dark Indigo (Sidebar) */
+  --color-accent: #D85676;
+  /* Raspberry */
 
-  --color-positive: #5c9f87;
-  --color-positive-strong: #3f7a63;
-  --color-positive-soft: #d8ece4;
+  --color-positive: #4FA866;
+  /* Medium Green */
+  --color-positive-strong: #2e663d;
+  --color-positive-soft: rgba(79, 168, 102, 0.15);
 
-  --color-warning: #c3a04b;
-  --color-warning-strong: #9d7d2e;
-  --color-warning-soft: #f5e9c8;
+  --color-warning: #ffd900;
+  /* Bright Yellow */
+  --color-warning-strong: #665200;
+  --color-warning-soft: rgba(255, 217, 0, 0.2);
 
-  --color-danger: #b85c5c;
-  --color-danger-strong: #923d3d;
-  --color-danger-soft: #f3d6d6;
+  --color-danger: #D85676;
+  /* Raspberry Red */
+  --color-danger-strong: #8c2a42;
+  --color-danger-soft: rgba(216, 86, 118, 0.15);
 
-  --color-overlay: rgba(33, 52, 72, 0.4);
+  --color-overlay: rgba(36, 45, 64, 0.5);
 
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-  /* Aliases for backwards compatibility */
+  /* Aliases */
   --color-gray-50: var(--color-card);
   --color-gray-200: var(--color-muted-surface);
   --color-gray-300: var(--color-border);
@@ -64,49 +73,42 @@
 
 /* 
   DARK MODE OVERRIDES
-  We override the --color-* variables directly when the .dark class is present on :root (html).
-  This works because Tailwind 4 outputs the @theme variables as CSS custom properties in :root.
 */
 :root.dark {
-  --color-bg: #0f172a;
-  /* Slate 900 */
-  --color-card: #1e293b;
-  /* Slate 800 */
-  --color-border: #334155;
-  /* Slate 700 */
-  --color-muted-surface: #334155;
+  --color-bg: #242D40;
+  /* Dark Blue-Gray */
+  --color-card: #2f3a4f;
+  /* Lighter Blue-Gray */
+  --color-border: #445168;
+  --color-muted-surface: #38425a;
 
-  --color-text: #f1f5f9;
-  /* Slate 100 */
-  --color-text-muted: #cbd5e1;
-  /* Slate 300 - lighter for better contrast */
+  --color-text: #F4F4FC;
+  /* Light Lavender/White */
+  --color-text-muted: #9ca3af;
   --color-text-on-strong: #ffffff;
-  --color-text-on-warning: #0f172a;
+  --color-text-on-warning: #242443;
+  /* Dark text on Yellow */
 
-  --color-primary: #38bdf8;
-  /* Sky 400 - much brighter for dark mode visibility */
-  --color-primary-strong: #0c4a6e;
-  /* Sky 900 */
-  --color-accent: #7dd3fc;
-  /* Sky 300 */
+  --color-primary: #3D8AEA;
+  /* Bright Blue (Lighter for Dark Mode) */
+  --color-primary-strong: #1a2233;
+  /* Darker Navy */
+  --color-accent: #D85676;
 
-  --color-positive: #34d399;
-  /* Emerald 400 */
-  --color-positive-strong: #064e3b;
-  /* Emerald 900 */
-  --color-positive-soft: rgba(52, 211, 153, 0.1);
+  --color-positive: #4FA866;
+  --color-positive-strong: #CCE315;
+  /* Lime Green (Pop!) */
+  --color-positive-soft: rgba(204, 227, 21, 0.15);
 
-  --color-warning: #fbbf24;
-  /* Amber 400 */
-  --color-warning-strong: #78350f;
-  /* Amber 900 */
-  --color-warning-soft: rgba(251, 191, 36, 0.1);
+  --color-warning: #ffd900;
+  --color-warning-strong: #ffd900;
+  /* Yellow Text */
+  --color-warning-soft: rgba(255, 230, 0, 0.15);
 
-  --color-danger: #f87171;
-  /* Red 400 */
-  --color-danger-strong: #7f1d1d;
-  /* Red 900 */
-  --color-danger-soft: rgba(248, 113, 113, 0.1);
+  --color-danger: #D85676;
+  --color-danger-strong: #ea8ea5;
+  /* Lighter Pink for text */
+  --color-danger-soft: rgba(216, 86, 118, 0.2);
 
   --color-overlay: rgba(0, 0, 0, 0.8);
 
