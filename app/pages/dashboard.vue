@@ -4,8 +4,8 @@
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
         <h1 class="text-3xl font-extrabold tracking-tight text-text">Dashboard</h1>
-        <p v-if="username" class="text-text-muted text-sm mt-1">Conectado como <span class="font-medium text-primary">{{
-            username }}</span></p>
+        <p v-if="username" class="text-text text-sm mt-1">Conectado como <span class="font-bold text-primary">{{
+          username }}</span></p>
       </div>
       <div class="flex gap-3 items-center">
         <span v-if="lastRefreshed" class="text-xs text-text-muted hidden sm:inline-block">
@@ -105,7 +105,7 @@
       <!-- VM Status -->
       <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="font-bold text-lg text-text">Estado de VMs</h3>
+          <h2 class="font-bold text-lg text-text">Estado de VMs</h2>
           <span class="text-xs bg-muted-surface px-2 py-1 rounded-full text-text-muted border border-border">Total {{
             totalVms }}</span>
         </div>
@@ -123,7 +123,7 @@
       <!-- CPU Nodes -->
       <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="font-bold text-lg text-text">Carga de CPU (Nodos)</h3>
+          <h2 class="font-bold text-lg text-text">Carga de CPU (Nodos)</h2>
         </div>
         <div class="min-h-[260px] flex items-center justify-center">
           <ClientOnly>
@@ -143,7 +143,7 @@
       <!-- Pool Distro -->
       <div class="lg:col-span-1 bg-card border border-border rounded-xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-lg text-text">Distribución por Pool</h3>
+          <h2 class="font-bold text-lg text-text">Distribución por Pool</h2>
         </div>
         <div class="min-h-[200px] flex items-center justify-center">
           <ClientOnly>
@@ -159,7 +159,7 @@
       <!-- Top Consumers -->
       <div class="lg:col-span-2 bg-card border border-border rounded-xl p-5 shadow-sm flex flex-col">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-lg text-text">Top Consumidores</h3>
+          <h2 class="font-bold text-lg text-text">Top Consumidores</h2>
           <div class="flex gap-2 text-xs">
             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary"></span> CPU</span>
             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-accent"></span> RAM</span>
@@ -169,7 +169,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
           <!-- CPU List -->
           <div class="space-y-3">
-            <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Mayor uso de CPU</h4>
+            <h3 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Mayor uso de CPU</h3>
             <div v-if="topCpuVms.length === 0" class="text-sm text-text-muted italic">Sin datos</div>
             <ul v-else class="space-y-2">
               <li v-for="(vm, i) in topCpuVms" :key="vm.vmid"
@@ -179,8 +179,8 @@
                   <div class="flex flex-col">
                     <span class="font-medium text-sm text-text group-hover:text-primary transition-colors">{{
                       vmDisplay(vm)
-                      }}</span>
-                    <span class="text-[10px] text-text-muted">{{ vm.node }}</span>
+                    }}</span>
+                    <span class="text-xs text-text-muted">{{ vm.node }}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -195,7 +195,7 @@
 
           <!-- RAM List -->
           <div class="space-y-3">
-            <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Mayor uso de RAM</h4>
+            <h3 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Mayor uso de RAM</h3>
             <div v-if="topMemVms.length === 0" class="text-sm text-text-muted italic">Sin datos</div>
             <ul v-else class="space-y-2">
               <li v-for="(vm, i) in topMemVms" :key="vm.vmid"
@@ -205,8 +205,8 @@
                   <div class="flex flex-col">
                     <span class="font-medium text-sm text-text group-hover:text-primary transition-colors">{{
                       vmDisplay(vm)
-                      }}</span>
-                    <span class="text-[10px] text-text-muted">{{ vm.node }}</span>
+                    }}</span>
+                    <span class="text-xs text-text-muted">{{ vm.node }}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -214,7 +214,7 @@
                     <div class="h-full bg-accent" :style="{ width: toPercent(vm.mem || 0, vm.maxmem || 1) }"></div>
                   </div>
                   <span class="text-xs font-bold text-accent w-10 text-right">{{ toPercent(vm.mem || 0, vm.maxmem || 1)
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
             </ul>
@@ -225,7 +225,7 @@
 
     <!-- Node Health Grid -->
     <div class="space-y-4">
-      <h3 class="font-bold text-lg text-text px-1">Estado de Nodos</h3>
+      <h2 class="font-bold text-lg text-text px-1">Estado de Nodos</h2>
       <div v-if="nodes.length === 0" class="text-text-muted px-1">No hay nodos disponibles</div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <div v-for="n in nodes" :key="n.node"

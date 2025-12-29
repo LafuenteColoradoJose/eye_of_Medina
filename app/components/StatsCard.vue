@@ -3,8 +3,8 @@
         class="relative overflow-hidden rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group">
         <div class="flex items-start justify-between">
             <div>
-                <p class="text-xs font-medium text-text-muted uppercase tracking-wider mb-1">{{ label }}</p>
-                <h3 class="text-2xl font-bold text-text tracking-tight">{{ value }}</h3>
+                <h2 class="text-xs font-medium text-text-muted uppercase tracking-wider mb-1">{{ label }}</h2>
+                <p class="text-2xl font-bold text-text tracking-tight">{{ value }}</p>
             </div>
             <div class="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
                 <!-- Slot para icono dinámico -->

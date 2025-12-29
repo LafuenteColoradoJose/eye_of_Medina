@@ -14,6 +14,7 @@
   --color-text: #213448;
   --color-text-muted: #547792;
   --color-text-on-strong: #ffffff;
+  --color-text-on-warning: #ffffff;
 
   --color-primary: #547792;
   --color-primary-strong: #213448;
@@ -77,9 +78,10 @@
 
   --color-text: #f1f5f9;
   /* Slate 100 */
-  --color-text-muted: #94a3b8;
-  /* Slate 400 */
+  --color-text-muted: #cbd5e1;
+  /* Slate 300 - lighter for better contrast */
   --color-text-on-strong: #ffffff;
+  --color-text-on-warning: #0f172a;
 
   --color-primary: #38bdf8;
   /* Sky 400 - much brighter for dark mode visibility */
@@ -224,7 +226,7 @@ button:not([class*="btn-"]) {
 }
 
 .btn-warning {
-  @apply bg-warning text-text-on-strong border-warning-strong hover:bg-warning-strong;
+  @apply bg-warning text-text-on-warning border-warning-strong hover:bg-warning-strong;
 }
 
 .btn-danger {

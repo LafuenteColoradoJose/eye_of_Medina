@@ -34,10 +34,13 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page', mode: 'out-in' },
     layoutTransition: { name: 'page', mode: 'out-in' },
     head: {
+      htmlAttrs: {
+        lang: 'es'
+      },
       title: 'Eye of Medina',
       charset: 'utf-8',
       meta: [
-        { name: 'description', content: 'Eye of Medina - Monitoring and gestion of Proxmox' }
+        { name: 'description', content: 'Eye of Medina - Monitorización y gestión de Proxmox' }
       ],
       link: [{ rel: 'icon', type: 'image/png', href: '/Logo_Eye_of_Medina.svg' }]
     }
