@@ -11,15 +11,16 @@ Guia rapida para operar el panel.
 3) Si usas certificado autofirmado en desarrollo, acepta el aviso del navegador.
 
 ## Menu principal
-- Dashboard: vista general con KPI, graficas, estado de nodos y ultimas tareas/eventos.
+- Dashboard: vista general con KPI, graficas, Top Consumidores y estado de nodos.
 - Machines: lista VMs y contenedores (CT) con acciones rapidas.
 - Pools, Groups, Users, Roles, ACL: gestion de identidades y permisos.
 - Permissions Tree: auditoria visual de permisos aplicados.
+- Apariencia: botón en el menú para alternar entre Modo Claro y Oscuro.
 
 ## Dashboard
 - KPI superiores: resumen de VMs/CTs y estado.
-- Graficas: distribucion por pools, top CPU/RAM, salud de nodos.
-- Tareas/eventos: ultimo historial visible.
+- Graficas: estado de VMs, carga de CPU por nodo y distribucion por pools.
+- Top Consumidores: listado de VMs con mayor uso de recursos.
 - Boton Refresh: recarga datos bajo demanda.
 
 ## Machines (VM/CT)

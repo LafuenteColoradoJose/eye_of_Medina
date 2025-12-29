@@ -28,13 +28,15 @@ Cómo crearlo en Proxmox:
 
 ## Funcionalidades en la UI
 - Dashboard
-  - KPIs de VMs/CTs, distribución por pools, top CPU/RAM, estado de nodos y últimas tareas/eventos.
+  - KPIs de VMs/CTs, gráficas de estado, distribución por pools, Top Consumidores y salud de nodos.
 - Máquinas (VM/CT)
   - Listar/filtrar, clonar (seleccionando pool destino), renombrar/actualizar hostname, cambiar pool y eliminar.
 - Pools, Grupos, Usuarios, Roles y ACL
   - Visualizar pools, roles y ACL existentes; asignar permisos y relacionar recursos con pools.
 - Árbol de permisos
   - Vista consolidada para auditar roles/ACL aplicados.
+- Apariencia
+  - Soporte completo para Modo Claro y Oscuro.
 
 ## Composable `useProxmox()` (frontend)
 Principales utilidades disponibles:
