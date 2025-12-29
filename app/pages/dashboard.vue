@@ -400,12 +400,12 @@ const toPercent = (value: number, max: number) => {
 // -- Charts Config --
 // Mapped colors from our CSS variables (hardcoded hex matches for Apex)
 const COLORS = {
-  primary: '#547792',
-  accent: '#94B4C1',
-  positive: '#5c9f87',
-  warning: '#c3a04b',
-  danger: '#b85c5c',
-  muted: '#EAE0CF'
+  primary: '#1371C2',
+  accent: '#D85676',
+  positive: '#4FA866',
+  warning: '#ffd900',
+  danger: '#D85676',
+  muted: '#94a3b8' // Visible gray for "Stopped" state
 }
 
 const chartVmState = computed(() => {
@@ -414,7 +414,7 @@ const chartVmState = computed(() => {
   return {
     series: [running, stopped],
     options: {
-      chart: { fontFamily: 'inherit', background: 'transparent' },
+      chart: { fontFamily: 'inherit', background: 'transparent', foreColor: 'var(--color-text)' },
       labels: ['Running', 'Stopped'],
       legend: { position: 'bottom', labels: { colors: 'var(--color-text)' } },
       colors: [COLORS.positive, COLORS.muted],
@@ -432,7 +432,7 @@ const chartNodeCpu = computed(() => {
   return {
     series: [{ name: 'CPU (%)', data }],
     options: {
-      chart: { toolbar: { show: false }, fontFamily: 'inherit', background: 'transparent' },
+      chart: { toolbar: { show: false }, fontFamily: 'inherit', background: 'transparent', foreColor: 'var(--color-text)' },
       xaxis: {
         categories: labels,
         labels: { style: { colors: 'var(--color-text-muted)' } },
@@ -455,7 +455,7 @@ const chartPool = computed(() => {
   return {
     series: entries.length ? entries.map(([, count]) => count) : [],
     options: {
-      chart: { fontFamily: 'inherit', background: 'transparent' },
+      chart: { fontFamily: 'inherit', background: 'transparent', foreColor: 'var(--color-text)' },
       labels: entries.map(([name]) => name),
       legend: { position: 'bottom', labels: { colors: 'var(--color-text)' } },
       colors: [COLORS.primary, COLORS.accent, COLORS.warning, COLORS.positive, COLORS.danger],
