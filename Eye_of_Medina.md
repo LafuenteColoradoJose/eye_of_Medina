@@ -28,7 +28,9 @@ Cómo crearlo en Proxmox:
 
 ## Funcionalidades en la UI
 - Dashboard
-  - KPIs de VMs/CTs, gráficas de estado, distribución por pools, Top Consumidores y salud de nodos.
+  - KPIs de VMs/CTs y Bridges Activos, gráficas de estado, distribución por pools, Top Consumidores y salud de nodos.
+- Redes
+  - Visualización de interfaces de red por nodo (Bridges, Ethernet, Bonds, VLANs), estado, direccionamiento IP y puertos asociados.
 - Máquinas (VM/CT)
   - Listar/filtrar, clonar (seleccionando pool destino), renombrar/actualizar hostname, cambiar pool y eliminar.
 - Pools, Grupos, Usuarios, Roles y ACL
@@ -44,6 +46,7 @@ Principales utilidades disponibles:
 - `logout()`, `isAuthenticated`, `username`
 - `proxmoxRequest(path, method, body?)` (proxy seguro vía backend)
 - `listNodes()`, `listPools()`, `listResources()` (VM/CT)
+- `getNodeNetworks(node)` para obtener interfaces de red
 - `updateMachineConfig(node, vmid, payload)` para cambios como nombre/hostname o pool
 - `cloneMachine(node, vmid, payload)` y `deleteMachine(node, vmid)`
 

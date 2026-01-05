@@ -11,8 +11,9 @@ Guia rapida para operar el panel.
 3) Si usas certificado autofirmado en desarrollo, acepta el aviso del navegador.
 
 ## Menu principal
-- Dashboard: vista general con KPI, graficas, Top Consumidores y estado de nodos.
+- Dashboard: vista general con KPI (inc. Bridges activos), graficas, Top Consumidores y estado de nodos.
 - Machines: lista VMs y contenedores (CT) con acciones rapidas.
+- Redes: visualizacion de interfaces de red, IPs y estado por nodo.
 - Pools, Groups, Users, Roles, ACL: gestion de identidades y permisos.
 - Permissions Tree: auditoria visual de permisos aplicados.
 - Apariencia: botón en el menú para alternar entre Modo Claro y Oscuro.
@@ -30,6 +31,14 @@ Guia rapida para operar el panel.
   - Edit: cambia nombre/hostname y pool asociado.
   - Delete: elimina la VM/CT.
 - Detalles: ver estado actual y nodo donde corre.
+
+## Redes
+- Selecciona un nodo del cluster para ver sus interfaces.
+- Visualiza:
+  - Bridges (`vmbrX`), Interfaces físicas (`eth`, `enp`), Bonds y VLANs.
+  - Estado (Activo/Inactivo) y Autostart.
+  - Direcciones IP y Gateways.
+  - Puertos asociados (en bridges) o esclavos (en bonds).
 
 ## Pools, Groups, Users, Roles, ACL
 - Pools: consulta pools existentes y recursos asociados.

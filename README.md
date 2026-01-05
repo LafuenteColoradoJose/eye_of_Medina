@@ -3,7 +3,8 @@
 Panel Nuxt 4 para monitoreo y gestion de Proxmox VE: dashboard con graficas, control de pools/grupos/roles/ACL y operaciones sobre VMs y contenedores.
 
 ## Caracteristicas
-- Dashboard con KPI, graficas, Top Consumidores y salud de nodos.
+- Dashboard con KPI (incluyendo Bridges Activos), graficas, Top Consumidores y salud de nodos.
+- Gestión de Redes: visualización de interfaces de red (Bridges, Ethernet, VLANs) y su estado por nodo.
 - Listado de VMs/CTs con filtros, clonado con seleccion de pool, renombrado/hostname, cambio de pool y eliminacion.
 - Gestion de pools, grupos, usuarios, roles y ACL alineada con permisos de Proxmox; vista arbol de permisos.
 - Soporte nativo para Modo Oscuro y Claro.

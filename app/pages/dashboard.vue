@@ -44,7 +44,7 @@
     </div>
 
     <!-- KPIs -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <StatsCard label="CPU Cluster" :value="kpiCpu" subtext="Media de uso en nodos">
         <template #icon>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -95,6 +95,17 @@
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path
               d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 2H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
+          </svg>
+        </template>
+      </StatsCard>
+
+      <StatsCard label="Bridges Activos" :value="String(totalBridges)" subtext="Puentes de red en nodos">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="9" width="20" height="6" rx="2" ry="2"></rect>
+            <path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"></path>
+            <path d="M5 9V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"></path>
           </svg>
         </template>
       </StatsCard>
@@ -179,7 +190,7 @@
                   <div class="flex flex-col">
                     <span class="font-medium text-sm text-text group-hover:text-primary transition-colors">{{
                       vmDisplay(vm)
-                      }}</span>
+                    }}</span>
                     <span class="text-xs text-text-muted">{{ vm.node }}</span>
                   </div>
                 </div>
@@ -205,7 +216,7 @@
                   <div class="flex flex-col">
                     <span class="font-medium text-sm text-text group-hover:text-primary transition-colors">{{
                       vmDisplay(vm)
-                      }}</span>
+                    }}</span>
                     <span class="text-xs text-text-muted">{{ vm.node }}</span>
                   </div>
                 </div>
@@ -214,7 +225,7 @@
                     <div class="h-full bg-accent" :style="{ width: toPercent(vm.mem || 0, vm.maxmem || 1) }"></div>
                   </div>
                   <span class="text-xs font-bold text-accent w-10 text-right">{{ toPercent(vm.mem || 0, vm.maxmem || 1)
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
             </ul>
@@ -300,7 +311,7 @@ type Pool = { poolid: string; comment?: string }
 const ApexChart = defineAsyncComponent(() => import('vue3-apexcharts'))
 
 // -- Composables --
-const { username, isAuthenticated, proxmoxRequest, restoreSession } = useProxmox()
+const { username, isAuthenticated, proxmoxRequest, restoreSession, getNodeNetworks } = useProxmox()
 
 // -- State --
 const loading = ref(false)
@@ -311,6 +322,7 @@ const lastRefreshed = ref<Date | null>(null)
 const nodes = ref<NodeResource[]>([])
 const vms = ref<VmResource[]>([])
 const pools = ref<Pool[]>([])
+const totalBridges = ref(0)
 
 // -- Lifecycle --
 onMounted(() => {
@@ -339,6 +351,23 @@ const loadDashboard = async () => {
 
     if (!vmsRes.success || !poolsRes.success || !nodesRes.success) {
       error.value = 'Algunos datos no se pudieron cargar parcial o totalmente.'
+    }
+
+    // Cargar redes de forma asíncrona para no bloquear
+    if (nodes.value.length > 0) {
+      const netPromises = nodes.value
+        .filter(n => n.status === 'online')
+        .map(async (n) => {
+          const res = await getNodeNetworks(n.node)
+          if (res.success && Array.isArray(res.data)) {
+            // Contar bridges activos
+            return res.data.filter((net: any) => net.type === 'bridge' && net.active).length
+          }
+          return 0
+        })
+
+      const results = await Promise.all(netPromises)
+      totalBridges.value = results.reduce((sum, count) => sum + count, 0)
     }
 
     lastRefreshed.value = new Date()

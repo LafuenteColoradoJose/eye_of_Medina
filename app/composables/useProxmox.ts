@@ -1,7 +1,7 @@
 export const useProxmox = () => {
   const runtimeConfig = useRuntimeConfig()
   const defaultHost = runtimeConfig.public?.proxmoxHost || (import.meta.server ? runtimeConfig.proxmoxHost : '')
-  
+
   // Estado de autenticación
   const authToken = useState<string | null>('proxmox-auth-token', () => null)
   const csrfToken = useState<string | null>('proxmox-csrf-token', () => null)
@@ -61,7 +61,7 @@ export const useProxmox = () => {
         authToken.value = response.data.ticket
         csrfToken.value = response.data.CSRFPreventionToken
         username.value = response.data.username
-        
+
         // Guardar en localStorage para persistencia
         if (import.meta.client) {
           localStorage.setItem('proxmox-auth-token', response.data.ticket)
@@ -92,7 +92,7 @@ export const useProxmox = () => {
     }
   }
 
-  
+
   /**
    * Hacer una petición autenticada a la API de Proxmox
    */
@@ -103,7 +103,7 @@ export const useProxmox = () => {
     body?: BodyInit | Record<string, unknown> | null
   ) => {
     const proxmoxHost = host || (typeof window !== 'undefined' ? localStorage.getItem('proxmox-host') : null) || defaultHost
-    
+
     if (!proxmoxHost) {
       throw new Error('Host de Proxmox no configurado')
     }
@@ -114,7 +114,7 @@ export const useProxmox = () => {
 
     try {
       const headers: Record<string, string> = {}
-      
+
       // Si usamos ticket (cookie)
       if (authToken.value.startsWith('PVE:')) {
         headers['Cookie'] = `PVEAuthCookie=${authToken.value}`
@@ -211,7 +211,7 @@ export const useProxmox = () => {
     csrfToken,
     username,
     isAuthenticated,
-    
+
     // Métodos
     login,
     proxmoxRequest,
@@ -254,6 +254,8 @@ export const useProxmox = () => {
     // Nodes and VM/CT resources
     listNodes: async () => proxmoxRequest('/nodes', 'GET'),
     listVMResources: async () => proxmoxRequest('/cluster/resources?type=vm', 'GET'),
+    // Network management
+    getNodeNetworks: async (node: string) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/network`, 'GET'),
 
     // VM/CT config helpers
     updateMachineConfig: async (

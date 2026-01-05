@@ -86,6 +86,7 @@ const items = [
   { to: '/', label: 'Home' },
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/machines', label: 'Máquinas' },
+  { to: '/networks', label: 'Redes' },
   { to: '/pools', label: 'Pools' },
   { to: '/users', label: 'Usuarios' },
   { to: '/groups', label: 'Grupos' },
