@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 space-y-8 max-w-[1920px] mx-auto">
+  <div class="p-4 space-y-4 max-w-[1920px] mx-auto">
     <!-- Header -->
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
@@ -112,36 +112,37 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- VM Status -->
-      <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="font-bold text-lg text-text">Estado de VMs</h2>
-          <span class="text-xs bg-muted-surface px-2 py-1 rounded-full text-text-muted border border-border">Total {{
-            totalVms }}</span>
+      <div class="bg-card border border-border rounded-xl p-3 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="font-bold text-base text-text">Estado de VMs</h2>
+          <span class="text-[10px] bg-muted-surface px-2 py-0.5 rounded-full text-text-muted border border-border">Total
+            {{
+              totalVms }}</span>
         </div>
-        <div class="min-h-[260px] flex items-center justify-center">
+        <div class="min-h-[140px] flex items-center justify-center">
           <ClientOnly>
-            <ApexChart v-if="totalVms > 0" type="donut" height="260" :options="chartVmState.options"
+            <ApexChart v-if="totalVms > 0" type="donut" height="140" :options="chartVmState.options"
               :series="chartVmState.series" />
-            <div v-else class="text-center text-text-muted">
-              <p>Sin datos de máquinas virtuales</p>
+            <div v-else class="text-center text-text-muted text-xs">
+              <p>Sin datos</p>
             </div>
           </ClientOnly>
         </div>
       </div>
 
       <!-- CPU Nodes -->
-      <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="font-bold text-lg text-text">Carga de CPU (Nodos)</h2>
+      <div class="bg-card border border-border rounded-xl p-3 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="font-bold text-base text-text">Carga de CPU (Nodos)</h2>
         </div>
-        <div class="min-h-[260px] flex items-center justify-center">
+        <div class="min-h-[140px] flex items-center justify-center">
           <ClientOnly>
-            <ApexChart v-if="nodes.length > 0" type="bar" height="260" :options="chartNodeCpu.options"
+            <ApexChart v-if="nodes.length > 0" type="bar" height="140" :options="chartNodeCpu.options"
               :series="chartNodeCpu.series" />
-            <div v-else class="text-center text-text-muted">
-              <p>Sin información de nodos</p>
+            <div v-else class="text-center text-text-muted text-xs">
+              <p>Sin datos</p>
             </div>
           </ClientOnly>
         </div>
@@ -149,83 +150,92 @@
     </div>
 
     <!-- Secondary Charts & Lists -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
       <!-- Pool Distro -->
-      <div class="lg:col-span-1 bg-card border border-border rounded-xl p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-bold text-lg text-text">Distribución por Pool</h2>
+      <div class="lg:col-span-1 bg-card border border-border rounded-xl p-3 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="font-bold text-base text-text">Distribución por Pool</h2>
         </div>
-        <div class="min-h-[200px] flex items-center justify-center">
+        <div class="min-h-[150px] flex items-center justify-center">
           <ClientOnly>
-            <ApexChart v-if="chartPool.series.length > 0" type="pie" height="240" :options="chartPool.options"
+            <ApexChart v-if="chartPool.series.length > 0" type="pie" height="160" :options="chartPool.options"
               :series="chartPool.series" />
-            <div v-else class="text-center text-text-muted py-8">
-              <p>No hay pools activos</p>
+            <div v-else class="text-center text-text-muted text-xs py-4">
+              <p>Sin pools</p>
             </div>
           </ClientOnly>
         </div>
       </div>
 
       <!-- Top Consumers -->
-      <div class="lg:col-span-2 bg-card border border-border rounded-xl p-5 shadow-sm flex flex-col">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-bold text-lg text-text">Top Consumidores</h2>
-          <div class="flex gap-2 text-xs">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary"></span> CPU</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-accent"></span> RAM</span>
+      <div class="lg:col-span-2 bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <h2 class="font-bold text-base text-text">Top Consumidores</h2>
+            <NuxtLink to="/machines" class="text-[10px] text-primary hover:underline cursor-pointer"
+              title="Ver tabla completa de máquinas">
+              (Analizar todo)
+            </NuxtLink>
+          </div>
+          <div class="flex gap-2 text-[10px]">
+            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> CPU</span>
+            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span> RAM</span>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
           <!-- CPU List -->
-          <div class="space-y-3">
-            <h3 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Mayor uso de CPU</h3>
-            <div v-if="topCpuVms.length === 0" class="text-sm text-text-muted italic">Sin datos</div>
-            <ul v-else class="space-y-2">
+          <div class="space-y-2">
+            <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Mayor uso de CPU</h3>
+            <div v-if="topCpuVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
+            <ul v-else class="space-y-1">
               <li v-for="(vm, i) in topCpuVms" :key="vm.vmid"
-                class="flex items-center justify-between p-2 rounded hover:bg-muted-surface transition-colors cursor-default group">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-mono text-text-muted w-4">{{ i + 1 }}</span>
+                class="flex items-center justify-between p-1.5 rounded hover:bg-muted-surface transition-colors cursor-default group">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-mono text-text-muted w-3">{{ i + 1 }}</span>
                   <div class="flex flex-col">
-                    <span class="font-medium text-sm text-text group-hover:text-primary transition-colors">{{
-                      vmDisplay(vm)
-                    }}</span>
-                    <span class="text-xs text-text-muted">{{ vm.node }}</span>
+                    <span
+                      class="font-medium text-xs text-text group-hover:text-primary transition-colors truncate max-w-[100px]">{{
+                        vmDisplay(vm)
+                      }}</span>
+                    <span class="text-[10px] text-text-muted leading-none">{{ vm.node }}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <div class="w-16 h-1.5 bg-border rounded-full overflow-hidden">
+                  <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
                     <div class="h-full bg-primary" :style="{ width: toPercent(vm.cpu || 0, 1) }"></div>
                   </div>
-                  <span class="text-xs font-bold text-primary w-10 text-right">{{ toPercent(vm.cpu || 0, 1) }}</span>
+                  <span class="text-[10px] font-bold text-primary w-8 text-right">{{ toPercent(vm.cpu || 0, 1) }}</span>
                 </div>
               </li>
             </ul>
           </div>
 
           <!-- RAM List -->
-          <div class="space-y-3">
-            <h3 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Mayor uso de RAM</h3>
-            <div v-if="topMemVms.length === 0" class="text-sm text-text-muted italic">Sin datos</div>
-            <ul v-else class="space-y-2">
+          <div class="space-y-2">
+            <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Mayor uso de RAM</h3>
+            <div v-if="topMemVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
+            <ul v-else class="space-y-1">
               <li v-for="(vm, i) in topMemVms" :key="vm.vmid"
-                class="flex items-center justify-between p-2 rounded hover:bg-muted-surface transition-colors cursor-default group">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-mono text-text-muted w-4">{{ i + 1 }}</span>
+                class="flex items-center justify-between p-1.5 rounded hover:bg-muted-surface transition-colors cursor-default group">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-mono text-text-muted w-3">{{ i + 1 }}</span>
                   <div class="flex flex-col">
-                    <span class="font-medium text-sm text-text group-hover:text-primary transition-colors">{{
-                      vmDisplay(vm)
-                    }}</span>
-                    <span class="text-xs text-text-muted">{{ vm.node }}</span>
+                    <span
+                      class="font-medium text-xs text-text group-hover:text-primary transition-colors truncate max-w-[100px]">{{
+                        vmDisplay(vm)
+                      }}</span>
+                    <span class="text-[10px] text-text-muted leading-none">{{ vm.node }}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <div class="w-16 h-1.5 bg-border rounded-full overflow-hidden">
+                  <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
                     <div class="h-full bg-accent" :style="{ width: toPercent(vm.mem || 0, vm.maxmem || 1) }"></div>
                   </div>
-                  <span class="text-xs font-bold text-accent w-10 text-right">{{ toPercent(vm.mem || 0, vm.maxmem || 1)
-                  }}</span>
+                  <span class="text-[10px] font-bold text-accent w-8 text-right">{{ toPercent(vm.mem || 0, vm.maxmem ||
+                    1)
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -451,7 +461,7 @@ const chartVmState = computed(() => {
       plotOptions: { pie: { donut: { size: '65%' } } },
       dataLabels: { enabled: false },
       stroke: { show: false },
-      tooltip: { theme: 'light' }
+      tooltip: { theme: 'dark', style: { fontSize: '12px' } }
     } satisfies ApexOptions,
   }
 })
@@ -475,23 +485,36 @@ const chartNodeCpu = computed(() => {
       plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
       colors: [COLORS.primary],
       fill: { opacity: 0.9 },
-      tooltip: { theme: 'light' }
+      tooltip: { theme: 'dark', style: { fontSize: '12px' } }
     } satisfies ApexOptions,
   }
 })
 
 const chartPool = computed(() => {
-  const entries = Object.entries(poolCounts.value)
+  const allEntries = Object.entries(poolCounts.value)
+  // Ordenar por cantidad de VMs (mayor a menor)
+  allEntries.sort((a, b) => b[1] - a[1])
+
+  let finalEntries = []
+  if (allEntries.length > 5) {
+    const top5 = allEntries.slice(0, 5)
+    const others = allEntries.slice(5)
+    const othersCount = others.reduce((sum, [, count]) => sum + count, 0)
+    finalEntries = [...top5, ['Otros', othersCount]]
+  } else {
+    finalEntries = allEntries
+  }
+
   return {
-    series: entries.length ? entries.map(([, count]) => count) : [],
+    series: finalEntries.length ? finalEntries.map(([, count]) => count) : [],
     options: {
       chart: { fontFamily: 'inherit', background: 'transparent', foreColor: 'var(--color-text)' },
-      labels: entries.map(([name]) => name),
-      legend: { position: 'bottom', labels: { colors: 'var(--color-text)' } },
-      colors: [COLORS.primary, COLORS.accent, COLORS.warning, COLORS.positive, COLORS.danger],
+      labels: finalEntries.map(([name]) => String(name)),
+      legend: { position: 'bottom', labels: { colors: 'var(--color-text)' }, fontSize: '11px' },
+      colors: [COLORS.primary, COLORS.accent, COLORS.warning, COLORS.positive, COLORS.danger, COLORS.muted],
       dataLabels: { enabled: true, style: { fontSize: '10px' } },
       stroke: { width: 0 },
-      tooltip: { theme: 'light' }
+      tooltip: { theme: 'dark', style: { fontSize: '12px' } }
     } satisfies ApexOptions,
   }
 })
