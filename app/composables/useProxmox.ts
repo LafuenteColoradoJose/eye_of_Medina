@@ -275,6 +275,22 @@ export const useProxmox = () => {
     // Network management
     getNodeNetworks: async (node: string) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/network`, 'GET'),
 
+    // Storage & Content
+    listStorages: async (node: string) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/storage`, 'GET'),
+
+    listStorageContent: async (node: string, storage: string, content?: 'iso' | 'vztmpl') => {
+      let url = `/nodes/${encodeURIComponent(node)}/storage/${encodeURIComponent(storage)}/content`
+      if (content) url += `?content=${content}`
+      return proxmoxRequest(url, 'GET')
+    },
+
+    // Create Machine from scratch
+    createQemu: async (node: string, data: Record<string, unknown>) =>
+      proxmoxRequest(`/nodes/${encodeURIComponent(node)}/qemu`, 'POST', undefined, data),
+
+    createLxc: async (node: string, data: Record<string, unknown>) =>
+      proxmoxRequest(`/nodes/${encodeURIComponent(node)}/lxc`, 'POST', undefined, data),
+
     // VM/CT config helpers
     updateMachineConfig: async (
       node: string,
@@ -282,6 +298,14 @@ export const useProxmox = () => {
       vmid: number | string,
       data: Record<string, unknown>
     ) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/${type}/${vmid}/config`, 'PUT', undefined, data),
+
+    // Power Management
+    setMachineStatus: async (
+      node: string,
+      type: 'qemu' | 'lxc',
+      vmid: number | string,
+      action: 'start' | 'stop' | 'shutdown' | 'reboot'
+    ) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/${type}/${vmid}/status/${action}`, 'POST'),
 
     deleteMachine: async (node: string, type: 'qemu' | 'lxc', vmid: number | string) =>
       proxmoxRequest(`/nodes/${encodeURIComponent(node)}/${type}/${vmid}`, 'DELETE'),
