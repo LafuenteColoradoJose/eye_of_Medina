@@ -2,18 +2,28 @@
 useHead({ title: 'Acceso' })
 import Login from '~/components/login.vue';
 
-const { isAuthenticated, restoreSession } = useProxmox();
+const { isAuthenticated, restoreSession, username } = useProxmox();
 const router = useRouter();
+
+const handleRedirect = () => {
+  const user = username.value || ''
+  // Logic: Admins (root) and Professors go to Dashboard. Others (Alumnos) go to simplified view.
+  if (user === 'root@pam' || user.toLowerCase().startsWith('profesor') || user.includes('profesor')) {
+    router.replace('/dashboard')
+  } else {
+    router.replace('/my-resources')
+  }
+}
 
 onMounted(() => {
   restoreSession();
   if (isAuthenticated.value) {
-    router.replace('/dashboard');
+    handleRedirect();
   }
 });
 
 watch(isAuthenticated, (isAuth) => {
-  if (isAuth) router.replace('/dashboard');
+  if (isAuth) handleRedirect();
 });
 </script>
 

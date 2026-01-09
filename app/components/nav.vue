@@ -78,22 +78,37 @@ import { ref, watch, onMounted } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
-const { logout, isAuthenticated } = useProxmox()
+import { computed } from 'vue'
+
+const { logout, isAuthenticated, username } = useProxmox()
 const isOpen = ref(false)
 const isDark = ref(false)
 
-const items = [
-  { to: '/', label: 'Home' },
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/machines', label: 'Máquinas' },
-  { to: '/networks', label: 'Redes' },
-  { to: '/pools', label: 'Pools' },
-  { to: '/users', label: 'Usuarios' },
-  { to: '/groups', label: 'Grupos' },
-  { to: '/roles', label: 'Roles' },
-  { to: '/permissions', label: 'Permisos' },
-  { to: '/permissions-tree', label: 'Árbol permisos' },
+const allItems = [
+  { to: '/', label: 'Home', roles: ['all'] },
+  { to: '/dashboard', label: 'Dashboard', roles: ['admin'] },
+  { to: '/my-resources', label: 'Mis Recursos', roles: ['student'] },
+  { to: '/machines', label: 'Máquinas', roles: ['admin'] },
+  { to: '/networks', label: 'Redes', roles: ['admin'] },
+  { to: '/pools', label: 'Pools', roles: ['admin'] },
+  { to: '/users', label: 'Usuarios', roles: ['admin'] },
+  { to: '/groups', label: 'Grupos', roles: ['admin'] },
+  { to: '/roles', label: 'Roles', roles: ['admin'] },
+  { to: '/permissions', label: 'Permisos', roles: ['admin'] },
+  { to: '/permissions-tree', label: 'Árbol permisos', roles: ['admin'] },
 ]
+
+const items = computed(() => {
+  const user = username.value || ''
+  const isAdmin = user === 'root@pam' || user.toLowerCase().startsWith('profesor') || user.includes('profesor')
+
+  return allItems.filter(item => {
+    if (item.roles.includes('all')) return true
+    if (isAdmin && item.roles.includes('admin')) return true
+    if (!isAdmin && item.roles.includes('student')) return true
+    return false
+  })
+})
 
 onMounted(() => {
   // Check localStorage or system preference

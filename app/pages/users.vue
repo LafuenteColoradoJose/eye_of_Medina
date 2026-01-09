@@ -14,7 +14,8 @@
       <section class="mb-6 section-card p-4 rounded shadow">
         <h2 class="font-bold mb-2">Crear usuario</h2>
         <p class="text-sm muted mb-3">Solo se pueden crear usuarios en el realm <code class="font-mono">pve</code>. Para
-          <code class="font-mono">pam</code>, crea primero el usuario en el sistema y luego asígnale permisos.</p>
+          <code class="font-mono">pam</code>, crea primero el usuario en el sistema y luego asígnale permisos.
+        </p>
         <form @submit.prevent="handleCreate" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm">ID (sin realm)</label>
@@ -237,12 +238,15 @@ const groupsOf = (u: User): string => (u.groups && u.groups.length > 0 ? u.group
 const handleCreate = async (): Promise<void> => {
   if (!form.value.userid || !form.value.password) return alert('Userid y password son requeridos')
   loading.value = true
+  // Ensure groups is a plain array of strings, stripping Vue reactivity
+  const cleanGroups = form.value.groups ? JSON.parse(JSON.stringify(form.value.groups)) : []
+
   const r = await createUser(
     form.value.userid,
     form.value.password,
-    form.value.realm,
+    'pve',
     form.value.comment,
-    form.value.groups
+    cleanGroups
   ) as ProxmoxResponse<unknown>
   loading.value = false
   if (r.success === false) return alert('Error: ' + (r.message || JSON.stringify(r)))

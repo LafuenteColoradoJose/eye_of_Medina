@@ -48,7 +48,7 @@
           <tbody>
             <tr v-for="r in roles" :key="r.roleid" class="border-b">
               <td class="p-2">{{ r.roleid }}</td>
-              <td class="p-2">{{ (r.privs || []).join(', ') }}</td>
+              <td class="p-2">{{ r.privs || '-' }}</td>
               <td class="p-2">
                 <button @click="editRole(r)" class="px-2 py-1 rounded mr-2 btn-warning">Editar</button>
                 <button @click="removeRole(r)" class="px-2 py-1 rounded btn-danger">Eliminar</button>
@@ -119,7 +119,7 @@ const loadRoles = async () => {
   if (res.success) roles.value = res.data || []
 }
 
-const editRole = (r: any) => { editing.value = { roleid: r.roleid, privsStr: (r.privs || []).join(',') } }
+const editRole = (r: any) => { editing.value = { roleid: r.roleid, privsStr: r.privs || '' } }
 const applyEdit = async () => {
   if (!editing.value) return
   loading.value = true

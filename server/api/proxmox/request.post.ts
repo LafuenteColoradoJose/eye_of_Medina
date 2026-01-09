@@ -16,7 +16,7 @@ type FetchErrorLike = {
   response?: { status?: number; statusMessage?: string }
   statusCode?: number
   message?: string
-  data?: unknown
+  data?: any
   stack?: string
 }
 
@@ -40,7 +40,8 @@ export default defineEventHandler(async (event) => {
     // Attach authentication if provided
     if (body.authToken) {
       if (body.authToken.startsWith('PVE:')) {
-        headers['Cookie'] = `PVEAuthCookie=${body.authToken}`
+        // Encode the ticket to preserve special characters like '+'
+        headers['Cookie'] = `PVEAuthCookie=${encodeURIComponent(body.authToken)}`
         if (body.csrfToken && method !== 'GET') {
           headers['CSRFPreventionToken'] = body.csrfToken
         }

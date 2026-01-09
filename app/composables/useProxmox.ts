@@ -216,16 +216,34 @@ export const useProxmox = () => {
     login,
     proxmoxRequest,
     // CRUD helpers
-    createUser: async (userid: string, password: string, realm = 'pam', comment?: string, groups?: string[]) => {
-      // userid should be like 'user' (without @realm) per Proxmox API expects userid and realm separately
-      const fullUser = `${userid}@${realm}`
-      // Proxmox expects form-encoded fields: userid, password, comment, groups (comma-separated)
-      return await proxmoxRequest('/access/users', 'POST', undefined, {
-        userid: fullUser,
-        password,
-        comment,
-        groups: groups && groups.length ? groups.join(',') : undefined,
-      })
+    createUser: async (userid: string, password: string, realm = 'pve', comment?: string, groups?: string | string[]) => {
+      // 1. Sanitize input
+      let cleanUser = userid.trim()
+
+      // 2. Smartly append realm if missing
+      // If user typed "pepe@pve", keep it. If "pepe", transform to "pepe@pve".
+      // We check if it ENDS with the realm to be precise, or has any @realm part.
+      if (!cleanUser.includes('@')) {
+        cleanUser = `${cleanUser}@${realm}`
+      }
+
+      // 3. Prepare payload for Proxmox API
+      const payload: Record<string, unknown> = {
+        userid: cleanUser,
+        password: password,
+        comment: comment || undefined,
+      }
+
+      // 4. Handle Groups safely
+      if (groups) {
+        if (Array.isArray(groups) && groups.length > 0) {
+          payload.groups = groups.join(',')
+        } else if (typeof groups === 'string' && groups.trim().length > 0) {
+          payload.groups = groups.trim()
+        }
+      }
+
+      return await proxmoxRequest('/access/users', 'POST', undefined, payload)
     },
     deleteUser: async (userid: string) => {
       // DELETE /access/users/{userid}
@@ -267,6 +285,9 @@ export const useProxmox = () => {
 
     deleteMachine: async (node: string, type: 'qemu' | 'lxc', vmid: number | string) =>
       proxmoxRequest(`/nodes/${encodeURIComponent(node)}/${type}/${vmid}`, 'DELETE'),
+
+    getVncTicket: async (node: string, type: 'qemu' | 'lxc', vmid: number | string) =>
+      proxmoxRequest(`/nodes/${encodeURIComponent(node)}/${type}/${vmid}/vncproxy`, 'POST', undefined, { websocket: 1 }),
 
     cloneMachine: async (
       node: string,
