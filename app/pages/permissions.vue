@@ -22,7 +22,7 @@
           </svg>
           Refrescar
         </button>
-        <button @click="openCreateModal"
+        <button v-if="canManagePermissions" @click="openCreateModal()"
           class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong transition-colors flex items-center gap-2 shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -43,7 +43,8 @@
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input v-model="search" placeholder="Buscar por usuario, grupo o ruta..."
-          class="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50" />
+          class="w-full pl-14 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
+          style="padding-left: 3.5rem" />
       </div>
       <div class="text-sm text-text-muted">
         <span class="font-bold text-primary">{{ flatACLs.length }}</span> reglas activas
@@ -104,7 +105,7 @@
             </div>
             <h3 class="font-mono text-lg font-bold text-text truncate" :title="group.path">{{ group.path }}</h3>
           </div>
-          <button @click="openCreateModal(group.path)"
+          <button v-if="canManagePermissions" @click="openCreateModal(group.path)"
             class="text-xs px-2 py-1 rounded bg-background border border-border text-text-muted hover:text-primary transition-colors flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -128,13 +129,12 @@
                 <div class="text-xs flex gap-2 mt-0.5">
                   <span
                     class="px-1.5 py-0.5 rounded bg-primary/10 text-primary uppercase font-bold tracking-wider text-[10px]">{{
-                    acl.roleid }}</span>
+                      acl.roleid }}</span>
                   <span class="text-text-muted">{{ acl.type === 'user' ? 'Usuario' : 'Grupo' }}</span>
                 </div>
               </div>
             </div>
-
-            <button @click="handleRemoveACL(acl)"
+            <button v-if="canManagePermissions" @click="handleRemoveACL(acl)"
               class="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded transition-colors"
               title="Revocar permiso">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -227,7 +227,9 @@ interface ACL { path: string; roleid?: string; role?: string; type?: string; ugi
 interface Role { roleid: string }
 
 const router = useRouter()
-const { listRoles, listACLs, createACL, deleteACL, restoreSession, isAuthenticated } = useProxmox()
+const { listRoles, listACLs, createACL, deleteACL, restoreSession, isAuthenticated, isClusterAdmin, hasPermission } = useProxmox()
+
+const canManagePermissions = computed(() => isClusterAdmin.value || hasPermission('Permissions.Modify', '/'))
 
 const loading = ref(false)
 const roles = ref<Role[]>([])
@@ -246,10 +248,23 @@ watch(isAuthenticated, (val) => { if (val && acls.value.length === 0) loadData()
 
 const loadData = async () => {
   loading.value = true
-  const [rData, aData] = await Promise.all([listRoles(), listACLs()])
 
-  if (rData.success) roles.value = (rData.data as Role[]) || []
-  if (aData.success) acls.value = (aData.data as ACL[]) || []
+  // Load Roles
+  try {
+    const rData = await listRoles()
+    if (rData.success) roles.value = (rData.data as Role[]) || []
+  } catch (e) {
+    console.warn('Cannot load roles', e)
+  }
+
+  // Load ACLs
+  try {
+    const aData = await listACLs()
+    if (aData.success) acls.value = (aData.data as ACL[]) || []
+  } catch (e) {
+    console.warn('Cannot load ACLs', e)
+    // Fallback: empty list, user sees nothing but page works
+  }
 
   loading.value = false
 }

@@ -10,6 +10,12 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/test-utils'
   ],
+  // Enable WebSocket support for VNC proxy
+  nitro: {
+    experimental: {
+      websocket: true
+    }
+  },
   runtimeConfig: {
     proxmoxHost: process.env.PROXMOX_HOST || process.env.NUXT_PUBLIC_PROXMOX_HOST || 'https://your-proxmox-host:8006',
     allowInsecureTLS: process.env.ALLOW_INSECURE_TLS === 'true',
@@ -24,10 +30,6 @@ export default defineNuxtConfig({
         overlay: false,
         port: 24680,
       },
-    },
-    // Deshabilita overlay de errores en cliente
-    css: {
-      devSourcemap: false,
     },
   },
   app: {

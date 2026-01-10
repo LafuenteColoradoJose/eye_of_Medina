@@ -22,7 +22,7 @@
           </svg>
           Refrescar
         </button>
-        <button @click="openCreateModal"
+        <button v-if="canCreateRole" @click="openCreateModal"
           class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong transition-colors flex items-center gap-2 shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,7 +45,8 @@
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input v-model="search" placeholder="Buscar roles..."
-          class="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50" />
+          class="w-full pl-14 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
+          style="padding-left: 3.5rem" />
       </div>
       <div class="text-sm text-text-muted">
         <span class="font-bold text-primary">{{ filteredRoles.length }}</span> roles definidos
@@ -87,7 +88,7 @@
               <h3 class="text-lg font-bold text-text truncate max-w-[150px]" :title="role.roleid">{{ role.roleid }}</h3>
             </div>
 
-            <button @click="editRole(role)"
+            <button v-if="canCreateRole" @click="editRole(role)"
               class="p-1.5 rounded-lg opacity-100 sm:opacity-0 group-hover:opacity-100 hover:bg-muted-surface text-text-muted hover:text-primary transition-all shadow-sm"
               title="Editar">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -199,7 +200,8 @@ import { ref, onMounted, watch, computed } from 'vue'
 useHead({ title: 'Gestión de Roles' })
 
 const router = useRouter()
-const { listRoles, createRole, deleteRole, restoreSession, isAuthenticated } = useProxmox()
+const { listRoles, createRole, deleteRole, restoreSession, isAuthenticated, isClusterAdmin, hasPermission } = useProxmox()
+const canCreateRole = computed(() => isClusterAdmin.value || hasPermission('Permissions.Modify', '/'))
 
 const loading = ref(false)
 const roles = ref<any[]>([])
@@ -251,9 +253,14 @@ watch(isAuthenticated, (val) => {
 const loadRoles = async () => {
   loading.value = true
   roles.value = []
-  const res = await listRoles()
-  loading.value = false
-  if (res.success) roles.value = res.data || []
+  try {
+    const res = await listRoles()
+    if (res.success) roles.value = res.data || []
+  } catch (e) {
+    console.warn('Cannot load roles', e)
+  } finally {
+    loading.value = false
+  }
 }
 
 const filteredRoles = computed(() => {

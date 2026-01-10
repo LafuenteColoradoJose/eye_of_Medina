@@ -5,44 +5,95 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Permitir libremente la página de login/landing
   if (to.path === '/' || to.path === '/index') return
 
-  const { isAuthenticated, username } = useProxmox()
+  const { isAuthenticated, username, hasPermission, hasPermissionAnywhere, getUserPermissions, isClusterAdmin } = useProxmox()
+
   if (!isAuthenticated.value) return navigateTo('/')
 
-  const user = username.value?.trim()
+  // Asegurarnos de que tenemos los permisos más recientes
+  // (Aunque restoreSession ya lo hace, mejor asegurar antes de navegar)
+  await getUserPermissions()
 
-  // root@pam y miembros del grupo Profesores tienen acceso completo
-  const isProfessor = user?.startsWith('Profesor') || user?.includes('@profesores')
-  if (user === 'root@pam' || isProfessor) return
+  // Dashboard accesible para todos los logueados
+  if (to.path === '/dashboard') return
 
-  // Rutas con requisitos de privilegios mínimos
-  const routeNeeds: Record<string, string[]> = {
-    '/permissions': ['Sys.Modify'],
-    '/roles': ['Sys.Audit'],
-    '/groups': ['Sys.Audit'],
-    '/users': ['User.Audit', 'Sys.Audit'],
-    '/pools': ['Pool.Audit'],
-    '/machines': ['VM.Audit'],
-    '/networks': ['Sys.Audit'],
-  }
+  // Superusuarios
+  if (isClusterAdmin.value) return
 
-  // Caso especial: solo root@pam puede ver árbol de permisos
-  if (to.path === '/permissions-tree') {
-    if (username.value !== 'root@pam') return navigateTo('/dashboard')
+  const path = to.path
+
+  // MÁQUINAS: Permitir si se tiene VM.Audit en CUALQUIER sitio
+  if (path === '/machines') {
+    if (!hasPermissionAnywhere('VM.Audit')) {
+      return navigateTo('/dashboard')
+    }
     return
   }
 
-  const required = routeNeeds[to.path]
-  if (!required) return
-
-  try {
-    const { fetchPermissions, has } = usePermissions()
-    const { success, permissions } = await fetchPermissions('/')
-    if (!success) return navigateTo('/dashboard')
-
-    const allowed = required.some((priv) => has(permissions, priv))
-    if (!allowed) return navigateTo('/dashboard')
-  } catch (error) {
-    console.error('ACL middleware error', error)
-    return navigateTo('/dashboard')
+  // REDES: Permitir si tiene Sys.Audit o SDN.Audit en cualquier sitio
+  if (path === '/networks') {
+    if (!hasPermissionAnywhere('Sys.Audit') && !hasPermissionAnywhere('SDN.Audit')) {
+      return navigateTo('/dashboard')
+    }
+    return
   }
+
+  // USUARIOS: Permitir si tiene User.Audit o User.Modify en cualquier sitio
+  if (path === '/users') {
+    if (!hasPermissionAnywhere('User.Audit') && !hasPermissionAnywhere('User.Modify')) {
+      return navigateTo('/dashboard')
+    }
+    return
+  }
+
+  // POOLS: Permitir si tiene Pool.Audit o VM.Allocate en cualquier sitio
+  if (path === '/pools') {
+    if (!hasPermissionAnywhere('Pool.Audit') && !hasPermissionAnywhere('VM.Allocate')) {
+      return navigateTo('/dashboard')
+    }
+    return
+  }
+
+  // PERMISOS: Permitir si tiene Sys.Audit o Permissions.Modify en cualquier sitio
+  if (path === '/permissions') {
+    if (!hasPermissionAnywhere('Sys.Audit') && !hasPermissionAnywhere('Permissions.Modify')) {
+      return navigateTo('/dashboard')
+    }
+    return
+  }
+
+  // ROLES
+  if (path === '/roles') {
+    if (!hasPermissionAnywhere('Sys.Audit') && !hasPermissionAnywhere('Permissions.Modify')) return navigateTo('/dashboard')
+    return
+  }
+
+  // GRUPOS
+  if (path === '/groups') {
+    if (!hasPermissionAnywhere('User.Audit') && !hasPermissionAnywhere('Group.Allocate')) return navigateTo('/dashboard')
+    return
+  }
+
+  // Rutas de Infraestructura Global (requieren permisos en Root)
+  const rootRoutes = {
+    // '/networks': 'Sys.Audit',
+    // '/pools': 'Pool.Audit', // Ya manejado arriba
+    // '/permissions': 'Sys.Audit', // Ya manejado arriba
+    '/permissions-tree': 'Sys.Audit',
+    // '/roles': 'Sys.Audit', // Ya manejado arriba
+    // '/groups': 'User.Audit', // Ya manejado arriba
+    // '/users': 'User.Audit' // Ya manejado arriba
+  }
+
+  if (path in rootRoutes) {
+    const required = rootRoutes[path as keyof typeof rootRoutes]
+    // Check estricto en '/'
+    if (!hasPermission(required, '/')) {
+      // Excepción: Users puede ser en /access/users
+      if (path === '/users' && hasPermission('User.Audit', '/access/users')) return
+      if (path === '/groups' && hasPermission('User.Audit', '/access/groups')) return
+
+      return navigateTo('/dashboard')
+    }
+  }
+
 })

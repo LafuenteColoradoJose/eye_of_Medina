@@ -22,9 +22,9 @@
                             <line x1="6" y1="18" x2="6" y2="18" />
                         </svg>
                     </div>
-                    <select v-model="selectedNode" @change="loadNetworks"
-                        class="appearance-none pl-16 pr-10 py-2.5 rounded-lg bg-card border border-border text-text hover:border-primary/50 transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary cursor-pointer min-w-[170px] font-bold"
-                        style="padding-left: 3.5rem;">
+                    <select v-model="selectedNode"
+                        class="appearance-none pl-12 pr-10 py-2.5 rounded-lg bg-card border border-border text-text hover:border-primary/50 transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary cursor-pointer min-w-[170px] font-bold"
+                        style="padding-left: 3.5rem">
                         <option v-for="node in nodes" :key="node.node" :value="node.node">{{ node.node }}</option>
                     </select>
                     <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
@@ -203,7 +203,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 useHead({ title: 'Topología de Red' })
 
 const router = useRouter()
-const { isAuthenticated, restoreSession, listNodes, getNodeNetworks } = useProxmox()
+const { isAuthenticated, restoreSession, listNodes, getNodeNetworks, listVMResources } = useProxmox()
 
 // Types
 type NodeInfo = { node: string; status: string }
@@ -227,28 +227,52 @@ const selectedNode = ref<string>('')
 const networks = ref<NetworkInterface[]>([])
 const loading = ref(false)
 
-onMounted(async () => {
+onMounted(() => {
     restoreSession()
-    if (isAuthenticated.value) await loadNodes()
 })
 
-watch(isAuthenticated, (val) => { if (val) loadNodes() })
+// Watch auth state with immediate execution to catch initial state
+watch(isAuthenticated, async (val) => {
+    if (val) {
+        console.log('Auth confirmed (immediate), loading nodes...')
+        await loadNodes()
+    }
+}, { immediate: true })
+
+watch(selectedNode, (val) => {
+    if (val) loadNetworks()
+})
 
 const loadNodes = async () => {
     try {
         const res = await listNodes()
-        if (res.success && res.data) {
+
+        if (res.success && res.data && Array.isArray(res.data) && res.data.length > 0) {
             nodes.value = res.data as NodeInfo[]
-            if (!selectedNode.value && nodes.value.length > 0) {
-                const activeNode = nodes.value.find(n => n.status === 'online') || nodes.value[0]
-                if (activeNode) {
-                    selectedNode.value = activeNode.node
-                    loadNetworks()
-                }
+        } else {
+            console.warn('Fallo al listar nodos (permisos?), intentando fallback vía Recursos...')
+            // Fallback: Obtener nodos de las máquinas visibles
+            const resResources = await listVMResources()
+            if (resResources.success && resResources.data) {
+                const uniqueNodes = Array.from(new Set((resResources.data as any[]).map(r => r.node)))
+                nodes.value = uniqueNodes.map(n => ({ node: n, status: 'online' })) as NodeInfo[]
             }
         }
+
+        if (!selectedNode.value && nodes.value.length > 0) {
+            const activeNode = nodes.value.find(n => n.status === 'online') || nodes.value[0]
+            if (activeNode) {
+                selectedNode.value = activeNode.node
+            }
+        }
+
+        // Safety: ensure networks are loaded
+        if (selectedNode.value) {
+            // Force load immediately if we just selected a node
+            await loadNetworks()
+        }
     } catch (e) {
-        console.error(e)
+        console.error('Error fatal cargando nodos:', e)
     }
 }
 

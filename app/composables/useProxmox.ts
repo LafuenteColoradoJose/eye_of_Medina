@@ -201,9 +201,80 @@ export const useProxmox = () => {
         authToken.value = token
         csrfToken.value = csrf
         username.value = user
+        // Refresh permissions
+        getUserPermissions()
       }
     }
   }
+
+  // Permisos del usuario actual (RBAC)
+  // Estructura: { "/": { "Sys.Audit": 1 }, "/vms/100": { ... } }
+  const userPermissions = useState<Record<string, Record<string, number>>>('proxmox-permissions', () => ({}))
+
+  /**
+   * Obtener permisos del usuario logueado desde la API
+   */
+  const getUserPermissions = async () => {
+    try {
+      const res = await proxmoxRequest('/access/permissions', 'GET')
+      if (res.success && res.data) {
+        userPermissions.value = res.data
+      }
+      return res
+    } catch (e) {
+      console.error('Error fetching permissions', e)
+      return { success: false }
+    }
+  }
+
+  /**
+   * Verificar si el usuario tiene un permiso específico (RBAC Check)
+   * Si no se especifica path, busca en la raíz ('/') o cualquiera.
+   * @param permission - Ej: 'Sys.Audit', 'VM.Allocate'
+   * @param path - (Opcional) Path específico, ej: '/vms/100'
+   */
+  /**
+   * Verificar si el usuario tiene un permiso específico (RBAC Check)
+   * Soporta herencia simple: Root -> Pool -> VM
+   * @param permission - Ej: 'Sys.Audit', 'VM.Allocate'
+   * @param path - (Opcional) Path específico, ej: '/vms/100'
+   * @param pool - (Opcional) ID del pool si el recurso pertenece a uno, ej: 'my-pool'
+   */
+  const hasPermission = (permission: string, path: string = '/', pool?: string) => {
+    if (!userPermissions.value) return false
+
+    // 1. Check Admin Global (Root)
+    if (userPermissions.value['/'] && userPermissions.value['/'][permission]) return true
+
+    // 2. Check Path Específico (ej. /vms/100)
+    if (path !== '/' && userPermissions.value[path] && userPermissions.value[path][permission]) return true
+
+    // 3. Check Herencia de Pool (si aplica)
+    if (pool) {
+      const poolPath = `/pool/${pool}`
+      if (userPermissions.value[poolPath] && userPermissions.value[poolPath][permission]) return true
+    }
+
+    return false
+  }
+
+  /**
+   * Verificar si el usuario tiene un permiso en CUALQUIER path.
+   * Útil para mostrar menús generales (ej: "Máquinas" si tienes acceso a alguna VM).
+   */
+  const hasPermissionAnywhere = (permission: string) => {
+    if (!userPermissions.value) return false
+    return Object.values(userPermissions.value).some(perms => perms[permission])
+  }
+
+  /**
+   * Helper simple para saber si es Admin de facto (tiene permisos en /)
+   */
+  const isClusterAdmin = computed(() => {
+    return hasPermission('Sys.Audit', '/') || username.value === 'root@pam'
+  })
+
+  // ... (resto del return)
 
   return {
     // Estado
@@ -211,10 +282,22 @@ export const useProxmox = () => {
     csrfToken,
     username,
     isAuthenticated,
+    userPermissions,
+    isClusterAdmin,
 
     // Métodos
-    login,
+    login: async (user: string, pass: string, host: string) => {
+      const res = await login(user, pass, host)
+      if (res.success) {
+        await getUserPermissions()
+      }
+      return res
+    },
+    getUserPermissions,
+    hasPermission,
+    hasPermissionAnywhere,
     proxmoxRequest,
+    // ... rest of methods
     // CRUD helpers
     createUser: async (userid: string, password: string, realm = 'pve', comment?: string, groups?: string | string[]) => {
       // 1. Sanitize input
@@ -271,7 +354,7 @@ export const useProxmox = () => {
 
     // Nodes and VM/CT resources
     listNodes: async () => proxmoxRequest('/nodes', 'GET'),
-    listVMResources: async () => proxmoxRequest('/cluster/resources?type=vm', 'GET'),
+    listVMResources: async () => proxmoxRequest('/cluster/resources', 'GET'),
     // Network management
     getNodeNetworks: async (node: string) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/network`, 'GET'),
 
@@ -396,6 +479,10 @@ export const useProxmox = () => {
       )
 
       return await proxmoxRequest('/access/acl', 'PUT', undefined, cleanedBody)
+    },
+
+    changeUserPassword: async (userid: string, password: string) => {
+      return await proxmoxRequest('/access/password', 'PUT', undefined, { userid, password })
     },
     logout,
     restoreSession,

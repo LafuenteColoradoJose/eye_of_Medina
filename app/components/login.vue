@@ -77,13 +77,8 @@ const handleLogin = async () => {
     messageType.value = 'success';
     message.value = '¡Login exitoso! Redirigiendo...';
     setTimeout(() => {
-      // Redirección inteligente
-      const userLower = fullUsername.toLowerCase()
-      if (userLower.startsWith('root') || userLower.includes('profesor')) {
-        router.push('/dashboard')
-      } else {
-        router.push('/my-resources')
-      }
+      // Redirección unificada al Dashboard
+      router.push('/dashboard')
     }, 1000);
   } else {
     messageType.value = 'error';

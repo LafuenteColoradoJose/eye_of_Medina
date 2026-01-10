@@ -22,7 +22,7 @@
           </svg>
           Refrescar
         </button>
-        <button @click="openCreateModal"
+        <button v-if="canCreateGroup" @click="openCreateModal"
           class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong transition-colors flex items-center gap-2 shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,7 +45,8 @@
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input v-model="search" placeholder="Buscar grupos..."
-          class="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50" />
+          class="w-full pl-14 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
+          style="padding-left: 3.5rem" />
       </div>
       <div class="text-sm text-text-muted">
         <span class="font-bold text-primary">{{ filteredGroups.length }}</span> grupos encontrados
@@ -95,7 +96,7 @@
 
             <!-- Actions Dropdown -->
             <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-              <button @click="editGroup(group)"
+              <button v-if="canCreateGroup" @click="editGroup(group)"
                 class="p-1.5 rounded-lg hover:bg-muted-surface text-text-muted hover:text-primary transition-colors"
                 title="Editar">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -184,7 +185,7 @@
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text"></textarea>
           </div>
 
-          <div class="pt-4 border-t border-border/50">
+          <div v-if="canCreateGroup" class="pt-4 border-t border-border/50">
             <h3 class="text-xs font-bold text-danger uppercase mb-2">Zona de Peligro</h3>
             <div class="bg-danger/5 border border-danger/20 rounded-lg p-3 flex items-center justify-between gap-4">
               <div class="text-sm text-text-muted">
@@ -214,7 +215,8 @@ import { ref, onMounted, watch, computed } from 'vue'
 useHead({ title: 'Gestión de Grupos' })
 
 const router = useRouter()
-const { listGroups, createGroup, updateGroup, deleteGroup, restoreSession, isAuthenticated } = useProxmox()
+const { listGroups, createGroup, updateGroup, deleteGroup, restoreSession, isAuthenticated, isClusterAdmin, hasPermission } = useProxmox()
+const canCreateGroup = computed(() => isClusterAdmin.value || hasPermission('User.Modify', '/access/groups') || hasPermission('Group.Allocate', '/'))
 
 const loading = ref(false)
 const groups = ref<any[]>([])
@@ -237,9 +239,14 @@ watch(isAuthenticated, (val) => {
 const loadGroups = async () => {
   loading.value = true
   groups.value = []
-  const res = await listGroups()
-  loading.value = false
-  if (res.success) groups.value = res.data || []
+  try {
+    const res = await listGroups()
+    if (res.success) groups.value = res.data || []
+  } catch (e) {
+    console.warn('Cannot load groups', e)
+  } finally {
+    loading.value = false
+  }
 }
 
 const filteredGroups = computed(() => {

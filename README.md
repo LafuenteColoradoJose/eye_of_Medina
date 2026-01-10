@@ -1,41 +1,165 @@
 # Eye of Medina
 
-Panel Nuxt 4 para monitoreo y gestion de Proxmox VE: dashboard con graficas, control de pools/grupos/roles/ACL y operaciones sobre VMs y contenedores.
+<div align="center">
 
-## Caracteristicas
-- Dashboard con KPI (incluyendo Bridges Activos), graficas, Top Consumidores y salud de nodos.
-- Gestión de Redes: visualización de interfaces de red (Bridges, Ethernet, VLANs) y su estado por nodo.
-- Listado de VMs/CTs con filtros, clonado con seleccion de pool, renombrado/hostname, cambio de pool y eliminacion.
-- Gestion de pools, grupos, usuarios, roles y ACL alineada con permisos de Proxmox; vista arbol de permisos.
-- Soporte nativo para Modo Oscuro y Claro.
-- Autenticacion via token o usuario/clave; proxy seguro a Proxmox desde el backend Nuxt.
+![Eye of Medina](public/Logo_Eye_of_Medina.svg)
 
-## Requisitos
-- Node.js 20+.
-- Acceso HTTPS al host de Proxmox (puerto 8006).
-- Variables de entorno basicas:
-	- `PROXMOX_HOST` o `NUXT_PUBLIC_PROXMOX_HOST`: URL base de Proxmox (ej: https://pve.local:8006).
-	- `ALLOW_INSECURE_TLS=true` si aceptas certificado autofirmado en desarrollo.
+**Panel web moderno para monitoreo y gestión de Proxmox VE**
 
-## Instalacion
+[![Nuxt 4](https://img.shields.io/badge/Nuxt-4.x-00DC82?style=flat-square&logo=nuxt.js)](https://nuxt.com)
+[![Vue 3](https://img.shields.io/badge/Vue-3.x-4FC08D?style=flat-square&logo=vue.js)](https://vuejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-4.x-06B6D4?style=flat-square&logo=tailwindcss)](https://tailwindcss.com)
+
+</div>
+
+---
+
+## ✨ Características
+
+### Dashboard
+- **KPIs en tiempo real**: VMs, contenedores, bridges activos y estado de nodos
+- **Gráficas interactivas**: estado de VMs, carga CPU por nodo, distribución por pools
+- **Top Consumidores**: VMs con mayor uso de recursos
+- **Estado de nodos**: salud y métricas de cada nodo del cluster
+
+### Gestión de Máquinas Virtuales
+- Listado con **filtros avanzados** (nombre, ID, tipo, pool)
+- **Clonación** de VMs/CTs con selección de pool destino
+- **Edición** de nombre/hostname y cambio de pool
+- **Start/Stop/Shutdown** con confirmación
+- Eliminación segura con doble confirmación
+
+### 🖥️ Consola VNC Integrada (NEW!)
+- **Acceso directo a consola** de VMs y contenedores desde el navegador
+- **Proxy WebSocket server-side**: conexión segura sin necesidad de sesión Proxmox separada
+- Basado en **noVNC** con soporte completo de teclado/ratón
+- **Send Ctrl-Alt-Del** con un clic
+- Reconexión automática
+
+### Gestión de Redes
+- Visualización por nodo: Bridges, Ethernet, Bonds, VLANs
+- Estado de interfaces (activo/inactivo, autostart)
+- Direccionamiento IP y gateways
+- Puertos asociados y esclavos
+
+### Identidad y Accesos
+- Gestión de **Pools**, **Grupos**, **Usuarios**, **Roles** y **ACL**
+- **Árbol de permisos**: auditoría visual de permisos efectivos
+- Alineado con el modelo de permisos de Proxmox
+
+### Experiencia de Usuario
+- **Modo Oscuro y Claro** con detección automática
+- Diseño responsive para desktop y tablets
+- Transiciones fluidas entre páginas
+
+---
+
+## 🚀 Instalación
+
+### Requisitos
+- Node.js 20+
+- Acceso HTTPS al host de Proxmox (puerto 8006)
+
+### Variables de entorno
+
+```env
+# URL de tu servidor Proxmox
+PROXMOX_HOST=https://tu-proxmox:8006
+NUXT_PUBLIC_PROXMOX_HOST=https://tu-proxmox:8006
+
+# Solo en desarrollo con certificado autofirmado
+ALLOW_INSECURE_TLS=true
+```
+
+### Instalación
+
 ```bash
+# Instalar dependencias
 npm install
-```
 
-## Desarrollo
-```bash
+# Desarrollo
 npm run dev
-```
-Abre http://localhost:3000.
 
-## Produccion
-```bash
+# Producción
 npm run build
-npm run preview  # para probar el build localmente
+npm run preview
 ```
 
-## Notas de arquitectura
-- Configuracion y metadatos en [nuxt.config.ts](nuxt.config.ts); CSS principal en [app/assets/css/main.css](app/assets/css/main.css).
-- API proxy a Proxmox en [server/api/proxmox/login.post.ts](server/api/proxmox/login.post.ts) y [server/api/proxmox/request.post.ts](server/api/proxmox/request.post.ts).
-- Dashboard y modulos principales en [app/pages](app/pages), composables en [app/composables](app/composables).
-- Documentacion funcional en [Eye_of_Medina.md](Eye_of_Medina.md).
+Abre [http://localhost:3000](http://localhost:3000) para acceder al panel.
+
+---
+
+## 🏗️ Arquitectura
+
+```
+eye_of_Medina/
+├── app/
+│   ├── pages/           # Páginas de la aplicación
+│   │   ├── console/     # Consola VNC integrada
+│   │   ├── machines/    # Gestión de VMs/CTs
+│   │   └── ...
+│   ├── components/      # Componentes reutilizables
+│   ├── composables/     # Lógica compartida (useProxmox, etc.)
+│   └── assets/          # CSS y recursos estáticos
+├── server/
+│   ├── api/proxmox/     # API proxy a Proxmox
+│   └── routes/_ws/      # WebSocket proxy para VNC
+└── nuxt.config.ts       # Configuración de Nuxt
+```
+
+### Tecnologías clave
+- **Nuxt 4** con Nitro server
+- **Vue 3** Composition API
+- **TypeScript** para tipado estático
+- **TailwindCSS 4** para estilos
+- **noVNC** para consola remota
+- **WebSocket nativo** de Nitro para proxy VNC
+
+---
+
+## 📖 Documentación
+
+- [Guía de integración con Proxmox](Eye_of_Medina.md) - Autenticación, permisos y API
+- [Manual de usuario](manual.md) - Guía de uso del panel
+
+---
+
+## 🔐 Autenticación
+
+### API Token (recomendado)
+```
+Token ID: usuario@realm!nombre-token
+Secret: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+### Usuario/Contraseña
+```
+Usuario: usuario@pam or usuario@pve
+Contraseña: tu-contraseña
+```
+
+---
+
+## 🤝 Contribuir
+
+Las contribuciones son bienvenidas. Por favor:
+1. Fork del repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit de cambios (`git commit -m 'Add: nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo licencia MIT. Ver [LICENSE](LICENSE) para más detalles.
+
+---
+
+<div align="center">
+
+**Desarrollado con ❤️ para la comunidad de Proxmox**
+
+</div>

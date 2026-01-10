@@ -21,8 +21,9 @@
             <path d="M16 16h5v5" />
           </svg>
           Refrescar
+          Refrescar
         </button>
-        <button @click="openCreateModal"
+        <button v-if="canCreateUser" @click="openCreateModal"
           class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong transition-colors flex items-center gap-2 shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -48,7 +49,8 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input v-model="search" placeholder="Buscar por ID o nombre..."
-            class="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            class="w-full pl-14 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
+            style="padding-left: 3.5rem" />
         </div>
 
         <select v-model="filterRealm"
@@ -100,7 +102,7 @@
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           </button>
-          <button @click="editUser(user)"
+          <button v-if="canCreateUser" @click="editUser(user)"
             class="p-1.5 rounded-md bg-muted-surface text-text-muted hover:text-warning hover:bg-background border border-transparent hover:border-border transition-all shadow-sm"
             title="Editar">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -342,7 +344,12 @@ type FormState = { userid: string; password: string; realm: Realm; comment?: str
 type EditableUser = User & { groups: string[] } // Ensure groups is array for logic
 
 const router = useRouter()
-const { proxmoxRequest, createUser, deleteUser, updateUser, restoreSession, isAuthenticated, listGroups } = useProxmox()
+const { proxmoxRequest, createUser, deleteUser, updateUser, restoreSession, isAuthenticated, listGroups, changeUserPassword, username, hasPermission, isClusterAdmin } = useProxmox()
+
+// Permissions
+const canCreateUser = computed(() => {
+  return isClusterAdmin.value || hasPermission('User.Modify', '/access/users') || hasPermission('User.Modify', '/')
+})
 
 // State
 const loading = ref<boolean>(false)
@@ -382,10 +389,31 @@ const getInitials = (id: string) => id.substring(0, 2).toUpperCase()
 // Data Loading
 const loadUsers = async (): Promise<void> => {
   loading.value = true
-  const res = await proxmoxRequest('/access/users', 'GET') as ProxmoxResponse<User[]>
-  if (res.success) users.value = res.data || []
+  try {
+    const res = await proxmoxRequest('/access/users', 'GET') as ProxmoxResponse<User[]>
 
-  // Also refresh groups to be sure
+    if (res.success && res.data) {
+      users.value = res.data
+    } else {
+      throw new Error("No se pudo listar usuarios globalmente")
+    }
+  } catch (e) {
+    console.warn('Acceso restringido a lista de usuarios. Mostrando usuario actual.', e)
+    // Fallback: Si no puedo ver a todos, al menos me veo a mí mismo
+    if (username.value) {
+      users.value = [{
+        userid: username.value,
+        realm: 'pve', // Asumido o extraido
+        enable: 1,
+        expire: 0,
+        role: 'User', // Placeholder
+        groups: [],
+        comment: 'Usuario Actual (Vista Restringida)'
+      } as unknown as User]
+    }
+  }
+
+  // Also refresh groups to be sure (quiet fail)
   await loadGroups()
 
   loading.value = false

@@ -22,7 +22,7 @@
           </svg>
           Refrescar
         </button>
-        <button @click="openCreateModal"
+        <button v-if="canCreatePool" @click="openCreateModal"
           class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong transition-colors flex items-center gap-2 shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,7 +45,8 @@
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input v-model="search" placeholder="Buscar pools..."
-          class="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50" />
+          class="w-full pl-14 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
+          style="padding-left: 3.5rem" />
       </div>
       <div class="text-sm text-text-muted">
         <span class="font-bold text-primary">{{ filteredPools.length }}</span> pools encontrados
@@ -92,7 +93,7 @@
 
             <!-- Actions Dropdown or simple buttons? Keeping it simple with hover icons for now -->
             <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-              <button @click="startEdit(pool)"
+              <button v-if="canManagePool(pool.poolid)" @click="startEdit(pool)"
                 class="p-1.5 rounded-lg hover:bg-muted-surface text-text-muted hover:text-primary transition-colors"
                 title="Editar">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -181,7 +182,7 @@
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text placeholder:text-text-muted/50"></textarea>
           </div>
 
-          <div class="pt-4 border-t border-border/50">
+          <div v-if="canDeletePool" class="pt-4 border-t border-border/50">
             <h3 class="text-xs font-bold text-danger uppercase mb-2">Zona de Peligro</h3>
             <div class="bg-danger/5 border border-danger/20 rounded-lg p-3 flex items-center justify-between gap-4">
               <div class="text-sm text-text-muted">
@@ -214,7 +215,11 @@ type Pool = { poolid: string; comment?: string }
 type ProxmoxResponse<T> = { success?: boolean; data?: T; message?: string }
 
 const router = useRouter()
-const { proxmoxRequest, restoreSession, isAuthenticated } = useProxmox()
+const { proxmoxRequest, restoreSession, isAuthenticated, hasPermission, isClusterAdmin } = useProxmox()
+
+const canCreatePool = computed(() => isClusterAdmin.value || hasPermission('Pool.Allocate', '/'))
+const canManagePool = (poolid: string) => isClusterAdmin.value || hasPermission('Pool.Allocate', `/pool/${poolid}`) || hasPermission('Pool.Allocate', '/')
+const canDeletePool = computed(() => isClusterAdmin.value || hasPermission('Pool.Allocate', '/')) // Solo admins globales borran pools
 
 const loading = ref<boolean>(false)
 const pools = ref<Pool[]>([])
@@ -236,10 +241,21 @@ watch(isAuthenticated, (val) => { if (val && pools.value.length === 0) loadPools
 
 const loadPools = async (): Promise<void> => {
   loading.value = true
-  const res = await proxmoxRequest('/pools', 'GET') as ProxmoxResponse<Pool[]>
-  loading.value = false
-  if (res && res.success) pools.value = res.data || []
-  else alert('Error cargando pools: ' + (res.message || JSON.stringify(res)))
+  try {
+    const res = await proxmoxRequest('/pools', 'GET') as ProxmoxResponse<Pool[]>
+    if (res && res.success) {
+      pools.value = res.data || []
+    } else {
+      // Silent fail or non-critical error
+      console.warn('Cannot load pools', res)
+      pools.value = []
+    }
+  } catch (e) {
+    console.error('Error loading pools (auth?)', e)
+    pools.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 const filteredPools = computed(() => {

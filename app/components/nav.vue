@@ -80,34 +80,61 @@ const route = useRoute()
 const router = useRouter()
 import { computed } from 'vue'
 
-const { logout, isAuthenticated, username } = useProxmox()
+const { logout, isAuthenticated, username, hasPermission, hasPermissionAnywhere, isClusterAdmin } = useProxmox()
 const isOpen = ref(false)
 const isDark = ref(false)
 
-const allItems = [
-  { to: '/', label: 'Home', roles: ['all'] },
-  { to: '/dashboard', label: 'Dashboard', roles: ['admin'] },
-  { to: '/my-resources', label: 'Mis Recursos', roles: ['student'] },
-  { to: '/machines', label: 'Máquinas', roles: ['admin'] },
-  { to: '/networks', label: 'Redes', roles: ['admin'] },
-  { to: '/pools', label: 'Pools', roles: ['admin'] },
-  { to: '/users', label: 'Usuarios', roles: ['admin'] },
-  { to: '/groups', label: 'Grupos', roles: ['admin'] },
-  { to: '/roles', label: 'Roles', roles: ['admin'] },
-  { to: '/permissions', label: 'Permisos', roles: ['admin'] },
-  { to: '/permissions-tree', label: 'Árbol permisos', roles: ['admin'] },
-]
+interface MenuItem {
+  to: string
+  label: string
+  // If true, requires full cluster admin (Sys.Audit on /).
+  adminOnly?: boolean
+  // If defined, checks hasPermission(perm, path)
+  permission?: { name: string, path?: string }
+  // Special condition function
+  condition?: () => boolean
+}
 
 const items = computed(() => {
-  const user = username.value || ''
-  const isAdmin = user === 'root@pam' || user.toLowerCase().startsWith('profesor') || user.includes('profesor')
+  const menu: MenuItem[] = []
 
-  return allItems.filter(item => {
-    if (item.roles.includes('all')) return true
-    if (isAdmin && item.roles.includes('admin')) return true
-    if (!isAdmin && item.roles.includes('student')) return true
-    return false
-  })
+  // 1. Home logic unificada
+  menu.push({ to: '/dashboard', label: 'Dashboard' })
+
+  // 2. Core Resources (Access if can view nodes or allocate VMs typically)
+  // Mostramos Máquinas si tienes permiso global de auditar VMs o gestionarlas en CUALQUIER sitio
+  if (isClusterAdmin.value || hasPermissionAnywhere('VM.Audit')) {
+    menu.push({ to: '/machines', label: 'Máquinas' })
+  }
+
+  // 3. Infrastructure
+  if (isClusterAdmin.value || hasPermissionAnywhere('Sys.Audit') || hasPermissionAnywhere('SDN.Audit')) {
+    menu.push({ to: '/networks', label: 'Redes' })
+  }
+
+  if (isClusterAdmin.value || hasPermissionAnywhere('Pool.Audit') || hasPermissionAnywhere('VM.Allocate')) {
+    menu.push({ to: '/pools', label: 'Pools' })
+  }
+
+  // 4. Identity & Access Management
+  if (isClusterAdmin.value || hasPermissionAnywhere('User.Modify') || hasPermissionAnywhere('User.Audit')) {
+    menu.push({ to: '/users', label: 'Usuarios' })
+  }
+
+  if (isClusterAdmin.value || hasPermissionAnywhere('User.Audit') || hasPermissionAnywhere('Group.Allocate') || hasPermissionAnywhere('User.Modify')) {
+    menu.push({ to: '/groups', label: 'Grupos' })
+  }
+
+  if (hasPermissionAnywhere('Permissions.Modify') || isClusterAdmin.value || hasPermissionAnywhere('Sys.Audit')) {
+    menu.push({ to: '/roles', label: 'Roles' })
+  }
+
+  if (isClusterAdmin.value || hasPermissionAnywhere('Permissions.Modify') || hasPermissionAnywhere('Sys.Audit')) {
+    menu.push({ to: '/permissions', label: 'Permisos' })
+    // menu.push({ to: '/permissions-tree', label: 'Árbol permisos' }) // Opcional, mantener oculto para simplificar si se quiere
+  }
+
+  return menu
 })
 
 onMounted(() => {
