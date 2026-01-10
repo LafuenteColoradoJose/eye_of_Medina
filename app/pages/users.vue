@@ -21,7 +21,6 @@
             <path d="M16 16h5v5" />
           </svg>
           Refrescar
-          Refrescar
         </button>
         <button v-if="canCreateUser" @click="openCreateModal"
           class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong transition-colors flex items-center gap-2 shadow-sm">

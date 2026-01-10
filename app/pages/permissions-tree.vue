@@ -81,11 +81,11 @@ const subjectsTree = ref<TreeNode[]>([])
 
 onMounted(async () => {
   restoreSession()
-  if (isAuthenticated.value) await loadAll()
+  if (isAuthenticated.value && import.meta.client) await loadAll()
 })
 
 watch(isAuthenticated, async (val) => {
-  if (val && acls.value.length === 0) await loadAll()
+  if (val && acls.value.length === 0 && import.meta.client) await loadAll()
 })
 
 const reloadAll = async () => await loadAll()

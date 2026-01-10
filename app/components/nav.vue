@@ -131,7 +131,7 @@ const items = computed(() => {
 
   if (isClusterAdmin.value || hasPermissionAnywhere('Permissions.Modify') || hasPermissionAnywhere('Sys.Audit')) {
     menu.push({ to: '/permissions', label: 'Permisos' })
-    // menu.push({ to: '/permissions-tree', label: 'Árbol permisos' }) // Opcional, mantener oculto para simplificar si se quiere
+    menu.push({ to: '/permissions-tree', label: 'Árbol permisos' })
   }
 
   return menu

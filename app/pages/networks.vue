@@ -202,7 +202,6 @@
 import { ref, onMounted, watch, computed } from 'vue'
 useHead({ title: 'Topología de Red' })
 
-const router = useRouter()
 const { isAuthenticated, restoreSession, listNodes, getNodeNetworks, listVMResources } = useProxmox()
 
 // Types
@@ -231,16 +230,16 @@ onMounted(() => {
     restoreSession()
 })
 
-// Watch auth state with immediate execution to catch initial state
+// Watch auth state - only execute on client side
 watch(isAuthenticated, async (val) => {
-    if (val) {
-        console.log('Auth confirmed (immediate), loading nodes...')
+    if (val && import.meta.client) {
+        console.log('Auth confirmed, loading nodes...')
         await loadNodes()
     }
 }, { immediate: true })
 
 watch(selectedNode, (val) => {
-    if (val) loadNetworks()
+    if (val && import.meta.client) loadNetworks()
 })
 
 const loadNodes = async () => {
