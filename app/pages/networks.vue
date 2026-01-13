@@ -234,7 +234,7 @@ onMounted(() => {
 watch(isAuthenticated, async (val) => {
     if (val && import.meta.client) {
         console.log('Auth confirmed, loading nodes...')
-        await loadNodes()
+        await fetchNodes()
     }
 }, { immediate: true })
 
@@ -242,7 +242,7 @@ watch(selectedNode, (val) => {
     if (val && import.meta.client) loadNetworks()
 })
 
-const loadNodes = async () => {
+async function fetchNodes() {
     try {
         const res = await listNodes()
 
