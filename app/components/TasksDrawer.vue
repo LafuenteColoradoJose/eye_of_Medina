@@ -6,7 +6,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['close'])
-const { getClusterLog, username, isClusterAdmin } = useProxmox()
+const { getClusterLog, getNodeTasks, listNodes, username, isClusterAdmin } = useProxmox()
 
 const tasks = ref<any[]>([])
 const loading = ref(false)
@@ -14,9 +14,30 @@ let interval: NodeJS.Timeout | null = null
 
 const loadTasks = async () => {
     loading.value = true
-    // If not admin, filter by own user to avoid 403/400 error
     const userFilter = isClusterAdmin.value ? undefined : username.value || undefined
-    const res = await getClusterLog(50, userFilter)
+
+    // 1. Try Cluster Log
+    let res = await getClusterLog(50, userFilter)
+
+    // 2. Fallback: If Cluster Log fails (common for restricted users), try Node Logs
+    if (!res.success) {
+        console.warn('Cluster log failed, trying node logs...')
+        const nodesRes = await listNodes()
+        if (nodesRes.success && nodesRes.data) {
+            const nodes = nodesRes.data as any[]
+            // Try fetching from nodes sequentially until one works or we merge them
+            // For simplicity, we just take the first successful one for now.
+            // In a real multi-node setup with restricted user, we might want to Promise.all and merge.
+            for (const n of nodes) {
+                const nodeRes = await getNodeTasks(n.node, 50, userFilter)
+                if (nodeRes.success && nodeRes.data) {
+                    res = nodeRes
+                    break
+                }
+            }
+        }
+    }
+
     if (res.success && res.data) {
         tasks.value = res.data as any[]
     }

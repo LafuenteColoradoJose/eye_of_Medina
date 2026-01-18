@@ -483,12 +483,20 @@ export const useProxmox = () => {
 
     // Cluster Logs / Tasks
     getClusterLog: async (limit = 50, userFilter?: string) => {
-      const params = new URLSearchParams()
-      params.append('limit', String(limit))
+      let url = `/cluster/tasks?limit=${limit}`
       if (userFilter) {
-        params.append('userfilter', userFilter)
+        url += `&userfilter=${encodeURIComponent(userFilter)}`
       }
-      return await proxmoxRequest(`/cluster/tasks?${params.toString()}`, 'GET')
+      return await proxmoxRequest(url, 'GET')
+    },
+
+    // Node Logs (Fallback if Cluster Log fails)
+    getNodeTasks: async (node: string, limit = 50, userFilter?: string) => {
+      let url = `/nodes/${encodeURIComponent(node)}/tasks?limit=${limit}`
+      if (userFilter) {
+        url += `&userfilter=${encodeURIComponent(userFilter)}`
+      }
+      return await proxmoxRequest(url, 'GET')
     },
 
     changeUserPassword: async (userid: string, password: string) => {
