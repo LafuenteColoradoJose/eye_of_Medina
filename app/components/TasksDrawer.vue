@@ -18,10 +18,14 @@ const loadTasks = async () => {
 
     const userFilter = isClusterAdmin.value ? undefined : username.value || undefined
 
-    // 1. Try Cluster Log
-    let res = await getClusterLog(50, userFilter)
+    // 1. Try Cluster Log ONLY if Admin (avoids 403/400 errors for students)
+    let res: any = { success: false, data: [] }
 
-    // 2. Fallback: If Cluster Log fails (common for restricted users), try Node Logs
+    if (isClusterAdmin.value) {
+        res = await getClusterLog(50)
+    }
+
+    // 2. Fallback / Default for Non-Admins: Fetch from Nodes
     if (!res.success) {
         const nodesRes = await listNodes()
         if (nodesRes.success && nodesRes.data) {
