@@ -481,6 +481,12 @@ export const useProxmox = () => {
       return await proxmoxRequest('/access/acl', 'PUT', undefined, cleanedBody)
     },
 
+    // Cluster Logs / Tasks
+    getClusterLog: async (limit = 50) => {
+      // /cluster/tasks?limit=50
+      return await proxmoxRequest(`/cluster/tasks?limit=${limit}`, 'GET')
+    },
+
     changeUserPassword: async (userid: string, password: string) => {
       return await proxmoxRequest('/access/password', 'PUT', undefined, { userid, password })
     },

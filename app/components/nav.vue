@@ -31,6 +31,22 @@
         'px-4 pb-4 md:pb-6 flex flex-col gap-3 md:mt-4',
         isOpen ? 'flex' : 'hidden md:flex'
       ]">
+
+        <!-- Tasks Button -->
+        <button
+          class="flex items-center justify-center gap-2 w-full py-2 rounded border border-white/20 bg-white/5 text-text-on-strong hover:bg-white/10 transition-colors"
+          @click="openTasksDrawer">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v4" />
+            <path d="M16 2v4" />
+            <rect width="18" height="18" x="3" y="4" rx="2" />
+            <path d="M3 10h18" />
+            <path d="m9 16 2 2 4-4" />
+          </svg>
+          Tareas Recientes
+        </button>
+
         <button
           class="flex items-center justify-center gap-2 w-full py-2 rounded border border-white/20 bg-white/10 text-text-on-strong hover:bg-white/20 transition-colors"
           @click="toggleTheme">
@@ -81,6 +97,7 @@ const router = useRouter()
 import { computed } from 'vue'
 
 const { logout, isAuthenticated, username, hasPermission, hasPermissionAnywhere, isClusterAdmin } = useProxmox()
+const { openTasksDrawer } = useUI()
 const isOpen = ref(false)
 const isDark = ref(false)
 

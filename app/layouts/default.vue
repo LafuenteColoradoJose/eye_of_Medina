@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const { isTasksDrawerOpen, closeTasksDrawer } = useUI()
+</script>
+
 <template>
   <div class="flex flex-col min-h-screen">
     <div class="flex flex-col md:flex-row flex-1">
@@ -8,6 +12,8 @@
         </Transition>
       </main>
     </div>
+
+    <TasksDrawer :is-open="isTasksDrawerOpen" @close="closeTasksDrawer" />
   </div>
 </template>
 
