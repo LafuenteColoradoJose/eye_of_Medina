@@ -562,7 +562,7 @@ onMounted(() => {
 })
 
 const loadInitial = async () => { await Promise.all([loadMachines(), loadPoolsList(), loadNodesList()]) }
-const loadMachines = async () => { loadingList.value = true; const res = await listVMResources(); loadingList.value = false; if (res.success && res.data) machines.value = res.data as Machine[] }
+const loadMachines = async () => { loadingList.value = true; const res = await listVMResources(); loadingList.value = false; if (res.success && res.data) machines.value = (res.data as Machine[]).filter(m => m.type === 'qemu' || m.type === 'lxc') }
 const loadPoolsList = async () => { const res = await listPools(); if (res.data) pools.value = (res.data as any).map((p: any) => p.poolid) }
 const loadNodesList = async () => { const res = await listNodes(); if (res.data) nodes.value = res.data as any }
 
