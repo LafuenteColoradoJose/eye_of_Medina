@@ -556,69 +556,41 @@ const filterStatus = ref('all')
 const filterPool = ref('all')
 
 // -- Lifecycle --
+
+let pollInterval: NodeJS.Timeout | null = null
+
 onMounted(() => {
   restoreSession()
-  if (isAuthenticated.value) loadInitial()
+  if (isAuthenticated.value) {
+    loadInitial()
+    // Start polling every 5 seconds
+    pollInterval = setInterval(() => {
+      // Background update: silent refresh (no loading spinner)
+      listVMResources().then(res => {
+        if (res.success && res.data) {
+          machines.value = (res.data as Machine[]).filter(m => m.type === 'qemu' || m.type === 'lxc')
+        }
+      })
+    }, 5000)
+  }
 })
 
-const loadInitial = async () => { await Promise.all([loadMachines(), loadPoolsList(), loadNodesList()]) }
-const loadMachines = async () => { loadingList.value = true; const res = await listVMResources(); loadingList.value = false; if (res.success && res.data) machines.value = (res.data as Machine[]).filter(m => m.type === 'qemu' || m.type === 'lxc') }
-const loadPoolsList = async () => { const res = await listPools(); if (res.data) pools.value = (res.data as any).map((p: any) => p.poolid) }
-const loadNodesList = async () => { const res = await listNodes(); if (res.data) nodes.value = res.data as any }
-
-// -- Permissions Helpers --
-const canCreate = computed(() => isClusterAdmin.value || hasPermission('VM.Allocate'))
-
-const canManagePower = (m: Machine) => isClusterAdmin.value || hasPermission('VM.PowerMgmt', `/vms/${m.vmid}`, m.pool)
-const canOpenConsole = (m: Machine) => isClusterAdmin.value || hasPermission('VM.Console', `/vms/${m.vmid}`, m.pool)
-// Config options usually require VM.Config.Options. Disk requires VM.Config.Disk, etc.
-const canConfigure = (m: Machine) => isClusterAdmin.value || hasPermission('VM.Config.Options', `/vms/${m.vmid}`, m.pool)
-const canDelete = (m: Machine) => isClusterAdmin.value || hasPermission('VM.Allocate', `/vms/${m.vmid}`, m.pool)
-
-// -- Data Fetching for New Machine --
-const fetchNodeStorage = async () => {
-  availableStorages.value = []
-  if (!newForm.value.node) return
-  const res = await listStorages(newForm.value.node)
-  if (res.success && Array.isArray(res.data)) {
-    // Filter storages that support ISO or Templates
-    availableStorages.value = res.data.filter((s: any) => s.content.includes('iso') || s.content.includes('vztmpl'))
-  }
-}
-
-const fetchContent = async () => {
-  availableIsos.value = []
-  if (!newForm.value.node || !newForm.value.isoStorage) return
-  // Determine if we need ISO or Template based on type
-  const contentType = newForm.value.type === 'qemu' ? 'iso' : 'vztmpl'
-  const res = await listStorageContent(newForm.value.node, newForm.value.isoStorage, contentType)
-  if (res.success && Array.isArray(res.data)) {
-    availableIsos.value = res.data
-  }
-}
-
-// -- Computed --
-const filteredMachines = computed(() => {
-  return machines.value.filter(m => {
-    if (filterType.value !== 'all' && m.type !== filterType.value) return false
-    if (filterStatus.value !== 'all' && m.status !== filterStatus.value) return false
-    if (filterPool.value === 'none' && m.pool) return false
-    if (filterPool.value !== 'all' && m.pool !== filterPool.value) return false
-    if (!search.value) return true
-    const term = search.value.toLowerCase()
-    return (m.name?.toLowerCase().includes(term) || String(m.vmid).includes(term) || m.node.toLowerCase().includes(term))
-  })
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval)
 })
 
-const modalTitle = computed(() => createMode.value === 'new' ? 'Crear Nueva Máquina' : 'Clonar Existente')
-
-const toPercent = (v: any, m: any) => (v && m) ? Math.round((v / m) * 100) + '%' : '0%'
-const formatUptime = (s: any) => s ? (Math.floor(s / 86400) + 'd ' + Math.floor((s % 86400) / 3600) + 'h') : '—'
-
-// -- Actions --
 const changePowerState = async (m: Machine, a: any) => {
   if (!canManagePower(m)) return alert('No tienes permisos de energía sobre esta máquina.')
-  actionLoading.value = m.vmid; await setMachineStatus(m.node, m.type, m.vmid, a); setTimeout(() => { loadMachines(); actionLoading.value = null }, 2000)
+
+  // Optimistic UI / Spinner start
+  actionLoading.value = m.vmid
+
+  await setMachineStatus(m.node, m.type, m.vmid, a)
+
+  // We don't wait 2s anymore. We reload once immediately to check, 
+  // but the background poller will handle the eventual state change.
+  await loadMachines()
+  actionLoading.value = null
 }
 const openConsole = (m: Machine) => {
   if (!canOpenConsole(m)) return alert('No tienes permisos de consola.')
