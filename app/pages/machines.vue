@@ -124,8 +124,10 @@
           </div>
           <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
             <!-- Console: Only if VM.Console -->
-            <button v-if="canOpenConsole(m)" @click="openConsole(m)" title="Abrir Consola"
-              class="p-1.5 rounded-lg hover:bg-background text-text-muted hover:text-primary transition-colors">
+            <button v-if="canOpenConsole(m)" @click="openConsole(m)" :disabled="m.status !== 'running'"
+              :title="m.status === 'running' ? 'Abrir Consola' : 'La máquina está apagada'"
+              class="p-1.5 rounded-lg transition-colors"
+              :class="m.status === 'running' ? 'hover:bg-background text-text-muted hover:text-primary' : 'opacity-40 cursor-not-allowed text-text-muted/50'">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
