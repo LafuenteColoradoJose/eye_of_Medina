@@ -482,9 +482,13 @@ export const useProxmox = () => {
     },
 
     // Cluster Logs / Tasks
-    getClusterLog: async (limit = 50) => {
-      // /cluster/tasks?limit=50
-      return await proxmoxRequest(`/cluster/tasks?limit=${limit}`, 'GET')
+    getClusterLog: async (limit = 50, userFilter?: string) => {
+      const params = new URLSearchParams()
+      params.append('limit', String(limit))
+      if (userFilter) {
+        params.append('userfilter', userFilter)
+      }
+      return await proxmoxRequest(`/cluster/tasks?${params.toString()}`, 'GET')
     },
 
     changeUserPassword: async (userid: string, password: string) => {

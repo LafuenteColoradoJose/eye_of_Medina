@@ -6,7 +6,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['close'])
-const { getClusterLog } = useProxmox()
+const { getClusterLog, username, isClusterAdmin } = useProxmox()
 
 const tasks = ref<any[]>([])
 const loading = ref(false)
@@ -14,7 +14,9 @@ let interval: NodeJS.Timeout | null = null
 
 const loadTasks = async () => {
     loading.value = true
-    const res = await getClusterLog(50)
+    // If not admin, filter by own user to avoid 403/400 error
+    const userFilter = isClusterAdmin.value ? undefined : username.value || undefined
+    const res = await getClusterLog(50, userFilter)
     if (res.success && res.data) {
         tasks.value = res.data as any[]
     }
