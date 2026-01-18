@@ -10,10 +10,12 @@ const { getClusterLog, getNodeTasks, listNodes, username, isClusterAdmin } = use
 
 const tasks = ref<any[]>([])
 const loading = ref(false)
+const isFirstLoad = ref(true)
 let interval: NodeJS.Timeout | null = null
 
 const loadTasks = async () => {
-    loading.value = true
+    if (isFirstLoad.value) loading.value = true
+
     const userFilter = isClusterAdmin.value ? undefined : username.value || undefined
 
     // 1. Try Cluster Log
@@ -42,6 +44,7 @@ const loadTasks = async () => {
         tasks.value = res.data as any[]
     }
     loading.value = false
+    isFirstLoad.value = false
 }
 
 // Auto-refresh when open
