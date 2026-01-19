@@ -178,16 +178,26 @@
               (Analizar todo)
             </NuxtLink>
           </div>
-          <div class="flex gap-2 text-[10px]">
-            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> CPU</span>
-            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span> RAM</span>
+
+          <!-- Mode Toggles -->
+          <div class="flex bg-muted-surface p-0.5 rounded-lg border border-border">
+            <button v-for="mode in ['vm', 'pool', 'cluster']" :key="mode" @click="consumerMode = mode as any"
+              class="px-2 py-0.5 text-[10px] uppercase font-bold rounded-md transition-all"
+              :class="consumerMode === mode ? 'bg-background text-primary shadow-sm' : 'text-text-muted hover:text-text'">
+              {{ mode }}
+            </button>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
           <!-- CPU List -->
           <div class="space-y-2">
-            <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Mayor uso de CPU</h3>
+            <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider flex justify-between">
+              <span>Mayor uso de CPU</span>
+              <span class="text-[9px] opacity-70 normal-case">
+                {{ consumerMode === 'vm' ? '% Asignado' : consumerMode === 'pool' ? '% del Pool' : '% del Cluster' }}
+              </span>
+            </h3>
             <div v-if="topCpuVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
             <ul v-else class="space-y-1">
               <li v-for="(vm, i) in topCpuVms" :key="vm.vmid"
@@ -204,9 +214,11 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
-                    <div class="h-full bg-primary" :style="{ width: toPercent(vm.cpu || 0, 1) }"></div>
+                    <div class="h-full bg-primary" :style="{ width: getVmMetric(vm, 'cpu') + '%' }"></div>
                   </div>
-                  <span class="text-[10px] font-bold text-primary w-8 text-right">{{ toPercent(vm.cpu || 0, 1) }}</span>
+                  <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
+                    'cpu'))
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -214,7 +226,12 @@
 
           <!-- RAM List -->
           <div class="space-y-2">
-            <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Mayor uso de RAM</h3>
+            <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider flex justify-between">
+              <span>Mayor uso de RAM</span>
+              <span class="text-[9px] opacity-70 normal-case">
+                {{ consumerMode === 'vm' ? '% Asignado' : consumerMode === 'pool' ? '% del Pool' : '% del Cluster' }}
+              </span>
+            </h3>
             <div v-if="topMemVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
             <ul v-else class="space-y-1">
               <li v-for="(vm, i) in topMemVms" :key="vm.vmid"
@@ -231,10 +248,9 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
-                    <div class="h-full bg-accent" :style="{ width: toPercent(vm.mem || 0, vm.maxmem || 1) }"></div>
+                    <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
                   </div>
-                  <span class="text-[10px] font-bold text-accent w-8 text-right">{{ toPercent(vm.mem || 0, vm.maxmem ||
-                    1)
+                  <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
                     }}</span>
                 </div>
               </li>
@@ -302,6 +318,7 @@ type VmResource = {
   type: 'qemu' | 'lxc'
   status?: string
   cpu?: number
+  maxcpu?: number
   mem?: number
   maxmem?: number
   pool?: string
@@ -311,6 +328,7 @@ type NodeResource = {
   node: string
   status?: string
   cpu?: number
+  maxcpu?: number
   mem?: number
   maxmem?: number
 }
@@ -328,13 +346,12 @@ const loading = ref(false)
 const hasLoaded = ref(false)
 const error = ref('')
 const lastRefreshed = ref<Date | null>(null)
+const consumerMode = ref<'vm' | 'pool' | 'cluster'>('vm')
 
 const nodes = ref<NodeResource[]>([])
 const vms = ref<VmResource[]>([])
 const pools = ref<Pool[]>([])
-const totalBridges = ref(0)
-
-// -- Lifecycle --
+const totalBridges = ref(0) // -- Lifecycle --
 onMounted(() => {
   restoreSession()
   if (isAuthenticated.value) loadDashboard()
@@ -407,16 +424,76 @@ const kpiRam = computed(() => {
   return `${((used / total) * 100).toFixed(1)}%`
 })
 
+// Calculations for View Modes
+const clusterTotals = computed(() => {
+  return {
+    cpu: nodes.value.reduce((sum, n) => sum + (n.maxcpu || 0), 0),
+    mem: nodes.value.reduce((sum, n) => sum + (n.maxmem || 0), 0),
+  }
+})
+
+const poolTotals = computed(() => {
+  const map = new Map<string, { cpu: number, mem: number }>()
+
+  // Initialize pools
+  pools.value.forEach(p => map.set(p.poolid, { cpu: 0, mem: 0 }))
+  map.set('Sin Pool', { cpu: 0, mem: 0 })
+
+  // Sum max capacities of all VMs in each pool
+  vms.value.forEach(vm => {
+    const key = vm.pool || 'Sin Pool'
+    if (!map.has(key)) map.set(key, { cpu: 0, mem: 0 })
+    const entry = map.get(key)!
+    entry.cpu += (vm.maxcpu || 1)
+    entry.mem += (vm.maxmem || 0)
+  })
+
+  return map
+})
+
+const getVmMetric = (vm: VmResource, type: 'cpu' | 'mem') => {
+  // Raw usage values
+  // vm.cpu is ratio (0..1) relative to vm.maxcpu. Actual cores used = vm.cpu * vm.maxcpu
+  const rawCpu = (vm.cpu || 0) * (vm.maxcpu || 1)
+  const rawMem = (vm.mem || 0)
+
+  if (consumerMode.value === 'vm') {
+    if (type === 'cpu') return (vm.cpu || 0) * 100 // Already ratio
+    return (rawMem / (vm.maxmem || 1)) * 100
+  }
+
+  if (consumerMode.value === 'pool') {
+    const key = vm.pool || 'Sin Pool'
+    const totals = poolTotals.value.get(key)
+    if (!totals) return 0
+
+    if (type === 'cpu') return totals.cpu ? (rawCpu / totals.cpu) * 100 : 0
+    return totals.mem ? (rawMem / totals.mem) * 100 : 0
+  }
+
+  if (consumerMode.value === 'cluster') {
+    if (type === 'cpu') return clusterTotals.value.cpu ? (rawCpu / clusterTotals.value.cpu) * 100 : 0
+    return clusterTotals.value.mem ? (rawMem / clusterTotals.value.mem) * 100 : 0
+  }
+
+  return 0
+}
+
+const formatMetric = (val: number) => {
+  if (val < 0.1 && val > 0) return '<0.1%'
+  return `${val.toFixed(1)}%`
+}
+
 const topCpuVms = computed(() =>
   [...vms.value]
-    .sort((a, b) => (b.cpu || 0) - (a.cpu || 0))
+    .sort((a, b) => getVmMetric(b, 'cpu') - getVmMetric(a, 'cpu'))
     .slice(0, 5)
 )
 
 const topMemVms = computed(() =>
   [...vms.value]
     .filter((vm) => vm.maxmem)
-    .sort((a, b) => (b.mem || 0) / (b.maxmem || 1) - (a.mem || 0) / (a.maxmem || 1))
+    .sort((a, b) => getVmMetric(b, 'mem') - getVmMetric(a, 'mem'))
     .slice(0, 5)
 )
 
@@ -432,6 +509,7 @@ const poolCounts = computed<Record<string, number>>(() => {
 // -- Helpers --
 const vmDisplay = (vm: VmResource) => vm.name || `VM ${vm.vmid}`
 
+// OLD helper replaced by getVmMetric logic
 const toPercent = (value: number, max: number) => {
   if (!max) return '—'
   return `${((value / max) * 100).toFixed(1)}%`
