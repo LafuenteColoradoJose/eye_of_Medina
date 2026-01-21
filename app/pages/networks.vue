@@ -253,7 +253,12 @@ async function fetchNodes() {
             // Fallback: Obtener nodos de las máquinas visibles
             const resResources = await listVMResources()
             if (resResources.success && resResources.data) {
-                const uniqueNodes = Array.from(new Set((resResources.data as any[]).map(r => r.node)))
+                // Filter items that have a 'node' property (VMs, LXC) and ignore Pools/Storage
+                const uniqueNodes = Array.from(new Set(
+                    (resResources.data as any[])
+                        .filter(r => r.node)
+                        .map(r => r.node)
+                ))
                 nodes.value = uniqueNodes.map(n => ({ node: n, status: 'online' })) as NodeInfo[]
             }
         }
