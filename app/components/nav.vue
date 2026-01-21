@@ -113,6 +113,8 @@ interface MenuItem {
 }
 
 const items = computed(() => {
+  if (!isAuthenticated.value) return []
+
   const menu: MenuItem[] = []
 
   // 1. Home logic unificada
