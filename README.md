@@ -66,7 +66,6 @@
 
 ```env
 # URL of your Proxmox server
-PROXMOX_HOST=https://your-proxmox:8006
 NUXT_PUBLIC_PROXMOX_HOST=https://your-proxmox:8006
 
 # Development only (for self-signed certificates)

@@ -60,7 +60,6 @@ Classic method via session ticket (`/access/ticket`):
 
 ```env
 # Proxmox base URL (with protocol and port)
-PROXMOX_HOST=https://proxmox.example.com:8006
 NUXT_PUBLIC_PROXMOX_HOST=https://proxmox.example.com:8006
 
 # Only for development with self-signed certificate

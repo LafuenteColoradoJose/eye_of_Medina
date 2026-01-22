@@ -317,7 +317,7 @@ Or:
 **Cause**: Connectivity or permission issues.
 
 **Solution**:
-- Verify `PROXMOX_HOST` is correct.
+- Verify `NUXT_PUBLIC_PROXMOX_HOST` is correct.
 - Check connectivity to port 8006.
 - Check user read permissions.
 
