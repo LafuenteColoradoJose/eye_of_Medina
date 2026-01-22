@@ -1,128 +1,129 @@
-# Eye of Medina · Integración con Proxmox VE
+# Eye of Medina · Proxmox VE Integration
 
-Guía técnica para integrar la aplicación con Proxmox VE: autenticación, permisos, API y arquitectura del sistema.
+Technical guide for integrating the application with Proxmox VE: authentication, permissions, API, and system architecture.
 
 ---
 
-## 📋 Índice
+## 📋 Table of Contents
 
-1. [Autenticación soportada](#autenticación-soportada)
-2. [Configuración rápida](#configuración-rápida)
-3. [Funcionalidades de la UI](#funcionalidades-de-la-ui)
-4. [Consola VNC integrada](#consola-vnc-integrada)
+1. [Supported Authentication](#supported-authentication)
+2. [Quick Setup](#quick-setup)
+3. [UI Features](#ui-features)
+4. [Integrated VNC Console](#integrated-vnc-console)
 5. [Composable useProxmox()](#composable-useproxmox)
-6. [Endpoints de Proxmox utilizados](#endpoints-de-proxmox-utilizados)
-7. [Buenas prácticas de permisos](#buenas-prácticas-de-permisos)
-8. [Solución de problemas](#solución-de-problemas)
-9. [Recursos](#recursos)
+6. [Used Proxmox Endpoints](#used-proxmox-endpoints)
+7. [Permission Best Practices](#permission-best-practices)
+8. [Troubleshooting](#troubleshooting)
+9. [Resources](#resources)
 
 ---
 
-## Autenticación soportada
+## Supported Authentication
 
-### API Token (recomendado)
+### API Token (Recommended)
 
-Los tokens son la forma más segura de autenticar aplicaciones:
+Tokens are the most secure way to authenticate applications:
 
-- **No caducan** (a diferencia de los tickets de sesión)
-- **Pueden limitarse** con permisos específicos
-- **Auditables** desde la interfaz de Proxmox
+- **Do not expire** (unlike session tickets).
+- **Can be scoped** with specific permissions.
+- **Auditable** from the Proxmox interface.
 
-**Formato del Token:**
+**Token Format:**
 ```
-Token ID: usuario@realm!nombre-token
+Token ID: user@realm!token-name
 Secret: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
-**Cómo crear un token en Proxmox:**
+**How to create a token in Proxmox:**
 
-1. Ve a: `Datacenter → Permissions → API Tokens → Add`
-2. **User**: el usuario base (ej: `root@pam` o un usuario dedicado)
-3. **Token ID**: nombre único para el token
+1. Go to: `Datacenter → Permissions → API Tokens → Add`.
+2. **User**: The base user (e.g., `root@pam` or a dedicated user).
+3. **Token ID**: Unique name for the token.
 4. **Privilege Separation**: 
-   - ✅ Marcado: el token tendrá permisos separados (más seguro)
-   - ❌ Desmarcado: hereda los permisos del usuario base
-5. **Guarda el Secret** - no se vuelve a mostrar
+   - ✅ Checked: The token will have separated permissions (safer).
+   - ❌ Unchecked: Inherits base user permissions.
+5. **Save the Secret** - it is never shown again.
 
-### Usuario y contraseña
+### Username and Password
 
-Método clásico vía ticket de sesión (`/access/ticket`):
+Classic method via session ticket (`/access/ticket`):
 
-- **Realms frecuentes**: `pam` (Linux) y `pve` (Proxmox interno)
-- Los tickets expiran tras 2 horas de inactividad
-- Requiere renovación periódica
+- **Common Realms**: `pam` (Linux) and `pve` (Internal Proxmox).
+- Tickets expire after 2 hours of inactivity.
+- Requires periodic renewal.
 
 ---
 
-## Configuración rápida
+## Quick Setup
 
-### Variables de entorno requeridas
+### Required Environment Variables
 
 ```env
-# URL base de Proxmox (con protocolo y puerto)
-PROXMOX_HOST=https://proxmox.ejemplo.com:8006
-NUXT_PUBLIC_PROXMOX_HOST=https://proxmox.ejemplo.com:8006
+# Proxmox base URL (with protocol and port)
+PROXMOX_HOST=https://proxmox.example.com:8006
+NUXT_PUBLIC_PROXMOX_HOST=https://proxmox.example.com:8006
 
-# Solo en desarrollo con certificado autofirmado
+# Only for development with self-signed certificate
 ALLOW_INSECURE_TLS=true
 ```
 
-### Requisitos de red
+### Network Requirements
 
-- **Puerto 8006** accesible desde el servidor donde corre Eye of Medina
-- **WebSocket** habilitado para la consola VNC (puerto 8006, mismo que la API)
-- **Certificado TLS**: en desarrollo se pueden aceptar autofirmados; en producción usa certificados válidos
+- **Port 8006** accessible from the server running Eye of Medina.
+- **WebSocket** enabled for VNC console (port 8006, same as API).
+- **TLS Certificate**: In development, self-signed certs can be accepted; in production, use valid certificates.
 
-### Sobre CORS
+### About CORS
 
-Las llamadas a Proxmox se enrutan a través del backend Nuxt:
-- `/api/proxmox/login` - Autenticación
-- `/api/proxmox/request` - Llamadas API generales
-- `/_ws/vnc` - WebSocket proxy para consola VNC
+Calls to Proxmox are routed through the Nuxt backend:
+- `/api/proxmox/login` - Authentication
+- `/api/proxmox/request` - General API calls
+- `/_ws/vnc` - WebSocket proxy for VNC console
 
-**No necesitas modificar la configuración de CORS en Proxmox.**
+**You do NOT need to modify CORS configuration in Proxmox.**
 
 ---
 
-## Funcionalidades de la UI
+## UI Features
 
 ### Dashboard
 
-| Componente | Descripción |
-|------------|-------------|
-| KPIs | VMs/CTs totales, en ejecución, bridges activos |
-| Gráficas | Estado de VMs, CPU por nodo, distribución por pools |
-| Top Consumidores | VMs ordenadas por uso de CPU/memoria |
-| Salud de nodos | Estado y métricas de cada nodo del cluster |
+| Component | Description |
+|-----------|-------------|
+| KPIs | Total VMs/CTs, running, active bridges. |
+| Charts | VM status, CPU per node, pool distribution. |
+| Top Consumers | Consumption analysis with three perspectives: **VM** (local usage), **Pool** (group impact), and **Cluster** (global impact). |
+| Tasks Drawer | Slide-out panel (`TasksDrawer`) with aggregated operation logs from all nodes (smart fallback for non-admins). |
+| Node Health | Status and metrics for each cluster node. |
 
-### Gestión de Máquinas (VM/CT)
+### Machine Management (VM/CT)
 
-- **Listar/Filtrar**: por nombre, ID, tipo (VM/CT), pool
-- **Clonar**: duplicar VMs/CTs seleccionando pool destino
-- **Editar**: cambiar nombre, hostname y pool asociado
-- **Eliminar**: con confirmación de seguridad
-- **Consola**: acceso VNC directo desde el navegador
+- **List/Filter**: By name, ID, type (VM/CT), pool.
+- **Clone**: Duplicate VMs/CTs selecting destination pool.
+- **Edit**: Change name, hostname, and associated pool.
+- **Delete**: With safety confirmation.
+- **Console**: Direct VNC access from the browser.
 
-### Gestión de Redes
+### Network Management
 
-- Interfaces por nodo: Bridges (`vmbr*`), Ethernet, Bonds, VLANs
-- Estado: activo/inactivo, autostart
-- Direccionamiento: IPs, gateways, máscaras
-- Relaciones: puertos en bridges, esclavos en bonds
+- Node Interfaces: Bridges (`vmbr*`), Ethernet, Bonds, VLANs.
+- Status: Active/Inactive, autostart.
+- Addressing: IPs, gateways, netmasks.
+- Relationships: Bridge ports, bond slaves.
 
-### Gestión de Identidad
+### Identity Management
 
-- **Pools**: recursos agrupados lógicamente
-- **Grupos**: conjuntos de usuarios
-- **Usuarios**: cuentas de acceso
-- **Roles**: conjuntos de privilegios
-- **ACL**: reglas de permisos sobre rutas
+- **Pools**: Logically grouped resources.
+- **Groups**: User sets.
+- **Users**: Access accounts.
+- **Roles**: Permission sets.
+- **ACL**: Access control rules on paths.
 
 ---
 
-## Consola VNC integrada
+## Integrated VNC Console
 
-### Arquitectura
+### Architecture
 
 ```
 ┌─────────────┐     WebSocket      ┌─────────────────┐     WebSocket     ┌─────────────┐
@@ -131,208 +132,208 @@ Las llamadas a Proxmox se enrutan a través del backend Nuxt:
 └─────────────┘                    └─────────────────┘                    └─────────────┘
 ```
 
-### Flujo de conexión
+### Connection Flow
 
-1. **Usuario hace clic** en el icono de consola de una VM
-2. **Cliente obtiene ticket VNC** de Proxmox vía API
-3. **Conecta al proxy WebSocket** del servidor Nuxt (`/_ws/vnc`)
-4. **El proxy conecta a Proxmox** usando el ticket
-5. **noVNC renderiza** la salida gráfica en el navegador
+1. **User clicks** console icon for a VM.
+2. **Client fetches VNC ticket** from Proxmox via API.
+3. **Connects to WebSocket proxy** on Nuxt server (`/_ws/vnc`).
+4. **Proxy connects to Proxmox** using the ticket.
+5. **noVNC renders** graphic output in the browser.
 
-### Ventajas del proxy server-side
+### Proxy Server-Side Advantages
 
-- ✅ **Sin sesión Proxmox separada**: el usuario solo necesita estar logueado en Eye of Medina
-- ✅ **Sin problemas de CORS/certificados**: el servidor maneja la conexión
-- ✅ **Seguro**: las credenciales nunca se exponen al navegador
+- ✅ **No separate Proxmox session**: User only needs Eye of Medina login.
+- ✅ **No CORS/Certificate issues**: Server handles the connection.
+- ✅ **Secure**: Credentials are never exposed to the browser.
 
-### Características de la consola
+### Console Features
 
-- **Teclado/ratón** completo
-- **Send Ctrl-Alt-Del** con un clic
-- **Escalado automático** de resolución
-- **Reconexión** automática tras desconexión
+- Full **Keyboard/Mouse** support.
+- **Send Ctrl-Alt-Del** with one click.
+- **Automatic scaling** of resolution.
+- **Auto-reconnect** after disconnection.
 
 ---
 
 ## Composable `useProxmox()`
 
-Utilidades disponibles en el frontend:
+Utilities available in the frontend:
 
-### Autenticación
+### Authentication
 
 ```typescript
 const { login, loginWithToken, logout, isAuthenticated, username } = useProxmox()
 
-// Login con credenciales
+// Login with credentials
 await login('admin@pve', 'password', 'https://proxmox:8006')
 
-// Login con token (recomendado)
+// Login with token (recommended)
 await loginWithToken('admin@pve!my-token', 'secret-uuid', 'https://proxmox:8006')
 
-// Cerrar sesión
+// Logout
 logout()
 ```
 
-### Operaciones API
+### API Operations
 
 ```typescript
 const { proxmoxRequest, listNodes, listPools, listVMResources } = useProxmox()
 
-// Petición genérica
+// Generic request
 const result = await proxmoxRequest('/cluster/resources', 'GET')
 
-// Listar nodos
+// List nodes
 const nodes = await listNodes()
 
-// Listar VMs/CTs
+// List VMs/CTs
 const vms = await listVMResources()
 ```
 
-### Gestión de VMs
+### VM Management
 
 ```typescript
 const { getVncTicket, updateMachineConfig, cloneMachine, deleteMachine } = useProxmox()
 
-// Obtener ticket VNC
+// Get VNC Ticket
 const ticket = await getVncTicket('pve1', 'qemu', '100')
 
-// Actualizar configuración
-await updateMachineConfig('pve1', '100', { name: 'nuevo-nombre' })
+// Update configuration
+await updateMachineConfig('pve1', '100', { name: 'new-name' })
 
-// Clonar VM
-await cloneMachine('pve1', '100', { newid: 200, pool: 'produccion' })
+// Clone VM
+await cloneMachine('pve1', '100', { newid: 200, pool: 'production' })
 
-// Eliminar VM
+// Delete VM
 await deleteMachine('pve1', '100')
 ```
 
 ---
 
-## Endpoints de Proxmox utilizados
+## Used Proxmox Endpoints
 
-### Autenticación y permisos
+### Authentication and Permissions
 
-| Endpoint | Método | Descripción |
+| Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/access/ticket` | POST | Obtener ticket de sesión |
-| `/access/users` | GET | Listar usuarios |
-| `/access/roles` | GET | Listar roles |
-| `/access/acl` | GET | Listar ACLs |
-| `/cluster/permissions` | GET | Permisos del usuario actual |
+| `/access/ticket` | POST | Get session ticket |
+| `/access/users` | GET | List users |
+| `/access/roles` | GET | List roles |
+| `/access/acl` | GET | List ACLs |
+| `/cluster/permissions` | GET | Current user permissions |
 
-### Inventario
+### Inventory
 
-| Endpoint | Método | Descripción |
+| Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/nodes` | GET | Listar nodos del cluster |
-| `/cluster/resources` | GET | Recursos (VMs, CTs, storage) |
-| `/pools` | GET | Listar pools |
-| `/pools/{poolid}` | GET/PUT | Gestionar pool específico |
+| `/nodes` | GET | List cluster nodes |
+| `/cluster/resources` | GET | Resources (VMs, CTs, storage) |
+| `/pools` | GET | List pools |
+| `/pools/{poolid}` | GET/PUT | Manage specific pool |
 
-### Máquinas virtuales/contenedores
+### Virtual Machines/Containers
 
-| Endpoint | Método | Descripción |
+| Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/nodes/{node}/qemu` | GET | Listar VMs de un nodo |
-| `/nodes/{node}/lxc` | GET | Listar CTs de un nodo |
-| `/nodes/{node}/{type}/{vmid}/config` | GET/PUT | Configuración de VM/CT |
+| `/nodes/{node}/qemu` | GET | List VMs on a node |
+| `/nodes/{node}/lxc` | GET | List CTs on a node |
+| `/nodes/{node}/{type}/{vmid}/config` | GET/PUT | VM/CT Configuration |
 | `/nodes/{node}/{type}/{vmid}/status/{action}` | POST | Start/Stop/Shutdown |
-| `/nodes/{node}/{type}/{vmid}/clone` | POST | Clonar VM/CT |
-| `/nodes/{node}/{type}/{vmid}` | DELETE | Eliminar VM/CT |
-| `/nodes/{node}/{type}/{vmid}/vncproxy` | POST | Obtener ticket VNC |
-| `/nodes/{node}/{type}/{vmid}/vncwebsocket` | WebSocket | Conexión VNC |
+| `/nodes/{node}/{type}/{vmid}/clone` | POST | Clone VM/CT |
+| `/nodes/{node}/{type}/{vmid}` | DELETE | Delete VM/CT |
+| `/nodes/{node}/{type}/{vmid}/vncproxy` | POST | Get VNC Ticket |
+| `/nodes/{node}/{type}/{vmid}/vncwebsocket` | WebSocket | VNC Connection |
 
-### Redes
+### Networks
 
-| Endpoint | Método | Descripción |
+| Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/nodes/{node}/network` | GET | Interfaces de red del nodo |
+| `/nodes/{node}/network` | GET | Node network interfaces |
 
 ---
 
-## Buenas prácticas de permisos
+## Permission Best Practices
 
-### Solo lectura (monitoreo)
-
-```
-Rol: PVEAuditor
-Ruta: /
-Propagar: Sí
-```
-
-### Operación de VMs/CTs
+### Read-Only (Monitoring)
 
 ```
-Roles necesarios:
+Role: PVEAuditor
+Path: /
+Propagate: Yes
+```
+
+### VM/CT Operations
+
+```
+Required Roles:
 - VM.PowerMgmt (start/stop/shutdown)
-- VM.Config.Options (cambiar nombre, opciones)
-- Pool.Allocate (cambiar pool)
+- VM.Config.Options (rename, options)
+- Pool.Allocate (change pool)
 
-Rutas: /pool/{pool-name} para cada pool a gestionar
+Paths: /pool/{pool-name} for each managed pool
 ```
 
-### Consola VNC
+### VNC Console
 
 ```
-Roles necesarios:
-- VM.Console (acceso a consola)
-- VM.Audit (ver estado)
+Required Roles:
+- VM.Console (console access)
+- VM.Audit (view status)
 
-Ruta: /pool/{pool-name} o /vms/{vmid}
+Path: /pool/{pool-name} or /vms/{vmid}
 ```
 
-### Recomendaciones
+### Recommendations
 
-1. **Prefiere tokens dedicados** por aplicación/usuario
-2. **Evita usar `root@pam`** en producción
-3. **Habilita Privilege Separation** en tokens para limitar alcance
-4. **Documenta los permisos** otorgados para auditoría
+1. **Prefer dedicated tokens** per application/user.
+2. **Avoid using `root@pam`** in production.
+3. **Enable Privilege Separation** on tokens to limit scope.
+4. **Document granted permissions** for auditing.
 
 ---
 
-## Solución de problemas
+## Troubleshooting
 
 ### Error 401 Unauthorized
 
-- ✅ Verifica que el token/secret sean correctos
-- ✅ Comprueba el realm (pam, pve, ldap, etc.)
-- ✅ Confirma que el rol tiene permisos sobre el recurso
+- ✅ Verify that token/secret are correct.
+- ✅ Check the realm (pam, pve, ldap, etc.).
+- ✅ Confirm the role has permissions on the resource.
 
-### Error de certificado
+### Certificate Error
 
-- ✅ En desarrollo: configura `ALLOW_INSECURE_TLS=true`
-- ✅ En producción: usa certificados válidos (Let's Encrypt, etc.)
+- ✅ In development: set `ALLOW_INSECURE_TLS=true`.
+- ✅ In production: use valid certificates (Let's Encrypt, etc.).
 
-### No aparecen VMs/datos
+### No VMs/Data appearing
 
-- ✅ Verifica conectividad al puerto 8006
-- ✅ Comprueba que `pveproxy` está activo: `systemctl status pveproxy`
-- ✅ Revisa permisos del usuario/token sobre los recursos
+- ✅ Verify connectivity to port 8006.
+- ✅ Check if `pveproxy` is active: `systemctl status pveproxy`.
+- ✅ Review user/token permissions on the resources.
 
-### Consola VNC no conecta
+### VNC Console not connecting
 
-- ✅ Verifica que la VM esté encendida
-- ✅ Comprueba que el usuario tiene permiso `VM.Console`
-- ✅ Revisa los logs del servidor Nuxt para errores de proxy
+- ✅ Verify the VM is powered on.
+- ✅ Check user has `VM.Console` permission.
+- ✅ Review Nuxt server logs for proxy errors.
 
-### Operaciones sobre pools fallan
+### Pool operations fail
 
-- ✅ Confirma permiso `Pool.Allocate` sobre el pool destino
-- ✅ Verifica `VM.Config.*` para cambiar configuración
+- ✅ Confirm `Pool.Allocate` permission on target pool.
+- ✅ Verify `VM.Config.*` for configuration changes.
 
 ---
 
-## Recursos
+## Resources
 
 - **Proxmox VE API Reference**: https://pve.proxmox.com/pve-docs/api-viewer/
-- **Gestión de tokens**: https://pve.proxmox.com/pve-docs/pveum-plain.html#pveum_tokens
-- **Roles y permisos**: https://pve.proxmox.com/wiki/User_Management
+- **Token Management**: https://pve.proxmox.com/pve-docs/pveum-plain.html#pveum_tokens
+- **Roles and Permissions**: https://pve.proxmox.com/wiki/User_Management
 - **noVNC**: https://novnc.com/
 
 ---
 
 <div align="center">
 
-**¿Encontraste un problema? Abre un issue en el repositorio.**
+**Found an issue? Open an issue in the repository.**
 
 </div>

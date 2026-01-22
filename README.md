@@ -4,7 +4,7 @@
 
 ![Eye of Medina](public/Logo_Eye_of_Medina.svg)
 
-**Panel web moderno para monitoreo y gestión de Proxmox VE**
+**Modern Web Dashboard for Proxmox VE Monitoring and Management**
 
 [![Nuxt 4](https://img.shields.io/badge/Nuxt-4.x-00DC82?style=flat-square&logo=nuxt.js)](https://nuxt.com)
 [![Vue 3](https://img.shields.io/badge/Vue-3.x-4FC08D?style=flat-square&logo=vue.js)](https://vuejs.org)
@@ -15,151 +15,152 @@
 
 ---
 
-## ✨ Características
+## ✨ Features
 
 ### Dashboard
-- **KPIs en tiempo real**: VMs, contenedores, bridges activos y estado de nodos
-- **Gráficas interactivas**: estado de VMs, carga CPU por nodo, distribución por pools
-- **Top Consumidores**: VMs con mayor uso de recursos
-- **Estado de nodos**: salud y métricas de cada nodo del cluster
+- **Real-time KPIs**: Total VMs, containers, active bridges, and node status.
+- **Interactive Charts**: VM status distribution, CPU load per node, pool distribution.
+- **Top Consumers**: Detailed resource consumption analysis (CPU/RAM) with **VM**, **Pool**, and **Cluster** views.
+- **Node Health**: Health status and metrics for each cluster node.
+- **Task Log (Tasks Drawer)**: Sliding side panel with real-time cluster task history.
 
-### Gestión de Máquinas Virtuales
-- Listado con **filtros avanzados** (nombre, ID, tipo, pool)
-- **Clonación** de VMs/CTs con selección de pool destino
-- **Edición** de nombre/hostname y cambio de pool
-- **Start/Stop/Shutdown** con confirmación
-- Eliminación segura con doble confirmación
+### Virtual Machine Management
+- **Advanced Filtering**: By name, ID, type, and pool.
+- **Cloning**: Clone VMs/CTs with destination pool selection.
+- **Editing**: Modify names, hostname, and pool assignment.
+- **Start/Stop/Shutdown**: With safety confirmation.
+- **Secure Deletion**: With double confirmation.
 
-### 🖥️ Consola VNC Integrada (NEW!)
-- **Acceso directo a consola** de VMs y contenedores desde el navegador
-- **Proxy WebSocket server-side**: conexión segura sin necesidad de sesión Proxmox separada
-- Basado en **noVNC** con soporte completo de teclado/ratón
-- **Send Ctrl-Alt-Del** con un clic
-- Reconexión automática
+### 🖥️ Integrated VNC Console (NEW!)
+- **Direct Console Access**: Connect to VMs and containers directly from the browser.
+- **Server-side WebSocket Proxy**: Secure connection without requiring a separate Proxmox session.
+- **noVNC based**: Full keyboard and mouse support.
+- **Send Ctrl-Alt-Del**: One-click action.
+- **Auto-reconnect**: Semantic handling of connection drops.
 
-### Gestión de Redes
-- Visualización por nodo: Bridges, Ethernet, Bonds, VLANs
-- Estado de interfaces (activo/inactivo, autostart)
-- Direccionamiento IP y gateways
-- Puertos asociados y esclavos
+### Network Management
+- **Node Visualization**: Bridges, Ethernet, Bonds, VLANs.
+- **Interface Status**: Active/Inactive, autostart.
+- **IP Addressing**: IPs, gateways, and netmasks.
+- **Port Associations**: Bridge ports and bond slaves.
 
-### Identidad y Accesos
-- Gestión de **Pools**, **Grupos**, **Usuarios**, **Roles** y **ACL**
-- **Árbol de permisos**: auditoría visual de permisos efectivos
-- Alineado con el modelo de permisos de Proxmox
+### Identity & Access Management (IAM)
+- **Pools, Groups, Users, Roles, and ACLs Management**.
+- **Permission Tree**: Visual audit of effective permissions.
+- **Proxmox Alignment**: Fully aligned with the PVE permission model.
 
-### Experiencia de Usuario
-- **Modo Oscuro y Claro** con detección automática
-- Diseño responsive para desktop y tablets
-- Transiciones fluidas entre páginas
+### User Experience
+- **Dark/Light Mode**: With automatic detection.
+- **Responsive Design**: Optimized for desktop and tablets.
+- **Smooth Transitions**: Fluid page navigation.
 
 ---
 
-## 🚀 Instalación
+## 🚀 Installation
 
-### Requisitos
+### Prerequisites
 - Node.js 20+
-- Acceso HTTPS al host de Proxmox (puerto 8006)
+- HTTPS access to the Proxmox host (port 8006)
 
-### Variables de entorno
+### Environment Variables
 
 ```env
-# URL de tu servidor Proxmox
-PROXMOX_HOST=https://tu-proxmox:8006
-NUXT_PUBLIC_PROXMOX_HOST=https://tu-proxmox:8006
+# URL of your Proxmox server
+PROXMOX_HOST=https://your-proxmox:8006
+NUXT_PUBLIC_PROXMOX_HOST=https://your-proxmox:8006
 
-# Solo en desarrollo con certificado autofirmado
+# Development only (for self-signed certificates)
 ALLOW_INSECURE_TLS=true
 ```
 
-### Instalación
+### Setup
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Desarrollo
+# Development Server
 npm run dev
 
-# Producción
+# Production Build
 npm run build
 npm run preview
 ```
 
-Abre [http://localhost:3000](http://localhost:3000) para acceder al panel.
+Open [http://localhost:3000](http://localhost:3000) to access the dashboard.
 
 ---
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
 ```
 eye_of_Medina/
 ├── app/
-│   ├── pages/           # Páginas de la aplicación
-│   │   ├── console/     # Consola VNC integrada
-│   │   ├── machines/    # Gestión de VMs/CTs
+│   ├── pages/           # Application pages
+│   │   ├── console/     # Integrated VNC Console
+│   │   ├── machines/    # VM/CT Management
 │   │   └── ...
-│   ├── components/      # Componentes reutilizables
-│   ├── composables/     # Lógica compartida (useProxmox, etc.)
-│   └── assets/          # CSS y recursos estáticos
+│   ├── components/      # Reusable components
+│   ├── composables/     # Shared logic (useProxmox, etc.)
+│   └── assets/          # CSS and static assets
 ├── server/
-│   ├── api/proxmox/     # API proxy a Proxmox
-│   └── routes/_ws/      # WebSocket proxy para VNC
-└── nuxt.config.ts       # Configuración de Nuxt
+│   ├── api/proxmox/     # Proxmox API Proxy
+│   └── routes/_ws/      # VNC WebSocket Proxy
+└── nuxt.config.ts       # Nuxt Configuration
 ```
 
-### Tecnologías clave
-- **Nuxt 4** con Nitro server
+### Key Technologies
+- **Nuxt 4** with Nitro server
 - **Vue 3** Composition API
-- **TypeScript** para tipado estático
-- **TailwindCSS 4** para estilos
-- **noVNC** para consola remota
-- **WebSocket nativo** de Nitro para proxy VNC
+- **TypeScript** for static typing
+- **TailwindCSS 4** for styling
+- **noVNC** for remote console
+- **Native WebSocket** (Nitro) for VNC proxying
 
 ---
 
-## 📖 Documentación
+## 📖 Documentation
 
-- [Guía de integración con Proxmox](Eye_of_Medina.md) - Autenticación, permisos y API
-- [Manual de usuario](manual.md) - Guía de uso del panel
+- [Proxmox Integration Guide](Eye_of_Medina.md) - Authentication, permissions, and API.
+- [User Manual](manual.md) - Dashboard usage guide.
 
 ---
 
-## 🔐 Autenticación
+## 🔐 Authentication
 
-### API Token (recomendado)
+### API Token (Recommended)
 ```
-Token ID: usuario@realm!nombre-token
+Token ID: user@realm!token-name
 Secret: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
-### Usuario/Contraseña
+### Username/Password
 ```
-Usuario: usuario@pam or usuario@pve
-Contraseña: tu-contraseña
+User: user@pam or user@pve
+Password: your-password
 ```
 
 ---
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-Las contribuciones son bienvenidas. Por favor:
-1. Fork del repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit de cambios (`git commit -m 'Add: nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
+Contributions are welcome. Please follow these steps:
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/new-feature`).
+3. Commit your changes (`git commit -m 'feat: Add new feature'`).
+4. Push to the branch (`git push origin feature/new-feature`).
+5. Open a Pull Request.
 
 ---
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está bajo licencia MIT. Ver [LICENSE](LICENSE) para más detalles.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
 <div align="center">
 
-**Desarrollado con ❤️ para la comunidad de Proxmox**
+**Developed with ❤️ for the Proxmox community**
 
 </div>

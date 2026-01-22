@@ -1,349 +1,359 @@
-# Manual de Usuario · Eye of Medina
+# User Manual · Eye of Medina
 
-Guía paso a paso para usar el panel de monitoreo y gestión de Proxmox VE.
+Step-by-step guide to using the Proxmox VE monitoring and management dashboard.
 
 ---
 
-## 📋 Índice
+## 📋 Table of Contents
 
-1. [Acceso al panel](#acceso-al-panel)
-2. [Menú principal](#menú-principal)
+1. [Accessing the Dashboard](#accessing-the-dashboard)
+2. [Main Menu](#main-menu)
 3. [Dashboard](#dashboard)
-4. [Gestión de máquinas](#gestión-de-máquinas)
-5. [Consola VNC](#consola-vnc)
-6. [Gestión de redes](#gestión-de-redes)
-7. [Gestión de identidad](#gestión-de-identidad)
-8. [Personalización](#personalización)
-9. [Errores comunes](#errores-comunes)
+4. [Machine Management](#machine-management)
+5. [VNC Console](#vnc-console)
+6. [Network Management](#network-management)
+7. [Identity Management](#identity-management)
+8. [Customization](#customization)
+9. [Common Errors](#common-errors)
 
 ---
 
-## Acceso al panel
+## Accessing the Dashboard
 
-### Inicio de sesión
+### Login
 
-1. Abre el navegador y accede a la URL del panel (ej: `http://localhost:3000`)
-2. Introduce tus credenciales de Proxmox:
+1. Open your browser and navigate to the dashboard URL (e.g., `http://localhost:3000`).
+2. Enter your Proxmox credentials:
 
-#### Opción A: Con API Token (recomendado)
+#### Option A: With API Token (Recommended)
 
-| Campo | Ejemplo |
+| Field | Example |
 |-------|---------|
 | Token ID | `admin@pve!eye-token` |
 | Secret | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
-| Host | `https://tu-proxmox:8006` |
+| Host | `https://your-proxmox:8006` |
 
-#### Opción B: Con usuario/contraseña
+#### Option B: With Username/Password
 
-| Campo | Ejemplo |
+| Field | Example |
 |-------|---------|
-| Usuario | `admin@pve` |
-| Contraseña | `tu-contraseña` |
-| Host | `https://tu-proxmox:8006` |
+| User | `admin@pve` |
+| Password | `your-password` |
+| Host | `https://your-proxmox:8006` |
 
-3. Haz clic en **Iniciar sesión**
+3. Click **Login**.
 
-> 💡 **Tip**: Los API Tokens no caducan y son más seguros para uso en aplicaciones.
+> 💡 **Tip**: API Tokens do not expire and are safer for application use.
 
 ---
 
-## Menú principal
+## Main Menu
 
-El menú lateral izquierdo proporciona acceso a todas las secciones:
+The left sidebar provides access to all sections:
 
-| Icono | Sección | Descripción |
-|-------|---------|-------------|
-| 📊 | Dashboard | Vista general del cluster |
-| 🖥️ | Machines | Gestión de VMs y contenedores |
-| 🌐 | Redes | Interfaces de red por nodo |
-| 📦 | Pools | Grupos de recursos |
-| 👥 | Groups | Grupos de usuarios |
-| 👤 | Users | Cuentas de usuario |
-| 🔐 | Roles | Roles de permisos |
-| 📋 | ACL | Listas de control de acceso |
-| 🌳 | Permissions | Árbol de permisos |
+| Icon | Section | Description |
+|------|---------|-------------|
+| 📊 | Dashboard | Cluster overview |
+| 🖥️ | Machines | VM and Container management |
+| 🌐 | Networks | Network interfaces per node |
+| 📦 | Pools | Resource groups |
+| 👥 | Groups | User groups |
+| 👤 | Users | User accounts |
+| 🔐 | Roles | Permission roles |
+| 📋 | ACL | Access Control Lists |
+| 🌳 | Permissions | Permission tree |
 
-En la parte inferior del menú encontrarás:
-- **Selector de tema** (🌙/☀️): Alterna entre modo oscuro y claro
-- **Cerrar sesión**: Termina la sesión actual
+At the bottom of the menu you will find:
+- **Theme Selector** (🌙/☀️): Toggle between dark and light mode.
+- **Logout**: End the current session.
 
 ---
 
 ## Dashboard
 
-El dashboard muestra una vista general del estado del cluster.
+The dashboard displays a general overview of the cluster status.
 
-### KPIs superiores
+### Top KPIs
 
-Métricas rápidas del cluster:
-- **VMs totales**: Número de máquinas virtuales
-- **CTs totales**: Número de contenedores
-- **En ejecución**: VMs/CTs actualmente activas
-- **Bridges activos**: Interfaces de red bridge
+Quick cluster metrics:
+- **Total VMs**: Number of virtual machines.
+- **Total CTs**: Number of containers.
+- **Running**: Currently active VMs/CTs.
+- **Active Bridges**: Network bridge interfaces.
 
-### Gráficas
+### Charts
 
-- **Estado de VMs**: Distribución por estado (running, stopped, etc.)
-- **CPU por nodo**: Uso de CPU en cada nodo
-- **Por pools**: Distribución de VMs/CTs por pool
+- **VM Status**: Distribution by status (running, stopped, etc.).
+- **CPU per Node**: CPU usage on each node.
+- **By Pools**: Distribution of VMs/CTs per pool.
 
-### Top Consumidores
+### Top Consumers
 
-Listado de VMs ordenadas por consumo de recursos (CPU/memoria).
+List of VMs sorted by resource consumption (CPU/Memory). Includes three view modes selectable via tabs:
 
-### Estado de nodos
+- **VM**: Shows usage % relative to the machine's assigned resources. Useful for detecting saturated VMs.
+- **POOL**: Shows usage % relative to the total resources of the Pool it belongs to. Useful for spotting "noisy neighbors" in a group.
+- **CLUSTER**: Shows usage % relative to the total physical server capacity. Useful for identifying who is consuming real infrastructure.
 
-Estado y métricas de cada nodo del cluster:
-- CPU y memoria
-- Almacenamiento
-- Uptime
+### Node Health
 
-### Refrescar datos
+Status and metrics for each cluster node:
+- CPU and Memory.
+- Storage.
+- Uptime.
 
-Usa el botón **Refresh** en la esquina superior derecha para actualizar los datos.
+### Task Log (Recent Tasks)
+
+Access by clicking the **Recent Tasks** button in the side menu to open a sliding panel.
+- Shows the history of cluster operations (backups, stops, starts).
+- Updates in real-time while the panel is open.
+- If you are not a global admin, you will only see tasks related to your user/accessible nodes.
+
+### Data Refresh
+
+Use the **Refresh** button in the top right corner to update data.
 
 ---
 
-## Gestión de máquinas
+## Machine Management
 
-Accede desde el menú: **Machines**
+Access via menu: **Machines**
 
-### Listado y filtros
+### List and Filters
 
-Usa los filtros superiores para encontrar VMs/CTs:
-- **Búsqueda**: Por nombre o ID
-- **Tipo**: VM (QEMU) o CT (LXC)
-- **Pool**: Filtrar por pool específico
-- **Estado**: Running, stopped, etc.
+Use the top filters to find VMs/CTs:
+- **Search**: By name or ID.
+- **Type**: VM (QEMU) or CT (LXC).
+- **Pool**: Filter by specific pool.
+- **Status**: Running, stopped, etc.
 
-### Acciones disponibles
+### Available Actions
 
-| Acción | Descripción |
+| Action | Description |
 |--------|-------------|
-| ▶️ Start | Encender la VM/CT |
-| ⏹️ Stop | Apagar forzosamente |
-| ⏸️ Shutdown | Apagado ordenado |
-| 🖥️ Console | Abrir consola VNC |
-| 📋 Clone | Duplicar la VM/CT |
-| ✏️ Edit | Modificar configuración |
-| 🗑️ Delete | Eliminar (con confirmación) |
+| ▶️ Start | Power on the VM/CT |
+| ⏹️ Stop | Force power off |
+| ⏸️ Shutdown | Graceful shutdown |
+| 🖥️ Console | Open VNC console |
+| 📋 Clone | Duplicate the VM/CT |
+| ✏️ Edit | Modify configuration |
+| 🗑️ Delete | Delete (with confirmation) |
 
-### Clonar una VM
+### Cloning a VM
 
-1. Haz clic en el botón **Clone** de la VM
-2. Completa el formulario:
-   - **Nuevo ID**: ID para el clon
-   - **Nombre**: Nombre del clon
-   - **Pool destino**: Pool donde crear el clon
-3. Haz clic en **Clonar**
+1. Click the **Clone** button on the VM.
+2. Fill out the form:
+   - **New ID**: ID for the clone.
+   - **Name**: Name of the clone.
+   - **Target Pool**: Pool where the clone will be created.
+3. Click **Clone**.
 
-### Editar configuración
+### Edit Configuration
 
-1. Haz clic en **Edit** en la VM
-2. Modifica los campos:
-   - **Nombre**: Nombre de la VM
-   - **Pool**: Pool asociado
-3. Guarda los cambios
+1. Click **Edit** on the VM.
+2. Modify fields:
+   - **Name**: VM name.
+   - **Pool**: Associated pool.
+3. Save changes.
 
-### Eliminar una VM
+### Deleting a VM
 
-1. Haz clic en **Delete**
-2. Confirma escribiendo el nombre de la VM
-3. Haz clic en **Eliminar definitivamente**
+1. Click **Delete**.
+2. Confirm by typing the VM name.
+3. Click **Delete Permanently**.
 
-> ⚠️ **Atención**: Esta acción es irreversible.
-
----
-
-## Consola VNC
-
-La consola permite acceso remoto a la pantalla de una VM o contenedor.
-
-### Abrir consola
-
-1. En la lista de máquinas, haz clic en el icono 🖥️ de la VM
-2. O navega a `/console/{vmid}?node={node}&type={qemu|lxc}`
-3. La consola se conectará automáticamente
-
-### Controles de la consola
-
-| Control | Función |
-|---------|---------|
-| **Send Ctrl-Alt-Del** | Envía la combinación de teclas |
-| **Reconectar** | Reinicia la conexión |
-
-### Interacción
-
-- **Teclado**: Escribe directamente, las teclas se envían a la VM
-- **Ratón**: Haz clic y mueve el cursor dentro de la consola
-- **Portapapeles**: Ctrl+V para pegar texto (si la VM lo soporta)
-
-### Indicador de estado
-
-- 🟢 **Verde**: Conectado correctamente
-- 🔴 **Rojo**: Desconectado o error
-
-### Solución de problemas
-
-Si la consola no conecta:
-1. Verifica que la VM esté **encendida**
-2. Comprueba tu **sesión** en Eye of Medina
-3. Usa el botón **Reconectar**
+> ⚠️ **Warning**: This action is irreversible.
 
 ---
 
-## Gestión de redes
+## VNC Console
 
-Accede desde el menú: **Redes**
+The console allows remote access to a VM or container screen.
 
-### Seleccionar nodo
+### Opening Console
 
-Usa el selector superior para elegir el nodo a inspeccionar.
+1. In the machine list, click the 🖥️ icon of the VM.
+2. Or navigate to `/console/{vmid}?node={node}&type={qemu|lxc}`.
+3. The console will connect automatically.
 
-### Tipos de interfaces
+### Console Controls
 
-| Tipo | Descripción |
+| Control | Function |
+|---------|----------|
+| **Send Ctrl-Alt-Del** | Sends the key combination |
+| **Reconnect** | Restarts the connection |
+
+### Interaction
+
+- **Keyboard**: Type directly, keys are sent to the VM.
+- **Mouse**: Click and move cursor inside the console.
+- **Clipboard**: Ctrl+V to paste text (if VM supports it).
+
+### Status Indicator
+
+- 🟢 **Green**: Connected successfully.
+- 🔴 **Red**: Disconnected or error.
+
+### Troubleshooting
+
+If console doesn't connect:
+1. Verify VM is **powered on**.
+2. Check your **session** in Eye of Medina.
+3. Use the **Reconnect** button.
+
+---
+
+## Network Management
+
+Access via menu: **Networks**
+
+### Select Node
+
+Use the top selector to choose the node to inspect.
+
+### Interface Types
+
+| Type | Description |
 |------|-------------|
-| **Bridge** | Puentes virtuales (vmbr0, vmbr1...) |
-| **Ethernet** | Interfaces físicas (eth0, enp0s3...) |
-| **Bond** | Agregación de enlaces |
-| **VLAN** | Interfaces VLAN |
+| **Bridge** | Virtual bridges (vmbr0, vmbr1...) |
+| **Ethernet** | Physical interfaces (eth0, enp0s3...) |
+| **Bond** | Link aggregation |
+| **VLAN** | VLAN interfaces |
 
-### Información mostrada
+### Displayed Information
 
-- **Nombre**: Identificador de la interfaz
-- **Estado**: Activo/Inactivo
-- **Autostart**: Si inicia con el sistema
-- **IP/Gateway**: Direccionamiento configurado
-- **Puertos**: Interfaces asociadas (en bridges/bonds)
+- **Name**: Interface identifier.
+- **Status**: Active/Inactive.
+- **Autostart**: If starts with system.
+- **IP/Gateway**: Configured addressing.
+- **Ports**: Associated interfaces (in bridges/bonds).
 
 ---
 
-## Gestión de identidad
+## Identity Management
 
 ### Pools
 
-Los pools agrupan recursos lógicamente.
+Pools group resources logically.
 
-1. Ve a **Pools** en el menú
-2. Visualiza los pools existentes
-3. Haz clic en un pool para ver sus recursos
+1. Go to **Pools**.
+2. View existing pools.
+3. Click a pool to see its resources.
 
 ### Groups
 
-Los grupos agrupan usuarios.
+Groups group users.
 
-1. Ve a **Groups**
-2. Visualiza grupos y miembros
+1. Go to **Groups**.
+2. View groups and members.
 
 ### Users
 
-Gestión de cuentas de usuario.
+User account management.
 
-1. Ve a **Users**
-2. Visualiza usuarios y sus roles
+1. Go to **Users**.
+2. View users and their roles.
 
 ### Roles
 
-Los roles definen conjuntos de permisos.
+Roles define permission sets.
 
-1. Ve a **Roles**
-2. Inspecciona los roles disponibles
-3. Haz clic en un rol para ver sus privilegios
+1. Go to **Roles**.
+2. Inspect available roles.
+3. Click a role to view privileges.
 
 ### ACL
 
-Las ACLs asignan roles a rutas.
+ACLs assign roles to paths.
 
-1. Ve a **ACL**
-2. Visualiza las reglas aplicadas
-3. Filtra por usuario, grupo o ruta
+1. Go to **ACL**.
+2. View applied rules.
+3. Filter by user, group, or path.
 
-### Árbol de permisos
+### Permission Tree
 
-Vista consolidada para auditoría:
+Consolidated view for auditing:
 
-1. Ve a **Permissions** (o Permissions Tree)
-2. Navega por el árbol jerárquico
-3. Identifica qué roles tienen acceso a cada recurso
-
----
-
-## Personalización
-
-### Modo oscuro/claro
-
-1. En el menú lateral, busca el icono de tema (🌙/☀️)
-2. Haz clic para alternar
-3. El tema se guarda automáticamente
-
-O bien:
-- El sistema detecta automáticamente tu preferencia del SO
+1. Go to **Permissions** (or Permissions Tree).
+2. Navigate the hierarchical tree.
+3. Identify which roles have access to each resource.
 
 ---
 
-## Errores comunes
+## Customization
+
+### Dark/Light Mode
+
+1. In the side menu, look for the theme icon (🌙/☀️).
+2. Click to toggle.
+3. Preference is saved automatically.
+
+Or:
+- Automatic detection of OS preference.
+
+---
+
+## Common Errors
 
 ### "401 Unauthorized"
 
-**Causa**: Credenciales inválidas o sin permisos.
+**Cause**: Invalid credentials or no permissions.
 
-**Solución**:
-- Verifica token/secret o usuario/contraseña
-- Comprueba el realm (pam, pve, ldap)
-- Confirma que tienes permisos sobre los recursos
+**Solution**:
+- Verify token/secret or username/password.
+- Check realm (pam, pve, ldap).
+- Confirm you have permissions on resources.
 
-### "Certificado inválido"
+### "Invalid Certificate"
 
-**Causa**: Proxmox usa certificado autofirmado.
+**Cause**: Proxmox uses self-signed certificate.
 
-**Solución**:
-- En desarrollo: acepta el certificado en el navegador
-- En producción: configura un certificado válido
+**Solution**:
+- In dev: Accept certificate in browser.
+- In prod: Use valid certificates.
 
-### "No aparecen datos"
+### "No Data Appearing"
 
-**Causa**: Problemas de conectividad o permisos.
+**Cause**: Connectivity or permission issues.
 
-**Solución**:
-- Verifica que `PROXMOX_HOST` sea correcto
-- Comprueba conectividad al puerto 8006
-- Revisa que tu usuario tenga permisos de lectura
+**Solution**:
+- Verify `PROXMOX_HOST` is correct.
+- Check connectivity to port 8006.
+- Check user read permissions.
 
-### "Consola no conecta"
+### "Console Not Connecting"
 
-**Causa**: VM apagada o permisos insuficientes.
+**Cause**: VM powered off or insufficient permissions.
 
-**Solución**:
-- Asegúrate de que la VM esté encendida
-- Verifica permiso `VM.Console` en tu usuario
-- Usa el botón **Reconectar**
+**Solution**:
+- Ensure VM is powered on.
+- Verify `VM.Console` permission.
+- Use **Reconnect** button.
 
-### "Error al clonar/eliminar"
+### "Clone/Delete Error"
 
-**Causa**: Permisos insuficientes sobre el recurso.
+**Cause**: Insufficient permissions on resource.
 
-**Solución**:
-- Verifica `Pool.Allocate` sobre el pool destino
-- Confirma `VM.Clone` y `VM.Allocate` para clonar
-- Confirma `VM.Allocate` para eliminar
+**Solution**:
+- Verify `Pool.Allocate` on target pool.
+- Confirm `VM.Clone` and `VM.Allocate`.
 
 ---
 
-## Atajos y consejos
+## Shortcuts and Tips
 
-| Acción | Consejo |
-|--------|---------|
-| Navegación | Usa el menú lateral para moverte entre secciones |
-| Búsqueda | Los filtros se aplican en tiempo real |
-| Refresh | El botón actualiza los datos del servidor |
-| Consola | Haz clic dentro de la consola para capturar el teclado |
-| Tema | El modo oscuro reduce la fatiga visual |
+| Action | Tip |
+|--------|-----|
+| Navigation | Use side menu to move between sections |
+| Search | Filters apply in real-time |
+| Refresh | Updates data from server |
+| Console | Click inside console to capture keyboard |
+| Theme | Dark mode reduces eye strain |
 
 ---
 
 <div align="center">
 
-**¿Necesitas ayuda? Consulta la [guía técnica](Eye_of_Medina.md) o abre un issue.**
+**Need help? Check the [technical guide](Eye_of_Medina.md) or open an issue.**
 
 </div>
