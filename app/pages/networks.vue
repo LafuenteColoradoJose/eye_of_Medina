@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/html-self-closing -->
 <!-- eslint-disable vue/attributes-order -->
 <template>
-    <div class="p-6 max-w-[1920px] mx-auto space-y-6">
+    <div class="p-6 max-w-[1920px] mx-auto space-y-8">
 
         <!-- Header & Node Selector -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -61,138 +61,202 @@
             </svg>
         </div>
 
-        <div v-else class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+        <div v-else class="space-y-12">
 
-            <!-- Logical Layer (Bridges, Bonds, VLANs) -->
-            <div class="col-span-1 xl:col-span-2 space-y-6">
-                <h2 class="text-sm font-bold text-text-muted uppercase tracking-wider flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            <!-- SECTION 1: L3 ADDRESSING (Las IPs son lo importante) -->
+            <section v-if="ipInterfaces.length > 0" class="space-y-4">
+                <h2
+                    class="text-sm font-bold text-text-muted uppercase tracking-wider flex items-center gap-2 border-b border-border pb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="text-primary">
-                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
-                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
-                        <line x1="6" y1="6" x2="6" y2="6" />
-                        <line x1="6" y1="18" x2="6" y2="18" />
+                        class="text-blue-500">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                     </svg>
-                    Capa Lógica & Puentes
+                    Zonas de Red & Direccionamiento (L3)
                 </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div v-for="net in logicalNetworks" :key="net.iface"
-                        class="bg-card border border-border rounded-xl shadow-sm overflow-hidden relative group">
-                        <!-- Status Line -->
-                        <div class="absolute top-0 left-0 w-1 h-full" :class="net.active ? 'bg-positive' : 'bg-muted'">
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div v-for="net in ipInterfaces" :key="net.iface"
+                        class="bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
 
-                        <div class="p-5">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
+                        <!-- Active indicator stripe -->
+                        <div class="absolute top-0 left-0 w-1.5 h-full"
+                            :class="net.active ? 'bg-positive' : 'bg-danger'"></div>
+
+                        <div class="p-5 space-y-4 pl-7">
+                            <!-- Header with Name & Comment -->
+                            <div class="flex justify-between items-start">
                                 <div>
-                                    <h3 class="text-xl font-bold text-text font-mono flex items-center gap-2">
-                                        {{ net.iface }}
+                                    <h3 class="font-bold text-lg text-text flex items-center gap-2">
+                                        {{ net.comments || 'Red Sin Nombre' }}
+                                        <span v-if="!net.comments"
+                                            class="text-xs font-normal text-text-muted font-mono bg-muted-surface px-1.5 py-0.5 rounded">{{
+                                                net.iface }}</span>
                                     </h3>
-                                    <div class="flex gap-2 mt-2">
-                                        <span
-                                            class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary">{{
-                                                net.type }}</span>
-                                        <span v-if="net.autostart"
-                                            class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border border-border bg-muted-surface text-text-muted">Autostart</span>
-                                    </div>
+                                    <p v-if="net.comments" class="font-mono text-xs text-text-muted mt-1">{{ net.iface
+                                        }}</p>
                                 </div>
-                                <!-- IP Address Chip -->
-                                <div v-if="net.address || net.address6"
-                                    class="w-full sm:w-auto text-left sm:text-right mt-1 sm:mt-0">
-                                    <div v-if="net.address"
-                                        class="inline-block text-sm font-mono text-text bg-muted-surface/50 px-2 py-1 rounded border border-border/50 break-all">
-                                        {{ net.address }}{{ net.cidr ? '/' + net.cidr : '' }}
+                                <span
+                                    class="text-[10px] items-center gap-1 bg-background border border-border px-2 py-1 rounded-full uppercase font-bold tracking-wide flex text-text-muted">
+                                    {{ net.type }}
+                                </span>
+                            </div>
+
+                            <!-- IP Addresses (The Hero Element) -->
+                            <div class="space-y-3">
+                                <!-- IPv4 -->
+                                <div v-if="net.address" @click="copyToClipboard(net.address)"
+                                    class="flex flex-col sm:flex-row sm:items-center justify-between bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 cursor-pointer hover:bg-blue-500/20 transition-colors group/ip relative gap-3">
+                                    <div class="flex items-center gap-3 w-full overflow-hidden">
+                                        <div
+                                            class="w-8 h-8 rounded bg-blue-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm shadow-blue-500/20">
+                                            v4</div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-mono font-bold text-lg text-text relative z-10 w-full truncate"
+                                                :title="net.address">
+                                                {{ net.address.split('/')[0] }}<span
+                                                    class="text-text-muted/70 text-base font-normal"
+                                                    v-if="net.address.includes('/')">/{{ net.address.split('/')[1]
+                                                    }}</span><span class="text-text-muted/70 text-base font-normal"
+                                                    v-else-if="net.cidr && net.cidr.includes('/')">/{{
+                                                    net.cidr.split('/')[1] }}</span><span
+                                                    class="text-text-muted/70 text-base font-normal"
+                                                    v-else-if="net.cidr && !net.cidr.includes('.')">/{{ net.cidr
+                                                    }}</span>
+                                            </div>
+                                            <div v-if="net.gateway"
+                                                class="text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="opacity-70">
+                                                    <path d="M5 12h14" />
+                                                    <path d="m12 5 7 7-7 7" />
+                                                </svg>
+                                                Gw: {{ net.gateway }}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div v-if="net.address6" class="text-xs font-mono text-text-muted mt-1 break-all"
-                                        :title="net.address6">
-                                        {{ net.address6 }}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="text-text-muted opacity-0 group-hover/ip:opacity-100 transition-opacity shrink-0 hidden sm:block">
+                                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                                    </svg>
+                                </div>
+
+                                <!-- IPv6 -->
+                                <div v-if="net.address6" @click="copyToClipboard(net.address6)"
+                                    class="flex flex-col sm:flex-row sm:items-center justify-between bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 cursor-pointer hover:bg-purple-500/20 transition-colors group/ip gap-3">
+                                    <div class="flex items-center gap-3 w-full overflow-hidden">
+                                        <div
+                                            class="w-8 h-8 rounded bg-purple-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm shadow-purple-500/20">
+                                            v6</div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-mono font-bold text-sm text-text truncate"
+                                                :title="net.address6">
+                                                {{ net.address6 }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="text-text-muted opacity-0 group-hover/ip:opacity-100 transition-opacity shrink-0 hidden sm:block">
+                                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Physical Hierarchy / Plumbing -->
+                            <div class="pt-3 border-t border-border/50">
+                                <span class="text-[10px] uppercase font-bold text-text-muted mb-2 block">Ruta
+                                    Física</span>
+                                <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                                    <!-- Physical Ports -->
+                                    <template v-if="getDeepPorts(net).length > 0">
+                                        <div v-for="port in getDeepPorts(net)" :key="port"
+                                            class="flex items-center gap-1 bg-muted-surface border border-border rounded px-1.5 py-0.5 whitespace-nowrap">
+                                            <div class="w-1.5 h-1.5 rounded-full"
+                                                :class="isPortActive(port) ? 'bg-positive' : 'bg-danger'"></div>
+                                            <span class="font-mono text-xs text-text">{{ port }}</span>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        <span class="text-xs text-text-muted italic">Virtual / Internal</span>
+                                    </template>
+
+                                    <!-- Arrow -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="text-text-muted shrink-0">
+                                        <path d="M5 12h14" />
+                                        <path d="m12 5 7 7-7 7" />
+                                    </svg>
+
+                                    <!-- The Interface Itself -->
+                                    <div
+                                        class="font-mono text-xs font-bold text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-0.5">
+                                        {{ net.iface }}
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Bridge Ports Visualization -->
-                            <div v-if="net.bridge_ports || net.slaves"
-                                class="mt-4 p-3 bg-background rounded-lg border border-border/50 relative">
-                                <div
-                                    class="absolute -top-2 left-3 px-1 bg-card text-[10px] font-bold text-text-muted uppercase">
-                                    Puertos Conectados</div>
-                                <div class="flex flex-wrap gap-2 mt-1">
-                                    <div v-for="port in splitPorts(net.bridge_ports || net.slaves)" :key="port"
-                                        class="flex items-center gap-1.5 px-2 py-1 rounded border bg-muted-surface text-text text-xs font-mono">
-                                        <div class="w-1.5 h-1.5 rounded-full"
-                                            :class="isPortActive(port) ? 'bg-positive' : 'bg-danger'"></div>
-                                        {{ port }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div v-if="net.comments"
-                                class="mt-3 text-sm text-text-muted italic border-t border-border/30 pt-2">
-                                {{ net.comments }}
-                            </div>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <div v-if="logicalNetworks.length === 0"
-                    class="p-8 border-2 border-dashed border-border rounded-xl text-center text-text-muted">
-                    No hay interfaces lógicas (bridges/bonds) configuradas.
-                </div>
-            </div>
-
-            <!-- Physical Layer -->
-            <div class="col-span-1 space-y-6">
-                <h2 class="text-sm font-bold text-text-muted uppercase tracking-wider flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            <!-- SECTION 2: L2 & RAW INTERFACES (Cables sueltos) -->
+            <section class="space-y-4">
+                <h2
+                    class="text-sm font-bold text-text-muted uppercase tracking-wider flex items-center gap-2 border-b border-border pb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="text-warning">
-                        <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-                        <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-                        <line x1="12" y1="20" x2="12.01" y2="20" />
+                        <path
+                            d="M4 14a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4v7m7-4-3 4-3-4" />
                     </svg>
-                    Interfaces Físicas
+                    Infraestructura de Red (L2/L1)
                 </h2>
 
-                <div class="space-y-3">
-                    <div v-for="net in physicalNetworks" :key="net.iface"
-                        class="bg-card border border-border rounded-xl p-4 flex items-center justify-between group hover:border-primary/30 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <!-- Icon Status -->
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                                :class="net.active ? 'bg-positive/10 text-positive' : 'bg-danger/10 text-danger'">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                                </svg>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div v-for="net in nonIpInterfaces" :key="net.iface"
+                        class="bg-card/50 border border-border rounded-lg p-4 flex flex-col justify-between hover:bg-card transition-colors">
+
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full" :class="net.active ? 'bg-positive' : 'bg-danger'"
+                                    :title="net.active ? 'Active' : 'Down'"></div>
+                                <h4 class="font-bold text-text font-mono">{{ net.iface }}</h4>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-text font-mono text-lg leading-tight">{{ net.iface }}</h3>
-                                <p class="text-xs text-text-muted mt-0.5">{{ net.active ? 'Link Up' : 'No Link' }} <span
-                                        v-if="net.type !== 'eth'" class="text-xs opacity-75">({{ net.type }})</span></p>
-                            </div>
+                            <span
+                                class="text-[10px] uppercase text-text-muted font-bold border border-border px-1.5 rounded">{{
+                                    net.type }}</span>
                         </div>
 
-                        <!-- Connection Chip -->
-                        <div v-if="getUpstream(net.iface)"
-                            class="text-xs px-2 py-1 rounded bg-secondary/10 text-secondary border border-secondary/20 font-bold flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M9 18l6-6-6-6" />
-                            </svg>
-                            {{ getUpstream(net.iface) }}
+                        <!-- Details for Bridge/Bond -->
+                        <div v-if="net.bridge_ports || net.slaves" class="mt-2">
+                            <span class="text-[10px] text-text-muted mb-1 block">Puertos:</span>
+                            <div class="flex flex-wrap gap-1">
+                                <span v-for="port in splitPorts(net.bridge_ports || net.slaves)" :key="port"
+                                    class="text-xs font-mono bg-muted-surface px-1 rounded border border-border/50 text-text">
+                                    {{ port }}
+                                </span>
+                            </div>
                         </div>
-                        <div v-else
-                            class="text-xs px-2 py-1 rounded bg-muted-surface text-text-muted border border-border">
-                            Unassigned
+                        <div v-else class="text-xs text-text-muted mt-2">
+                            {{ net.active ? 'Enlace activo' : 'Desconectado' }}
                         </div>
+
                     </div>
                 </div>
-            </div>
+            </section>
 
         </div>
     </div>
@@ -233,7 +297,6 @@ onMounted(() => {
 // Watch auth state - only execute on client side
 watch(isAuthenticated, async (val) => {
     if (val && import.meta.client) {
-        console.log('Auth confirmed, loading nodes...')
         await fetchNodes()
     }
 }, { immediate: true })
@@ -249,7 +312,7 @@ async function fetchNodes() {
         if (res.success && res.data && Array.isArray(res.data) && res.data.length > 0) {
             nodes.value = res.data as NodeInfo[]
         } else {
-            console.warn('Fallo al listar nodos (permisos?), intentando fallback vía Recursos...')
+            console.warn('Fallback al listar recursos para obtener nodos...')
             // Fallback: Obtener nodos de las máquinas visibles
             const resResources = await listVMResources()
             if (resResources.success && resResources.data) {
@@ -272,7 +335,6 @@ async function fetchNodes() {
 
         // Safety: ensure networks are loaded
         if (selectedNode.value) {
-            // Force load immediately if we just selected a node
             await loadNetworks()
         }
     } catch (e) {
@@ -293,14 +355,24 @@ const loadNetworks = async () => {
     finally { loading.value = false }
 }
 
-// Computeds for Organization
-const logicalNetworks = computed(() => {
-    return networks.value.filter(n => ['bridge', 'bond', 'vlan', 'OVSBridge', 'OVSBond'].includes(n.type)).sort((a, b) => a.iface.localeCompare(b.iface))
+// Computeds for Smart UI organization
+const ipInterfaces = computed(() => {
+    // Interfaces que tienen una identidad L3 (IP)
+    return networks.value.filter(n => n.address || n.address6).sort((a, b) => a.iface.localeCompare(b.iface))
 })
 
-const physicalNetworks = computed(() => {
-    return networks.value.filter(n => ['eth', 'unknown', 'loopback'].includes(n.type) || !['bridge', 'bond', 'vlan', 'OVSBridge', 'OVSBond'].includes(n.type)).sort((a, b) => a.iface.localeCompare(b.iface))
+const nonIpInterfaces = computed(() => {
+    // Resto de cables e infraestructura sin IP directa
+    return networks.value.filter(n => !n.address && !n.address6).sort((a, b) => {
+        // Priorizar bridges/bonds sobre eths vacíos
+        if (a.type !== b.type) {
+            if (['bridge', 'bond'].includes(a.type)) return -1
+            if (['bridge', 'bond'].includes(b.type)) return 1
+        }
+        return a.iface.localeCompare(b.iface)
+    })
 })
+
 
 // Helpers
 const splitPorts = (portsStr?: string) => {
@@ -313,13 +385,36 @@ const isPortActive = (portName: string) => {
     return net ? net.active : false
 }
 
-const getUpstream = (iface: string) => {
-    // Find which bridge/bond has this interface as a member
-    for (const net of logicalNetworks.value) {
-        const ports = splitPorts(net.bridge_ports || net.slaves)
-        if (ports.includes(iface)) return net.iface
+// Recursively find real physical ports for a logical interface
+const getDeepPorts = (net: NetworkInterface): string[] => {
+    const directPorts = splitPorts(net.bridge_ports || net.slaves)
+    if (directPorts.length === 0) return []
+
+    // Si los puertos son físicos (eth), devolverlos. Si son logical (bonds), profundizar.
+    let result: string[] = []
+
+    directPorts.forEach(portName => {
+        const childNet = networks.value.find(n => n.iface === portName)
+        if (childNet && (childNet.type === 'bond' || childNet.type === 'OVSBond')) {
+            result = result.concat(getDeepPorts(childNet))
+        } else {
+            result.push(portName)
+        }
+    })
+
+    return result
+}
+
+const copyToClipboard = async (text: string) => {
+    if (!text) return
+    const cleanText = text.split('/')[0] // copy just the IP, usually more useful
+    try {
+        await navigator.clipboard.writeText(cleanText)
+        // Could add visual toast notification here
+        alert('IP copiada: ' + cleanText) // Simple feedback for now
+    } catch (err) {
+        console.error('Failed to copy', err)
     }
-    return null
 }
 
 </script>
