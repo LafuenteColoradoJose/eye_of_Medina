@@ -18,7 +18,7 @@
 ## ✨ Features
 
 ### Dashboard
-- **Real-time KPIs**: Total VMs, containers, active bridges, and node status.
+- **Real-time KPIs**: Total VMs, containers, **active IP zones**, and node status.
 - **Interactive Charts**: VM status distribution, CPU load per node, pool distribution.
 - **Top Consumers**: Detailed resource consumption analysis (CPU/RAM) with **VM**, **Pool**, and **Cluster** views.
 - **Node Health**: Health status and metrics for each cluster node.
@@ -39,10 +39,10 @@
 - **Auto-reconnect**: Semantic handling of connection drops.
 
 ### Network Management
-- **Node Visualization**: Bridges, Ethernet, Bonds, VLANs.
-- **Interface Status**: Active/Inactive, autostart.
-- **IP Addressing**: IPs, gateways, and netmasks.
-- **Port Associations**: Bridge ports and bond slaves.
+- **Smart IP Zones**: Visualization of L3 Networks with active IPs.
+- **Visual IP Cards**: interactive cards for IPv4/IPv6 with "Click-to-Copy".
+- **Physical Hierarchy**: Visual path from logical interface to physical cable.
+- **Node Visualization**: Separation between Addressing (L3) and Infrastructure (L2/L1).
 
 ### Identity & Access Management (IAM)
 - **Pools, Groups, Users, Roles, and ACLs Management**.

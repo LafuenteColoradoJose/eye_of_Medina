@@ -79,7 +79,7 @@ Quick cluster metrics:
 - **Total VMs**: Number of virtual machines.
 - **Total CTs**: Number of containers.
 - **Running**: Currently active VMs/CTs.
-- **Active Bridges**: Network bridge interfaces.
+- **Active IP Zones**: Interfaces with assigned IP addresses (L3).
 
 ### Charts
 
@@ -211,6 +211,18 @@ Access via menu: **Networks**
 
 Use the top selector to choose the node to inspect.
 
+### Smart Visualization (IP Zones)
+The new interface prioritizes logical connectivity over cabling:
+
+1.  **IP Zones (L3)**:
+    - Cards highlighting configured networks.
+    - **Click-to-Copy**: Click on any IP (v4 or v6) to copy it to the clipboard.
+    - **Visual Hierarchy**: Shows the path from physical cable -> Bridge -> IP.
+
+2.  **Infrastructure (L2/L1)**:
+    - Separate section for raw interfaces (unassigned cables, pure bridges).
+    - Status indicators (Active/Down).
+
 ### Interface Types
 
 | Type | Description |
@@ -219,14 +231,6 @@ Use the top selector to choose the node to inspect.
 | **Ethernet** | Physical interfaces (eth0, enp0s3...) |
 | **Bond** | Link aggregation |
 | **VLAN** | VLAN interfaces |
-
-### Displayed Information
-
-- **Name**: Interface identifier.
-- **Status**: Active/Inactive.
-- **Autostart**: If starts with system.
-- **IP/Gateway**: Configured addressing.
-- **Ports**: Associated interfaces (in bridges/bonds).
 
 ---
 

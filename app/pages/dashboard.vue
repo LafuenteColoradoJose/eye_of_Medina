@@ -99,13 +99,13 @@
         </template>
       </StatsCard>
 
-      <StatsCard label="Bridges Activos" :value="String(totalBridges)" subtext="Puentes de red en nodos">
+      <StatsCard label="Zonas IP" :value="String(totalIpZones)" subtext="Interfaces con IP asignada">
         <template #icon>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="9" width="20" height="6" rx="2" ry="2"></rect>
-            <path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"></path>
-            <path d="M5 9V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"></path>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
           </svg>
         </template>
       </StatsCard>
@@ -218,7 +218,7 @@
                   </div>
                   <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
                     'cpu'))
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
             </ul>
@@ -251,7 +251,7 @@
                     <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
                   </div>
                   <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
             </ul>
@@ -351,7 +351,7 @@ const consumerMode = ref<'vm' | 'pool' | 'cluster'>('vm')
 const nodes = ref<NodeResource[]>([])
 const vms = ref<VmResource[]>([])
 const pools = ref<Pool[]>([])
-const totalBridges = ref(0) // -- Lifecycle --
+const totalIpZones = ref(0) // -- Lifecycle --
 onMounted(() => {
   restoreSession()
   if (isAuthenticated.value) loadDashboard()
@@ -387,14 +387,14 @@ const loadDashboard = async () => {
         .map(async (n) => {
           const res = await getNodeNetworks(n.node)
           if (res.success && Array.isArray(res.data)) {
-            // Contar bridges activos
-            return res.data.filter((net: any) => net.type === 'bridge' && net.active).length
+            // Contar zonas IP activas (interfaces con dirección L3)
+            return res.data.filter((net: any) => (net.address || net.address6) && net.active).length
           }
           return 0
         })
 
       const results = await Promise.all(netPromises)
-      totalBridges.value = results.reduce((sum, count) => sum + count, 0)
+      totalIpZones.value = results.reduce((sum, count) => sum + count, 0)
     }
 
     lastRefreshed.value = new Date()

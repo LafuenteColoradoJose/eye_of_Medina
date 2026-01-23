@@ -89,7 +89,7 @@ Calls to Proxmox are routed through the Nuxt backend:
 
 | Component | Description |
 |-----------|-------------|
-| KPIs | Total VMs/CTs, running, active bridges. |
+| KPIs | Total VMs/CTs, running, **active IP zones**. |
 | Charts | VM status, CPU per node, pool distribution. |
 | Top Consumers | Consumption analysis with three perspectives: **VM** (local usage), **Pool** (group impact), and **Cluster** (global impact). |
 | Tasks Drawer | Slide-out panel (`TasksDrawer`) with aggregated operation logs from all nodes (smart fallback for non-admins). |
@@ -105,10 +105,9 @@ Calls to Proxmox are routed through the Nuxt backend:
 
 ### Network Management
 
-- Node Interfaces: Bridges (`vmbr*`), Ethernet, Bonds, VLANs.
-- Status: Active/Inactive, autostart.
-- Addressing: IPs, gateways, netmasks.
-- Relationships: Bridge ports, bond slaves.
+- **Smart Addressing**: New dashboard focusing on "Zones" (L3) rather than raw cables.
+- **Visual Topology**: Hierarchical visualization `[Physical] -> [Bond/Bridge] -> [IP]`.
+- **UX Improvements**: "Click-to-Copy" for IPs, visual distinction between v4/v6.
 
 ### Identity Management
 
