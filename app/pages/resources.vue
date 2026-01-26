@@ -30,10 +30,10 @@
 
             <!-- Node Card -->
             <div v-for="node in nodesData" :key="node.name"
-                class="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow">
+                class="bg-card border border-border rounded-xl flex flex-col shadow-sm hover:shadow-md transition-shadow">
 
                 <!-- Node Header (Capacity) -->
-                <div class="p-5 border-b border-border/50 bg-muted-surface/30">
+                <div class="p-5 border-b border-border/50 bg-muted-surface/30 rounded-t-xl">
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex items-center gap-3">
                             <div class="w-3 h-3 rounded-full"
@@ -54,7 +54,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">CPU Host</span>
                                 <span :class="getLoadColorText(node.cpuUsage)">{{ (node.cpuUsage * 100).toFixed(1)
-                                }}%</span>
+                                    }}%</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full transition-all duration-500"
@@ -67,7 +67,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">RAM Host</span>
                                 <span class="text-text">{{ formatBytes(node.memUsed) }} / {{ formatBytes(node.memTotal)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full bg-blue-500 transition-all duration-500"
@@ -78,7 +78,7 @@
                 </div>
 
                 <!-- VMs Heatmap (The Grid) -->
-                <div class="p-5 flex-1 bg-[#0a0a0a]">
+                <div class="p-5 flex-1 bg-[#0a0a0a] rounded-b-xl">
                     <h3 class="text-[10px] uppercase font-bold text-text-muted mb-3 flex justify-between">
                         <span>Carga Individual de VMs (CPU)</span>
                         <span class="text-[9px] opacity-50">hover para detalles</span>
@@ -107,7 +107,7 @@
                                 </div>
                                 <div class="space-y-1.5 text-xs font-mono">
                                     <div class="flex justify-between"><span class="opacity-70">ID:</span> <span>{{
-                                            vm.vmid }}</span></div>
+                                        vm.vmid }}</span></div>
                                     <div class="flex justify-between"><span class="opacity-70">Type:</span> <span
                                             class="uppercase font-bold">{{ vm.type }}</span></div>
                                     <div class="flex justify-between items-center">
