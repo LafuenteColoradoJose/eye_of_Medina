@@ -367,6 +367,14 @@ export const useProxmox = () => {
       return proxmoxRequest(url, 'GET')
     },
 
+    downloadUrlToStorage: async (node: string, storage: string, url: string, filename: string, content: 'iso' | 'vztmpl' = 'iso') => {
+      return proxmoxRequest(`/nodes/${encodeURIComponent(node)}/storage/${encodeURIComponent(storage)}/download-url`, 'POST', undefined, {
+        content,
+        filename,
+        url
+      })
+    },
+
     // Create Machine from scratch
     createQemu: async (node: string, data: Record<string, unknown>) =>
       proxmoxRequest(`/nodes/${encodeURIComponent(node)}/qemu`, 'POST', undefined, data),
