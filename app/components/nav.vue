@@ -232,10 +232,14 @@ const items = computed(() => {
     menu.push({ to: '/groups', label: 'Grupos', icon: IconGroups })
   }
 
-  // 5. IAM - Permissions
-  if (hasPermissionAnywhere('Permissions.Modify') || isClusterAdmin.value || hasPermissionAnywhere('Sys.Audit')) {
+  // 5. IAM - Permissions (Strict visibility)
+  // Only show if user can actually MANAGE or AUDIT permissions globally.
+  // Regular users with just VM access should NOT see this.
+  const canManagePermissions = isClusterAdmin.value || hasPermissionAnywhere('Permissions.Modify') || hasPermissionAnywhere('Sys.Audit')
+
+  if (canManagePermissions) {
     menu.push({ to: '/roles', label: 'Roles', icon: IconRoles })
-    menu.push({ to: '/permissions', label: 'ACLs', icon: IconTree }) // Consolidating ACL and Permissions concept
+    menu.push({ to: '/permissions', label: 'ACLs', icon: IconTree })
   }
 
   return menu
