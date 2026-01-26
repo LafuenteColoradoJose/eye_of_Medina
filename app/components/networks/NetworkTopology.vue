@@ -15,6 +15,12 @@
                 <span class="text-xs text-text-muted font-mono">Generando mapa...</span>
             </div>
         </div>
+
+        <!-- DEBUG OVERLAY (Remove later) -->
+        <div
+            class="absolute bottom-4 right-4 bg-black/80 text-xs font-mono text-green-400 p-2 rounded pointer-events-none z-20 max-w-sm overflow-auto max-h-40">
+            DEBUG TYPES: {{ debugTypes }}
+        </div>
     </div>
 </template>
 
@@ -39,6 +45,7 @@ const props = defineProps<{
 const loading = ref(false)
 const nodes = ref<Node[]>([])
 const edges = ref<Edge[]>([])
+const debugTypes = ref<string[]>([])
 
 // --- Constants ---
 const LAYER_WIDTH = 300
@@ -66,6 +73,9 @@ const buildTopology = async () => {
         // 1. Fetch Node Networks (Bridges & Ports)
         const netRes = await getNodeNetworks(props.targetNode)
         const allIfaces = (netRes.success ? netRes.data : []) as any[]
+
+        // DEBUG: Capture types
+        debugTypes.value = Array.from(new Set(allIfaces.map(i => i.type)))
 
         // Identify Bridges and Physical Ports (Standard Linux Bridge OR Open vSwitch Bridge)
         const bridges = allIfaces.filter(n => n.type === 'bridge' || n.type === 'OVSBridge')
