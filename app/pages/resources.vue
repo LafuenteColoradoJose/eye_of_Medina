@@ -1,6 +1,5 @@
 <template>
     <div class="p-6 max-w-[1920px] mx-auto space-y-8">
-
         <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -54,7 +53,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">CPU Host</span>
                                 <span :class="getLoadColorText(node.cpuUsage)">{{ (node.cpuUsage * 100).toFixed(1)
-                                }}%</span>
+                                    }}%</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full transition-all duration-500"
@@ -67,7 +66,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">RAM Host</span>
                                 <span class="text-text">{{ formatBytes(node.memUsed) }} / {{ formatBytes(node.memTotal)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full bg-blue-500 transition-all duration-500"
@@ -135,13 +134,6 @@
 
             </div>
         </div>
-
-        <!-- DEBUG: RAW NODES DUMP (Temporary) -->
-        <div
-            class="mt-8 p-4 bg-black text-green-400 font-mono text-xs rounded border border-green-900 overflow-auto max-h-64">
-            <div class="font-bold mb-2">DEBUG /nodes RESPONSE:</div>
-            <pre>{{ rawNodes }}</pre>
-        </div>
     </div>
 </template>
 
@@ -150,7 +142,7 @@ import { ref, onMounted, computed } from 'vue'
 
 useHead({ title: 'Heatmap de Recursos' })
 
-const { isAuthenticated, restoreSession, listVMResources, listNodes } = useProxmox()
+const { isAuthenticated, restoreSession, listVMResources, listNodes, proxmoxRequest } = useProxmox()
 
 // Types
 type ClusterResource = {
@@ -188,19 +180,49 @@ onMounted(() => {
 const fetchData = async () => {
     loading.value = true
     try {
-        // Parallel fetch for robustness: Nodes stats + Cluster Resources (VMs)
-        const [clusterRes, nodesRes] = await Promise.all([
+        // 1. Fetch Basic Lists (Nodes + VMs)
+        const [clusterRes, nodesListRes] = await Promise.all([
             listVMResources(),
             listNodes()
         ])
 
+        let machines: ClusterResource[] = []
+        let nodesBasic: any[] = []
+
         if (clusterRes.success && clusterRes.data) {
-            rawResources.value = clusterRes.data as ClusterResource[]
+            machines = clusterRes.data as ClusterResource[]
+            rawResources.value = machines
         }
 
-        if (nodesRes.success && nodesRes.data) {
-            rawNodes.value = nodesRes.data as any[]
+        if (nodesListRes.success && nodesListRes.data) {
+            nodesBasic = nodesListRes.data as any[]
         }
+
+        // 2. Fetch Detailed Stats for EACH Node (to get CPU/RAM)
+        // /nodes endpoint is lightweight and doesn't return metrics. We need /nodes/{node}/status
+        const nodeDetailPromises = nodesBasic
+            .filter((n: any) => n.status === 'online')
+            .map(async (n: any) => {
+                const statusRes = await proxmoxRequest(`/nodes/${n.node}/status`, 'GET')
+                if (statusRes.success && statusRes.data) {
+                    // Normalize fields: status API returns 'memory' object usually, or flat fields depending on version
+                    // Usually: { memory: { total: X, used: Y }, cpu: 0.1 }
+                    const d = statusRes.data as any
+
+                    // Flatten for easier consumption
+                    return {
+                        ...n,
+                        cpu: d.cpu, // 0.05
+                        mem: d.memory?.used || d.mem || 0,
+                        maxmem: d.memory?.total || d.maxmem || 0,
+                        uptime: d.uptime
+                    }
+                }
+                return n
+            })
+
+        const detailedNodes = await Promise.all(nodeDetailPromises)
+        rawNodes.value = detailedNodes
 
     } catch (e) { console.error(e) }
     finally { loading.value = false }
