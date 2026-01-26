@@ -54,7 +54,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">CPU Host</span>
                                 <span :class="getLoadColorText(node.cpuUsage)">{{ (node.cpuUsage * 100).toFixed(1)
-                                    }}%</span>
+                                }}%</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full transition-all duration-500"
@@ -67,7 +67,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">RAM Host</span>
                                 <span class="text-text">{{ formatBytes(node.memUsed) }} / {{ formatBytes(node.memTotal)
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full bg-blue-500 transition-all duration-500"
@@ -134,6 +134,13 @@
                 </div>
 
             </div>
+        </div>
+
+        <!-- DEBUG: RAW NODES DUMP (Temporary) -->
+        <div
+            class="mt-8 p-4 bg-black text-green-400 font-mono text-xs rounded border border-green-900 overflow-auto max-h-64">
+            <div class="font-bold mb-2">DEBUG /nodes RESPONSE:</div>
+            <pre>{{ rawNodes }}</pre>
         </div>
     </div>
 </template>
