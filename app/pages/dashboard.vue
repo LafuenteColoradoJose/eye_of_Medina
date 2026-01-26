@@ -116,9 +116,9 @@
       <!-- VM Status -->
       <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
         <h2 class="font-bold text-base text-text mb-4">Estado de VMs</h2>
-        <div class="flex items-center gap-6 flex-1 min-h-[140px]">
+        <div class="flex items-center gap-4 flex-1 min-h-[140px]">
           <!-- Donut Chart -->
-          <div class="relative w-[120px] h-[120px] shrink-0">
+          <div class="relative w-[110px] h-[110px] shrink-0">
             <ClientOnly>
               <ApexChart v-if="totalVms > 0" type="donut" width="100%" height="100%" :options="chartVmState.options"
                 :series="chartVmState.series" />
@@ -130,20 +130,20 @@
             </ClientOnly>
           </div>
           <!-- Custom Legend -->
-          <div class="flex flex-col gap-2 flex-1 justify-center">
+          <div class="flex flex-col gap-3 flex-1 justify-center min-w-0">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full bg-positive shadow-[0_0_8px_rgba(74,222,128,0.4)]"></div>
-                <span class="text-xs font-medium text-text">Running</span>
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-2.5 h-2.5 rounded-full bg-positive shrink-0 shadow-[0_0_8px_rgba(74,222,128,0.4)]"></div>
+                <span class="text-xs font-medium text-text truncate">Running</span>
               </div>
-              <span class="text-xs font-bold text-text">{{ runningVms }}</span>
+              <span class="text-xs font-bold text-text ml-2 whitespace-nowrap">{{ runningVms }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full bg-muted shadow-sm"></div>
-                <span class="text-xs font-medium text-text">Stopped</span>
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0 shadow-sm"></div>
+                <span class="text-xs font-medium text-text truncate">Stopped</span>
               </div>
-              <span class="text-xs font-bold text-text-muted">{{ totalVms - runningVms }}</span>
+              <span class="text-xs font-bold text-text-muted ml-2 whitespace-nowrap">{{ totalVms - runningVms }}</span>
             </div>
           </div>
         </div>
@@ -152,9 +152,9 @@
       <!-- Storage Global -->
       <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
         <h2 class="font-bold text-base text-text mb-4">Almacenamiento (Local)</h2>
-        <div class="flex items-center gap-6 flex-1 min-h-[140px]">
+        <div class="flex items-center gap-4 flex-1 min-h-[140px]">
           <!-- Donut Chart -->
-          <div class="relative w-[120px] h-[120px] shrink-0">
+          <div class="relative w-[110px] h-[110px] shrink-0">
             <ClientOnly>
               <ApexChart v-if="nodes.length > 0" type="donut" width="100%" height="100%" :options="chartStorage.options"
                 :series="chartStorage.series" />
@@ -167,20 +167,22 @@
             </ClientOnly>
           </div>
           <!-- Custom Legend -->
-          <div class="flex flex-col gap-2 flex-1 justify-center">
+          <div class="flex flex-col gap-3 flex-1 justify-center min-w-0 pl-1">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></div>
-                <span class="text-xs font-medium text-text">Ocupado</span>
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></div>
+                <span class="text-xs font-medium text-text truncate">Ocupado</span>
               </div>
-              <span class="text-xs font-bold text-text">{{ formatBytes(storageMetrics.used) }}</span>
+              <span class="text-xs font-bold text-text tabular-nums ml-2 whitespace-nowrap">{{
+                formatBytes(storageMetrics.used) }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full bg-muted shadow-sm"></div>
-                <span class="text-xs font-medium text-text">Total</span>
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0 shadow-sm"></div>
+                <span class="text-xs font-medium text-text truncate">Total</span>
               </div>
-              <span class="text-xs font-bold text-text-muted">{{ formatBytes(storageMetrics.total) }}</span>
+              <span class="text-xs font-bold text-text-muted tabular-nums ml-2 whitespace-nowrap">{{
+                formatBytes(storageMetrics.total) }}</span>
             </div>
           </div>
         </div>
@@ -303,7 +305,7 @@
                   </div>
                   <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
                     'cpu'))
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
             </ul>
@@ -336,7 +338,7 @@
                     <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
                   </div>
                   <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
             </ul>
@@ -492,7 +494,8 @@ const startPolling = () => {
         statuses.forEach((s) => {
           if (s.success && s.data) {
             // netin + netout (cumulative bytes)
-            totalBytes += (s.data.netin || 0) + (s.data.netout || 0)
+            const d = s.data as any
+            totalBytes += (d.netin || 0) + (d.netout || 0)
           }
         })
 
