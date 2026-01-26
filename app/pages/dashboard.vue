@@ -142,7 +142,7 @@
           </div>
         </div>
         <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
-          <RealtimeChart title="CPU Cluster" :data-point="currentClusterCpuVal" color="var(--color-primary)"
+          <RealtimeChart title="CPU Cluster" :data-point="currentClusterCpuVal" :color="COLORS.primary" :height="160"
             :max-points="30" />
         </div>
       </div>
@@ -221,7 +221,7 @@
                   </div>
                   <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
                     'cpu'))
-                  }}</span>
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -254,7 +254,7 @@
                     <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
                   </div>
                   <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
-                  }}</span>
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -552,12 +552,12 @@ const toPercent = (value: number, max: number) => {
 // -- Charts Config --
 // Mapped colors from our CSS variables (hardcoded hex matches for Apex)
 const COLORS = {
-  primary: '#1371C2',
-  accent: '#D85676',
-  positive: '#4FA866',
-  warning: '#ffd900',
-  danger: '#D85676',
-  muted: '#94a3b8' // Visible gray for "Stopped" state
+  primary: '#7c3aed', // Violet 600 (Matches main.css)
+  accent: '#2dd4bf',  // Teal 400
+  positive: '#4ade80', // Green 400
+  warning: '#facc15', // Yellow 400
+  danger: '#f87171',  // Red 400
+  muted: '#94a3b8'
 }
 
 const chartVmState = computed(() => {
