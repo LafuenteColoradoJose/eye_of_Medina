@@ -13,8 +13,9 @@ Step-by-step guide to using the Proxmox VE monitoring and management dashboard.
 5. [VNC Console](#vnc-console)
 6. [Network Management](#network-management)
 7. [Identity Management](#identity-management)
-8. [Customization](#customization)
-9. [Common Errors](#common-errors)
+8. [Storage Management](#storage-management)
+9. [Customization](#customization)
+10. [Common Errors](#common-errors)
 
 ---
 
@@ -55,6 +56,7 @@ The left sidebar provides access to all sections:
 |------|---------|-------------|
 | 📊 | Dashboard | Cluster overview |
 | 🖥️ | Machines | VM and Container management |
+| 💾 | Storage | ISOs and Backups management |
 | 🌐 | Networks | Network interfaces per node |
 | 📦 | Pools | Resource groups |
 | 👥 | Groups | User groups |
@@ -71,36 +73,18 @@ At the bottom of the menu you will find:
 
 ## Dashboard
 
-The dashboard displays a general overview of the cluster status.
+The dashboard displays a general overview of the cluster status with high density information.
 
-### Top KPIs
+### Main Metrics (Top Row)
+1. **VM Status**: Circular chart showing Running vs Stopped VMs.
+2. **Global Storage**: Total vs Used capacity of all local disks in the cluster.
+3. **CPU Real-time**: Cluster-wide CPU load graph.
+4. **Network Traffic**: Real-time aggregate bandwidth (Mbps) usage.
 
-Quick cluster metrics:
-- **Total VMs**: Number of virtual machines.
-- **Total CTs**: Number of containers.
-- **Running**: Currently active VMs/CTs.
+### Secondary Metrics
+- **Top Consumers**: List of VMs sorted by resource consumption (CPU/Memory). 
 - **Active IP Zones**: Interfaces with assigned IP addresses (L3).
-
-### Charts
-
-- **VM Status**: Distribution by status (running, stopped, etc.).
-- **CPU per Node**: CPU usage on each node.
-- **By Pools**: Distribution of VMs/CTs per pool.
-
-### Top Consumers
-
-List of VMs sorted by resource consumption (CPU/Memory). Includes three view modes selectable via tabs:
-
-- **VM**: Shows usage % relative to the machine's assigned resources. Useful for detecting saturated VMs.
-- **POOL**: Shows usage % relative to the total resources of the Pool it belongs to. Useful for spotting "noisy neighbors" in a group.
-- **CLUSTER**: Shows usage % relative to the total physical server capacity. Useful for identifying who is consuming real infrastructure.
-
-### Node Health
-
-Status and metrics for each cluster node:
-- CPU and Memory.
-- Storage.
-- Uptime.
+- **Node Health**: Grid showing status (Online/Offline) and resource usage of each node.
 
 ### Task Log (Recent Tasks)
 
@@ -234,7 +218,35 @@ The new interface prioritizes logical connectivity over cabling:
 
 ---
 
-## Identity Management
+---
+ 
+ ## Storage Management
+ 
+ Access via menu: **Storage**
+ 
+ ### Browse Content
+ 
+ 1. Select the **Node** from the dropdown menu.
+ 2. Select the specific **Storage** (e.g., `local`, `local-lvm`).
+ 3. Use the tabs to filter by type:
+    - **ISO**: Installation images.
+    - **Templates**: LXC container templates.
+    - **Backups**: VZDump backup files.
+ 
+ ### Download Content (URL)
+ 
+ You can download ISOs directly to the server:
+ 
+ 1. Click the **Download from URL** button.
+ 2. Enter the direct link to the ISO file.
+ 3. Enter the target filename.
+ 4. Click **Download**.
+ 
+ > The download happens in the background on the Proxmox node.
+ 
+ ---
+ 
+ ## Identity Management
 
 ### Pools
 

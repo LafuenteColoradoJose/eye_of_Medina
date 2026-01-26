@@ -17,12 +17,18 @@
 
 ## ✨ Features
 
-### Dashboard
-- **Real-time KPIs**: Total VMs, containers, **active IP zones**, and node status.
-- **Interactive Charts**: VM status distribution, CPU load per node, pool distribution.
+### Dashboard 2.0
+- **High Density Layout**: 4-column grid optimized for large screens (`KPIs` + `State` + `Storage` + `CPU` + `Network`).
+- **Real-time Metrics**: Live monitoring of **CPU Cluster**, **Global Storage**, and **Network Traffic** (Mbps).
+- **Interactive Charts**: VM status donut, storage capacity, and historical trends.
 - **Top Consumers**: Detailed resource consumption analysis (CPU/RAM) with **VM**, **Pool**, and **Cluster** views.
 - **Node Health**: Health status and metrics for each cluster node.
 - **Task Log (Tasks Drawer)**: Sliding side panel with real-time cluster task history.
+
+### Storage Management (NEW!)
+- **ISO & Templates**: Browse and manage content across all cluster storage.
+- **Download from URL**: Directly download ISOs/Images to Proxmox storage nodes.
+- **Visual Browsing**: Filter by content type (ISO, Backup, CT Template, Snippet).
 
 ### Virtual Machine Management
 - **Advanced Filtering**: By name, ID, type, and pool.

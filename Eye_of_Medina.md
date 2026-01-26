@@ -85,15 +85,20 @@ Calls to Proxmox are routed through the Nuxt backend:
 
 ## UI Features
 
-### Dashboard
+### Dashboard 2.2
+- **High Density Layout**: 4-column responsive grid (`State`, `Storage`, `CPU`, `Network`) for large screens.
+- **Real-time Monitoring**:
+  - **Network**: Aggregate cluster traffic (Mbps) calculated from node deltas.
+  - **Storage**: Global capacity usage of all local disks.
+  - **CPU**: Real-time cluster load chart.
+- **Top Consumers**: Detailed resource consumption analysis (CPU/RAM).
+- **Tasks Drawer**: Slide-out panel with aggregated operation logs.
+- **Node Health**: Grid view of all nodes with status indicators.
 
-| Component | Description |
-|-----------|-------------|
-| KPIs | Total VMs/CTs, running, **active IP zones**. |
-| Charts | VM status, CPU per node, pool distribution. |
-| Top Consumers | Consumption analysis with three perspectives: **VM** (local usage), **Pool** (group impact), and **Cluster** (global impact). |
-| Tasks Drawer | Slide-out panel (`TasksDrawer`) with aggregated operation logs from all nodes (smart fallback for non-admins). |
-| Node Health | Status and metrics for each cluster node. |
+### Storage Management
+- **Unified Browser**: View files (ISOs, Templates, Backups) across all nodes/storages.
+- **Direct Download**: Feature to download files (e.g., ISOs) from a URL directly to the Proxmox node storage.
+- **Capacity Analysis**: specific visualization of storage usage.
 
 ### Machine Management (VM/CT)
 
@@ -255,6 +260,14 @@ await deleteMachine('pve1', '100')
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/nodes/{node}/network` | GET | Node network interfaces |
+
+### Storage
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/nodes/{node}/storage` | GET | List storages on a node |
+| `/nodes/{node}/storage/{storage}/content` | GET | List files (ISOs, VZTemplates) |
+| `/nodes/{node}/storage/{storage}/download-url` | POST | Download file from URL |
 
 ---
 
