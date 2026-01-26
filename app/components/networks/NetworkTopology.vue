@@ -67,8 +67,8 @@ const buildTopology = async () => {
         const netRes = await getNodeNetworks(props.targetNode)
         const allIfaces = (netRes.success ? netRes.data : []) as any[]
 
-        // Identify Bridges and Physical Ports
-        const bridges = allIfaces.filter(n => n.type === 'bridge')
+        // Identify Bridges and Physical Ports (Standard Linux Bridge OR Open vSwitch Bridge)
+        const bridges = allIfaces.filter(n => n.type === 'bridge' || n.type === 'OVSBridge')
         // Physical ports are those that are NOT bridges/bonds/vlans OR are listed as bridge_ports
         // Simplification: We will link Uplink -> Bridge directly if no physical port found, or Uplink -> Phys -> Bridge
 
