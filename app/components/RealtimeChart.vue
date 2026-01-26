@@ -1,17 +1,25 @@
 <template>
     <div class="w-full h-full min-h-[150px]">
         <ClientOnly>
-            <apexchart ref="chartRef" :type="type" :height="height" :options="chartOptions" :series="series" />
+            <component :is="apexchart" v-if="apexchart" ref="chartRef" :type="type" :height="height"
+                :options="chartOptions" :series="series" />
         </ClientOnly>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, shallowRef } from 'vue'
 import type { ApexOptions } from 'apexcharts'
-import VueApexCharts from 'vue3-apexcharts'
 
-const apexchart = VueApexCharts
+const apexchart = shallowRef<any>(null)
+
+onMounted(async () => {
+    if (typeof window !== 'undefined') {
+        const module = await import('vue3-apexcharts')
+        apexchart.value = module.default
+        initData()
+    }
+})
 
 const props = defineProps({
     title: { type: String, default: '' },

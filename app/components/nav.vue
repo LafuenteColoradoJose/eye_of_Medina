@@ -193,6 +193,7 @@ const IconGroups = h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 20, he
 const IconRoles = h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [h('path', { d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10' }), h('path', { d: 'm9 12 2 2 4-4' })])
 const IconACL = h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [h('rect', { width: 18, height: 11, x: 3, y: 11, rx: 2, ry: 2 }), h('path', { d: 'M7 11V7a5 5 0 0 1 10 0v4' })])
 const IconTree = h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [h('rect', { width: 20, height: 8, x: 2, y: 2, rx: 2, ry: 2 }), h('path', { d: 'M2 14h20' }), h('path', { d: 'M12 10v12' }), h('path', { d: 'M12 14h6' }), h('rect', { width: 6, height: 6, x: 18, y: 18, rx: 1 })])
+const IconActivity = h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [h('path', { d: 'M22 12h-4l-3 9L9 3l-3 9H2' })])
 
 
 interface MenuItem {
@@ -217,6 +218,7 @@ const items = computed(() => {
   // 3. Infrastructure
   if (isClusterAdmin.value || hasPermissionAnywhere('Sys.Audit') || hasPermissionAnywhere('SDN.Audit')) {
     menu.push({ to: '/networks', label: 'Redes', icon: IconNetworks })
+    menu.push({ to: '/resources', label: 'Métricas & Calor', icon: IconActivity })
   }
 
   if (isClusterAdmin.value || hasPermissionAnywhere('Pool.Audit') || hasPermissionAnywhere('VM.Allocate')) {
