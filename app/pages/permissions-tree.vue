@@ -11,10 +11,28 @@
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
+
+      <!-- Error Alert -->
+      <div v-if="error"
+        class="col-span-1 md:col-span-2 p-4 bg-red-500/10 border border-red-500/50 text-red-500 rounded-lg flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" x2="12" y1="8" y2="12" />
+          <line x1="12" x2="12.01" y1="16" y2="16" />
+        </svg>
+        <div>
+          <p class="font-bold">Error cargando permisos</p>
+          <p class="text-sm font-mono">{{ error }}</p>
+        </div>
+      </div>
+
       <div class="section-card p-4 rounded shadow w-full overflow-hidden">
         <h1 class="text-xl font-bold mb-3">Árbol por Recursos</h1>
         <p class="text-sm muted mb-4">Explora recursos (pools, VMs, nodes) y ve qué sujetos tienen roles asignados.</p>
         <div v-if="loading" class="text-sm muted">Cargando...</div>
+        <div v-else-if="resourcesTree.length === 0" class="text-sm text-yellow-500 italic">No se encontraron permisos de
+          recursos o acceso denegado.</div>
         <PermissionTree v-else :nodes="resourcesTree" is-root />
       </div>
 
@@ -22,6 +40,8 @@
         <h1 class="text-xl font-bold mb-3">Árbol por Sujetos</h1>
         <p class="text-sm muted mb-4">Explora usuarios y grupos y ve a qué recursos están asignados.</p>
         <div v-if="loading" class="text-sm muted">Cargando...</div>
+        <div v-else-if="subjectsTree.length === 0" class="text-sm text-yellow-500 italic">No se encontraron sujetos con
+          permisos.</div>
         <PermissionTree v-else :nodes="subjectsTree" is-root />
       </div>
 
@@ -67,6 +87,7 @@ const router = useRouter()
 const { listACLs, listRoles, listGroups, proxmoxRequest, restoreSession, isAuthenticated } = useProxmox()
 
 const loading = ref<boolean>(true)
+const error = ref<string | null>(null) // Added error state
 const acls = ref<ACL[]>([])
 const roles = ref<Record<string, unknown>[]>([])
 const users = ref<Record<string, unknown>[]>([])
@@ -91,6 +112,43 @@ watch(isAuthenticated, async (val) => {
 const reloadAll = async () => await loadAll()
 const showRaw = () => (raw.value = !raw.value)
 
+async function loadAll() {
+  loading.value = true
+  error.value = null // Reset error
+
+  try {
+    const [rACLs, rRoles, rUsers, rGroups, rPools, rVMs] = await Promise.all([
+      listACLs(),
+      listRoles(),
+      proxmoxRequest('/access/users', 'GET'),
+      listGroups(),
+      proxmoxRequest('/pools', 'GET'),
+      proxmoxRequest('/cluster/resources?type=vm', 'GET'),
+    ])
+
+    if (!rACLs.success) {
+      console.error('[PermissionsTree] Failed to load ACLs:', rACLs)
+      error.value = `Error obteniendo ACLs: ${rACLs.message || 'Desconocido'}`
+    }
+
+    acls.value = rACLs.success ? (rACLs.data as ACL[]) || [] : []
+    roles.value = rRoles.success ? (rRoles.data as Record<string, unknown>[]) || [] : []
+    users.value = rUsers.success ? (rUsers.data as Record<string, unknown>[]) || [] : []
+    groups.value = rGroups.success ? (rGroups.data as Record<string, unknown>[]) || [] : []
+    pools.value = rPools.success ? (rPools.data as Record<string, unknown>[]) || [] : []
+    vms.value = rVMs.success ? (rVMs.data as Record<string, unknown>[]) || [] : []
+
+    buildResourceTree()
+    buildSubjectsTree()
+
+  } catch (e: any) {
+    console.error('[PermissionsTree] Exception:', e)
+    error.value = e.message || String(e)
+  } finally {
+    loading.value = false
+  }
+}
+
 function ensureNode<T>(map: Map<string, T>, key: string, nodeFactory: () => T): T {
   if (!map.has(key)) {
     map.set(key, nodeFactory())
@@ -98,29 +156,7 @@ function ensureNode<T>(map: Map<string, T>, key: string, nodeFactory: () => T): 
   return map.get(key) as T
 }
 
-async function loadAll() {
-  loading.value = true
-  const [rACLs, rRoles, rUsers, rGroups, rPools, rVMs] = await Promise.all([
-    listACLs(),
-    listRoles(),
-    proxmoxRequest('/access/users', 'GET'),
-    listGroups(),
-    proxmoxRequest('/pools', 'GET'),
-    proxmoxRequest('/cluster/resources?type=vm', 'GET'),
-  ])
-
-  acls.value = rACLs.success ? (rACLs.data as ACL[]) || [] : []
-  roles.value = rRoles.success ? (rRoles.data as Record<string, unknown>[]) || [] : []
-  users.value = rUsers.success ? (rUsers.data as Record<string, unknown>[]) || [] : []
-  groups.value = rGroups.success ? (rGroups.data as Record<string, unknown>[]) || [] : []
-  pools.value = rPools.success ? (rPools.data as Record<string, unknown>[]) || [] : []
-  vms.value = rVMs.success ? (rVMs.data as Record<string, unknown>[]) || [] : []
-
-  buildResourceTree()
-  buildSubjectsTree()
-
-  loading.value = false
-}
+// Old implementation removed to fix duplicate error
 
 function buildResourceTree() {
   // resource -> role -> [subjects]

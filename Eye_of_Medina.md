@@ -109,8 +109,17 @@ Calls to Proxmox are routed through the Nuxt backend:
 - **Visual Topology**: Hierarchical visualization `[Physical] -> [Bond/Bridge] -> [IP]`.
 - **UX Improvements**: "Click-to-Copy" for IPs, visual distinction between v4/v6.
 
-### Identity Management
+### Resources Heatmap & Capacity
+- **Real-time Capacity**: Visualizes Host CPU/RAM usage.
+- **Smart Fallback Architecture**: If the user lacks `Sys.Audit` permissions (seeing 0% host usage), the system **automatically aggregates** the CPU/RAM of all visible VMs to calculate a "Virtual Load", ensuring useful data is always displayed.
+- **Granular Heatmap**: Interactive grid showing individual VM load (CPU) with color-coded alerts (Green -> Red).
 
+### Network Topology
+- **Interactive Map**: Visual graph `[Physical Node] -> [Bridge/Bond] -> [IP/CIDR]`.
+- **Smart Addressing**: Focuses on Layer 3 (IP Zones) rather than raw interfaces.
+- **Visual Aids**: Distinction between IPv4/IPv6, click-to-copy IPs, and intuitive tree layout.
+
+### Identity Management
 - **Pools**: Logically grouped resources.
 - **Groups**: User sets.
 - **Users**: Access accounts.
@@ -306,7 +315,12 @@ Path: /pool/{pool-name} or /vms/{vmid}
 
 - ✅ Verify connectivity to port 8006.
 - ✅ Check if `pveproxy` is active: `systemctl status pveproxy`.
+- ✅ Check if `pveproxy` is active: `systemctl status pveproxy`.
 - ✅ Review user/token permissions on the resources.
+
+### Missing Host Metrics (CPU/RAM 0%)
+- **Cause**: The user likely lacks `Sys.Audit` permission on `/nodes/{node}`.
+- **Solution**: Grant `Sys.Audit` OR rely on the **Smart Fallback** feature (Eye of Medina will automatically sum VM usage instead).
 
 ### VNC Console not connecting
 

@@ -241,8 +241,11 @@ const items = computed(() => {
 
   if (canManagePermissions) {
     menu.push({ to: '/roles', label: 'Roles', icon: IconRoles })
-    menu.push({ to: '/permissions', label: 'ACLs', icon: IconTree })
+    menu.push({ to: '/permissions', label: 'ACLs', icon: IconACL })
   }
+
+  // Debug / Visibility: Alway show Tree for now
+  menu.push({ to: '/permissions-tree', label: 'Árbol Permisos', icon: IconTree })
 
   return menu
 })
