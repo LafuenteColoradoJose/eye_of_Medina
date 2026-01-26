@@ -46,19 +46,19 @@
                         </div>
                     </div>
 
-                    <!-- Host Metrics - WITH ERROR INDICATOR IF MISSING -->
+                    <!-- Host Metrics -->
                     <div class="space-y-3">
                         <!-- CPU Bar -->
                         <div>
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">CPU Host</span>
                                 <span :class="getLoadColorText(node.cpuUsage)">{{ (node.cpuUsage * 100).toFixed(1)
-                                }}%</span>
+                                    }}%</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full transition-all duration-500"
                                     :class="getLoadColorBg(node.cpuUsage)"
-                                    :style="{ width: `${node.cpuUsage * 100}%` }"></div>
+                                    :style="{ width: `${Math.min(node.cpuUsage * 100, 100)}%` }"></div>
                             </div>
                         </div>
                         <!-- RAM Bar -->
@@ -66,11 +66,12 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">RAM Host</span>
                                 <span class="text-text">{{ formatBytes(node.memUsed) }} / {{ formatBytes(node.memTotal)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full bg-blue-500 transition-all duration-500"
-                                    :style="{ width: `${(node.memUsed / node.memTotal) * 100}%` }"></div>
+                                    :style="{ width: `${node.memTotal > 0 ? (node.memUsed / node.memTotal) * 100 : 0}%` }">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -153,7 +154,7 @@ type ClusterResource = {
     name?: string
     status?: string
     maxcpu?: number
-    cpu?: number // 0.0 to 1.0
+    cpu?: number // 0.0 to 1.0 (ratio)
     maxmem?: number
     mem?: number
     uptime?: number
@@ -213,7 +214,7 @@ const fetchData = async () => {
                         uptime: d.uptime
                     })
                 } else {
-                    console.warn(`[Eye of Medina] Fallo status nodo ${n.node}:`, statusRes)
+                    console.warn(`[Eye of Medina] Fallo status nodo ${n.node} (Probablemente permisos 403):`, statusRes)
                     // Push basic node info without stats if fetch fails
                     detailedNodes.push(n)
                 }
@@ -244,18 +245,16 @@ const nodesData = computed<NodeAggregated[]>(() => {
         })
     })
 
-    // 2. Fallback/Merge Pass: Fill from /cluster/resources
-    // Crucial fix: If direct node status failed (403 Forbidden), check if cluster resources has the stats
+    // 2. Fallback/Merge Pass: Fill from /cluster/resources if node not found or empty
     rawResources.value.forEach(r => {
         if (r.type === 'node') {
+            // Try to update existing node if it has zero stats
             const existing = nodesMap.get(r.node)
             if (existing) {
-                // If we have the node but stats are empty (0), try to fill from resource list
                 if (existing.cpuUsage === 0 && (r.cpu || 0) > 0) existing.cpuUsage = r.cpu || 0
                 if (existing.memUsed === 0 && (r.mem || 0) > 0) existing.memUsed = r.mem || 0
                 if (existing.memTotal === 0 && (r.maxmem || 0) > 0) existing.memTotal = r.maxmem || 0
             } else {
-                // Node completely new (not in /nodes list?)
                 nodesMap.set(r.node, {
                     name: r.node,
                     status: r.status === 'online' ? 'online' : 'offline',
@@ -268,33 +267,55 @@ const nodesData = computed<NodeAggregated[]>(() => {
         }
     })
 
-    // 3. Populate VMs
+    // 3. Populate VMs into their respective Nodes
     rawResources.value.forEach(r => {
         if (r.type === 'qemu' || r.type === 'lxc') {
             const node = nodesMap.get(r.node)
             if (node) {
                 node.vms.push(r)
             } else {
-                nodesMap.set(r.node, {
-                    name: r.node,
-                    status: 'unknown',
-                    cpuUsage: 0,
-                    memUsed: 0,
-                    memTotal: 0,
-                    vms: [r]
-                })
+                if (!nodesMap.has(r.node)) {
+                    nodesMap.set(r.node, {
+                        name: r.node,
+                        status: 'unknown',
+                        cpuUsage: 0,
+                        memUsed: 0,
+                        memTotal: 0,
+                        vms: []
+                    })
+                }
+                nodesMap.get(r.node)?.vms.push(r)
             }
         }
     })
 
+    // 4. Final Aggregation Patch: If Node metrics are 0 (Permission Denied), use SUM of VMs
+    // This provides a "Virtual" capacity view for restricted users
+    for (const node of nodesMap.values()) {
+        if (node.memTotal === 0 || node.memUsed === 0) {
+            const totalVmMem = node.vms.reduce((acc, vm) => acc + (vm.mem || 0), 0)
+            const totalVmMaxMem = node.vms.reduce((acc, vm) => acc + (vm.maxmem || 0), 0)
+            const totalVmCpu = node.vms.reduce((acc, vm) => acc + (vm.cpu || 0), 0)
+
+            if (totalVmMaxMem > 0) {
+                node.memUsed = totalVmMem
+                node.memTotal = totalVmMaxMem // This is now "Total Provisioned", not "Host Total"
+                node.cpuUsage = totalVmCpu    // Sum of VM loads
+            }
+        }
+    }
+
+    // Sort nodes by name
     return Array.from(nodesMap.values()).sort((a, b) => a.name.localeCompare(b.name))
 })
 
+
 // --- Style Helpers ---
+
 const getLoadColorBg = (load: number) => {
-    if (load < 0.3) return 'bg-emerald-500'
-    if (load < 0.7) return 'bg-amber-500'
-    return 'bg-rose-600'
+    if (load < 0.3) return 'bg-emerald-500' // Cool
+    if (load < 0.7) return 'bg-amber-500'   // Warm
+    return 'bg-rose-600'                    // Hot
 }
 
 const getLoadColorText = (load: number) => {
@@ -304,13 +325,19 @@ const getLoadColorText = (load: number) => {
 }
 
 const getVmHeatColor = (vm: ClusterResource) => {
-    if (vm.status !== 'running') return 'bg-zinc-800'
+    if (vm.status !== 'running') return 'bg-zinc-800' // Stopped
+
+    // Calculate heat based on CPU and Memory pressure? 
+    // Usually CPU is the "heat", Memory is "capacity". Let's stick to CPU heat.
     const load = vm.cpu || 0
-    if (load < 0.1) return 'bg-emerald-900/80 border-emerald-700/50'
-    if (load < 0.3) return 'bg-emerald-600 border-emerald-400/50'
-    if (load < 0.6) return 'bg-amber-500 border-amber-300/50'
-    if (load < 0.8) return 'bg-orange-600 border-orange-400/50'
-    return 'bg-rose-600 border-rose-400 animate-pulse'
+    // Proxmox sends CPU as ratio of used cores? Wait, API sends 0.05 for 5% of assigned cores usually.
+    // Let's assume 0-1 range.
+
+    if (load < 0.1) return 'bg-emerald-900/80 border-emerald-700/50' // Very Idle
+    if (load < 0.3) return 'bg-emerald-600 border-emerald-400/50'   // Working
+    if (load < 0.6) return 'bg-amber-500 border-amber-300/50'       // Busy
+    if (load < 0.8) return 'bg-orange-600 border-orange-400/50'     // Heavy
+    return 'bg-rose-600 border-rose-400 animate-pulse'              // Critical
 }
 
 const formatBytes = (bytes: number) => {
@@ -320,4 +347,5 @@ const formatBytes = (bytes: number) => {
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
+
 </script>
