@@ -112,7 +112,7 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- VM Status -->
       <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
         <h2 class="font-bold text-base text-text mb-4">Estado de VMs</h2>
@@ -134,22 +134,22 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <div class="w-2.5 h-2.5 rounded-full bg-positive shadow-[0_0_8px_rgba(74,222,128,0.4)]"></div>
-                <span class="text-sm font-medium text-text">Running</span>
+                <span class="text-xs font-medium text-text">Running</span>
               </div>
-              <span class="text-sm font-bold text-text">{{ runningVms }}</span>
+              <span class="text-xs font-bold text-text">{{ runningVms }}</span>
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <div class="w-2.5 h-2.5 rounded-full bg-muted shadow-sm"></div>
-                <span class="text-sm font-medium text-text">Stopped</span>
+                <span class="text-xs font-medium text-text">Stopped</span>
               </div>
-              <span class="text-sm font-bold text-text-muted">{{ totalVms - runningVms }}</span>
+              <span class="text-xs font-bold text-text-muted">{{ totalVms - runningVms }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Storage Global (New) -->
+      <!-- Storage Global -->
       <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
         <h2 class="font-bold text-base text-text mb-4">Almacenamiento (Local)</h2>
         <div class="flex items-center gap-6 flex-1 min-h-[140px]">
@@ -171,16 +171,16 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></div>
-                <span class="text-sm font-medium text-text">Ocupado</span>
+                <span class="text-xs font-medium text-text">Ocupado</span>
               </div>
-              <span class="text-sm font-bold text-text">{{ formatBytes(storageMetrics.used) }}</span>
+              <span class="text-xs font-bold text-text">{{ formatBytes(storageMetrics.used) }}</span>
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <div class="w-2.5 h-2.5 rounded-full bg-muted shadow-sm"></div>
-                <span class="text-sm font-medium text-text">Total</span>
+                <span class="text-xs font-medium text-text">Total</span>
               </div>
-              <span class="text-sm font-bold text-text-muted">{{ formatBytes(storageMetrics.total) }}</span>
+              <span class="text-xs font-bold text-text-muted">{{ formatBytes(storageMetrics.total) }}</span>
             </div>
           </div>
         </div>
@@ -197,6 +197,21 @@
         </div>
         <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
           <RealtimeChart title="CPU Cluster" :data-point="currentClusterCpuVal" :color="COLORS.primary" :height="160"
+            :max-points="30" />
+        </div>
+      </div>
+
+      <!-- Network Traffic (Realtime) -->
+      <div class="bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col relative overflow-hidden">
+        <div class="flex items-center justify-between mb-2 z-10">
+          <h2 class="font-bold text-base text-text">Red Cluster</h2>
+          <div class="flex items-center gap-2">
+            <span class="animate-pulse w-2 h-2 rounded-full bg-accent"></span>
+            <span class="text-xs font-mono text-accent font-bold">{{ currentNetMbps }} Mbps</span>
+          </div>
+        </div>
+        <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
+          <RealtimeChart title="Traffic" :data-point="currentNetMbps" :color="COLORS.accent" :height="160"
             :max-points="30" />
         </div>
       </div>
@@ -288,7 +303,7 @@
                   </div>
                   <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
                     'cpu'))
-                  }}</span>
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -321,7 +336,7 @@
                     <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
                   </div>
                   <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
-                  }}</span>
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -446,15 +461,59 @@ watch(isAuthenticated, (val) => {
   }
 })
 
+
+
+// Network State
+const currentKwIn = ref(0) // Used for CPU Realtime actually
+const currentNetMbps = ref(0)
+const lastNetState = { time: 0, bytes: 0 }
+
+// ... (Lifecycle hooks)
+
 const startPolling = () => {
   if (pollInterval) clearInterval(pollInterval)
   // Poll nodes every 3 seconds for smooth-ish realtime chart
   pollInterval = setInterval(async () => {
     if (!isAuthenticated.value) return
+
+    // 1. Basic Node List (for CPU/RAM)
     const res = await proxmoxRequest('/nodes', 'GET')
-    if (res.success) nodes.value = (res.data || []) as NodeResource[]
+    if (res.success) {
+      nodes.value = (res.data || []) as NodeResource[]
+
+      // 2. Realtime Network Calculation
+      // Fetch detailed status for online nodes to get cumulative netin/netout
+      const onlineNodes = nodes.value.filter(n => n.status === 'online')
+      if (onlineNodes.length > 0) {
+        const statusPromises = onlineNodes.map(n => proxmoxRequest(`/nodes/${n.node}/status`, 'GET'))
+        const statuses = await Promise.all(statusPromises)
+
+        let totalBytes = 0
+        statuses.forEach((s) => {
+          if (s.success && s.data) {
+            // netin + netout (cumulative bytes)
+            totalBytes += (s.data.netin || 0) + (s.data.netout || 0)
+          }
+        })
+
+        const now = Date.now()
+        if (lastNetState.time > 0 && totalBytes >= lastNetState.bytes) {
+          const timeDiff = (now - lastNetState.time) / 1000 // Seconds
+          const bytesDiff = totalBytes - lastNetState.bytes
+          if (timeDiff > 0) {
+            const bitsPerSecond = (bytesDiff * 8) / timeDiff
+            currentNetMbps.value = Number((bitsPerSecond / 1_000_000).toFixed(2)) // Mbps
+          }
+        }
+
+        lastNetState.time = now
+        lastNetState.bytes = totalBytes
+      }
+    }
   }, 3000)
 }
+
+// ... (loadDashboard remains mostly same)
 
 // -- Actions --
 const loadDashboard = async () => {
