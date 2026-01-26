@@ -53,7 +53,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">CPU Host</span>
                                 <span :class="getLoadColorText(node.cpuUsage)">{{ (node.cpuUsage * 100).toFixed(1)
-                                    }}%</span>
+                                }}%</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full transition-all duration-500"
@@ -66,7 +66,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">RAM Host</span>
                                 <span class="text-text">{{ formatBytes(node.memUsed) }} / {{ formatBytes(node.memTotal)
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full bg-blue-500 transition-all duration-500"
@@ -244,17 +244,27 @@ const nodesData = computed<NodeAggregated[]>(() => {
         })
     })
 
-    // 2. Fallback Pass: Fill from /cluster/resources if missing
+    // 2. Fallback/Merge Pass: Fill from /cluster/resources
+    // Crucial fix: If direct node status failed (403 Forbidden), check if cluster resources has the stats
     rawResources.value.forEach(r => {
-        if (r.type === 'node' && !nodesMap.has(r.node)) {
-            nodesMap.set(r.node, {
-                name: r.node,
-                status: r.status === 'online' ? 'online' : 'offline',
-                cpuUsage: r.cpu || 0,
-                memUsed: r.mem || 0,
-                memTotal: r.maxmem || 0,
-                vms: []
-            })
+        if (r.type === 'node') {
+            const existing = nodesMap.get(r.node)
+            if (existing) {
+                // If we have the node but stats are empty (0), try to fill from resource list
+                if (existing.cpuUsage === 0 && (r.cpu || 0) > 0) existing.cpuUsage = r.cpu || 0
+                if (existing.memUsed === 0 && (r.mem || 0) > 0) existing.memUsed = r.mem || 0
+                if (existing.memTotal === 0 && (r.maxmem || 0) > 0) existing.memTotal = r.maxmem || 0
+            } else {
+                // Node completely new (not in /nodes list?)
+                nodesMap.set(r.node, {
+                    name: r.node,
+                    status: r.status === 'online' ? 'online' : 'offline',
+                    cpuUsage: r.cpu || 0,
+                    memUsed: r.mem || 0,
+                    memTotal: r.maxmem || 0,
+                    vms: []
+                })
+            }
         }
     })
 
