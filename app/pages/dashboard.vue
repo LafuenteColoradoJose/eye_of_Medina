@@ -132,19 +132,18 @@
         </div>
       </div>
 
-      <!-- CPU Nodes -->
-      <div class="bg-card border border-border rounded-xl p-3 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="font-bold text-base text-text">Carga de CPU (Nodos)</h2>
+      <!-- CPU Cluster History (Realtime) -->
+      <div class="bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col relative overflow-hidden">
+        <div class="flex items-center justify-between mb-2 z-10">
+          <h2 class="font-bold text-base text-text">CPU en Tiempo Real</h2>
+          <div class="flex items-center gap-2">
+            <span class="animate-pulse w-2 h-2 rounded-full bg-positive"></span>
+            <span class="text-xs font-mono text-primary font-bold">{{ kpiCpu }}</span>
+          </div>
         </div>
-        <div class="min-h-[140px] flex items-center justify-center">
-          <ClientOnly>
-            <ApexChart v-if="nodes.length > 0" type="bar" height="140" :options="chartNodeCpu.options"
-              :series="chartNodeCpu.series" />
-            <div v-else class="text-center text-text-muted text-xs">
-              <p>Sin datos</p>
-            </div>
-          </ClientOnly>
+        <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
+          <RealtimeChart title="CPU Cluster" :data-point="currentClusterCpuVal" color="var(--color-primary)"
+            :max-points="30" />
         </div>
       </div>
     </div>
@@ -167,6 +166,10 @@
           </ClientOnly>
         </div>
       </div>
+
+      <!-- Pools totals logic for chart (kept from original) -->
+      <!-- ... -->
+
 
       <!-- Top Consumers -->
       <div class="lg:col-span-2 bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col">
@@ -306,9 +309,10 @@
 
 <script setup lang="ts">
 useHead({ title: 'Dashboard' })
-import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { ApexOptions } from 'apexcharts'
 import StatsCard from '~/components/StatsCard.vue'
+import RealtimeChart from '~/components/RealtimeChart.vue'
 
 // -- Types --
 type VmResource = {
@@ -347,6 +351,7 @@ const hasLoaded = ref(false)
 const error = ref('')
 const lastRefreshed = ref<Date | null>(null)
 const consumerMode = ref<'vm' | 'pool' | 'cluster'>('vm')
+let pollInterval: NodeJS.Timeout | null = null
 
 const nodes = ref<NodeResource[]>([])
 const vms = ref<VmResource[]>([])
@@ -354,12 +359,34 @@ const pools = ref<Pool[]>([])
 const totalIpZones = ref(0) // -- Lifecycle --
 onMounted(() => {
   restoreSession()
-  if (isAuthenticated.value) loadDashboard()
+  if (isAuthenticated.value) {
+    loadDashboard()
+    startPolling()
+  }
+})
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval)
 })
 
 watch(isAuthenticated, (val) => {
-  if (val && !hasLoaded.value) loadDashboard()
+  if (val && !hasLoaded.value) {
+    loadDashboard()
+    startPolling()
+  } else if (!val && pollInterval) {
+    clearInterval(pollInterval)
+  }
 })
+
+const startPolling = () => {
+  if (pollInterval) clearInterval(pollInterval)
+  // Poll nodes every 3 seconds for smooth-ish realtime chart
+  pollInterval = setInterval(async () => {
+    if (!isAuthenticated.value) return
+    const res = await proxmoxRequest('/nodes', 'GET')
+    if (res.success) nodes.value = (res.data || []) as NodeResource[]
+  }, 3000)
+}
 
 // -- Actions --
 const loadDashboard = async () => {
@@ -406,6 +433,13 @@ const loadDashboard = async () => {
     loading.value = false
   }
 }
+
+// -- Computed Metrics --
+const currentClusterCpuVal = computed(() => {
+  if (!nodes.value.length) return 0
+  const avg = nodes.value.reduce((sum, n) => sum + (n.cpu || 0), 0) / nodes.value.length
+  return Number((avg * 100).toFixed(1))
+})
 
 // -- Computed Metrics --
 const totalVms = computed(() => vms.value.length)
