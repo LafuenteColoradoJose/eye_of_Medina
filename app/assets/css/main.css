@@ -203,8 +203,7 @@ body::before {
 .btn-positive,
 .btn-warning,
 .btn-danger,
-.btn-muted,
-button:not([class*="btn-"]) {
+.btn-muted {
   @apply px-4 py-2 rounded transition-colors duration-200 font-medium border cursor-pointer flex items-center justify-center gap-2;
 }
 
@@ -212,8 +211,7 @@ button {
   @apply cursor-pointer;
 }
 
-.btn-primary,
-button:not([class*="btn-"]) {
+.btn-primary {
   @apply bg-primary text-text-on-strong border-primary-strong hover:bg-primary-strong;
 }
 
@@ -234,21 +232,7 @@ button:not([class*="btn-"]) {
 }
 
 /* Layout Specifics - Ensuring Sidebar Contrast in Dark Mode */
-.sidebar-nav {
-  /* En dark mode, usamos el mismo tono oscuro que el card, pero con borde. En light, primary-strong */
-  background-color: var(--color-primary-strong) !important;
-  color: var(--color-text-on-strong) !important;
-  border-right: 1px solid var(--color-border);
-  width: 200px;
-}
-
-.sidebar-nav a {
-  color: var(--color-text-on-strong) !important;
-}
-
-.sidebar-nav a:hover {
-  color: var(--color-accent) !important;
-}
+/* Removed legacy .sidebar-nav styles as they conflict with new Nav component */
 
 footer {
   background-color: var(--color-primary-strong) !important;
