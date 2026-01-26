@@ -235,8 +235,7 @@ const items = computed(() => {
   // 5. IAM - Permissions
   if (hasPermissionAnywhere('Permissions.Modify') || isClusterAdmin.value || hasPermissionAnywhere('Sys.Audit')) {
     menu.push({ to: '/roles', label: 'Roles', icon: IconRoles })
-    menu.push({ to: '/acl', label: 'ACLs', icon: IconACL }) // Assuming ACL page exists or is part of permissions
-    menu.push({ to: '/permissions', label: 'Árbol permisos', icon: IconTree })
+    menu.push({ to: '/permissions', label: 'ACLs', icon: IconTree }) // Consolidating ACL and Permissions concept
   }
 
   return menu
