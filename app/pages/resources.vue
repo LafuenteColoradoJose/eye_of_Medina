@@ -54,7 +54,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">CPU Host</span>
                                 <span :class="getLoadColorText(node.cpuUsage)">{{ (node.cpuUsage * 100).toFixed(1)
-                                    }}%</span>
+                                }}%</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full transition-all duration-500"
@@ -67,7 +67,7 @@
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-text-muted font-bold">RAM Host</span>
                                 <span class="text-text">{{ formatBytes(node.memUsed) }} / {{ formatBytes(node.memTotal)
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
                                 <div class="h-full rounded-full bg-blue-500 transition-all duration-500"
@@ -96,32 +96,33 @@
                                 <span class="text-[10px] font-bold text-white/90 drop-shadow-md">{{ vm.vmid }}</span>
                             </div>
 
-                            <!-- Tooltip -->
+                            <!-- Tooltip with High Contrast -->
                             <div
-                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-card border border-border rounded-lg p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-left">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <div class="w-2 h-2 rounded-full"
-                                        :class="vm.status === 'running' ? 'bg-positive' : 'bg-danger'"></div>
-                                    <span class="font-bold text-xs text-text truncate">{{ vm.name }}</span>
-                                </div>
-                                <div class="space-y-1 text-[10px] text-text-muted font-mono">
-                                    <div class="flex justify-between"><span>ID:</span> <span class="text-text">{{
-                                            vm.vmid }}</span></div>
-                                    <div class="flex justify-between"><span>Type:</span> <span class="uppercase">{{
-                                            vm.type }}</span></div>
-                                    <div class="flex justify-between">
-                                        <span>CPU:</span>
-                                        <span :class="getLoadColorText(vm.cpu || 0)">{{ ((vm.cpu || 0) * 100).toFixed(1)
-                                            }}% of {{ vm.maxcpu }} cores</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>RAM:</span>
-                                        <span>{{ formatBytes(vm.mem || 0) }} / {{ formatBytes(vm.maxmem || 0) }}</span>
-                                    </div>
-                                </div>
-                                <!-- Triangle -->
+                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 border border-zinc-700 dark:border-zinc-300 rounded-lg p-3 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] text-left">
                                 <div
-                                    class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-card">
+                                    class="flex items-center gap-2 mb-2 pb-2 border-b border-white/10 dark:border-black/10">
+                                    <div class="w-2.5 h-2.5 rounded-full shadow-sm"
+                                        :class="vm.status === 'running' ? 'bg-emerald-500' : 'bg-red-500'"></div>
+                                    <span class="font-bold text-sm truncate flex-1">{{ vm.name }}</span>
+                                </div>
+                                <div class="space-y-1.5 text-xs font-mono">
+                                    <div class="flex justify-between"><span class="opacity-70">ID:</span> <span>{{
+                                            vm.vmid }}</span></div>
+                                    <div class="flex justify-between"><span class="opacity-70">Type:</span> <span
+                                            class="uppercase font-bold">{{ vm.type }}</span></div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="opacity-70">CPU:</span>
+                                        <span class="px-1.5 rounded bg-white/10 dark:bg-black/10 font-bold">{{ ((vm.cpu
+                                            || 0) * 100).toFixed(1) }}%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="opacity-70">RAM:</span>
+                                        <span>{{ formatBytes(vm.mem || 0) }}</span>
+                                    </div>
+                                </div>
+                                <!-- Arrow -->
+                                <div
+                                    class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-zinc-900 dark:border-t-zinc-100">
                                 </div>
                             </div>
                         </div>
