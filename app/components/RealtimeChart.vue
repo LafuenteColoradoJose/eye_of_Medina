@@ -1,7 +1,7 @@
 <template>
     <div class="w-full h-full min-h-[150px]">
         <ClientOnly>
-            <apexchart ref="chartRef" :type="type" height="100%" :options="chartOptions" :series="series" />
+            <apexchart ref="chartRef" :type="type" :height="height" :options="chartOptions" :series="series" />
         </ClientOnly>
     </div>
 </template>
@@ -9,6 +9,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import type { ApexOptions } from 'apexcharts'
+import VueApexCharts from 'vue3-apexcharts'
+
+const apexchart = VueApexCharts
 
 const props = defineProps({
     title: { type: String, default: '' },
