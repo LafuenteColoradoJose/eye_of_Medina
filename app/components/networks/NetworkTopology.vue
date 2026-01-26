@@ -156,19 +156,26 @@ const buildTopology = async () => {
                 vmY += NODE_HEIGHT_SPACING
 
                 const isRunning = vm.status === 'running'
+                const isLxc = vm.type === 'lxc'
 
                 newNodes.push({
                     id: `vm-${vm.vmid}`,
-                    label: `${vm.vmid} - ${vm.name}`,
+                    label: `${isLxc ? '📦' : '🖥️'} ${vm.name}\n${isLxc ? '(CT)' : '(VM)'} ${vm.vmid}`,
                     position: { x: LAYER_WIDTH * 2.5, y: vmY },
                     sourcePosition: Position.Left,
                     targetPosition: Position.Left, // Connect left-to-left looks odd, default is good
                     style: {
-                        background: isRunning ? '#064e3b' : '#3f3f46', // Green vs Gray
-                        color: isRunning ? '#a7f3d0' : '#a1a1aa',
-                        borderColor: isRunning ? '#059669' : '#52525b',
-                        opacity: isRunning ? 1 : 0.7,
-                        width: '200px'
+                        background: isRunning
+                            ? (isLxc ? '#0e7490' : '#064e3b') // Cyan for LXC, Green for VM
+                            : '#3f3f46',
+                        color: '#f0f9ff',
+                        borderColor: isRunning
+                            ? (isLxc ? '#22d3ee' : '#059669')
+                            : '#52525b',
+                        opacity: isRunning ? 1 : 0.6,
+                        width: '200px',
+                        borderRadius: isLxc ? '12px' : '2px', // Round for Container, Square for VM
+                        borderStyle: isLxc ? 'dashed' : 'solid'
                     },
                 })
 
@@ -176,9 +183,9 @@ const buildTopology = async () => {
                     id: `e-${br.iface}-${vm.vmid}`,
                     source: br.iface,
                     target: `vm-${vm.vmid}`,
-                    type: 'smoothstep', // Orthogonal lines
-                    animated: isRunning, // Only animate active traffic lines
-                    style: { stroke: isRunning ? '#10b981' : '#52525b' }
+                    type: isLxc ? 'default' : 'smoothstep', // Bezier for CT, Orthogonal for VM
+                    animated: isRunning,
+                    style: { stroke: isRunning ? (isLxc ? '#22d3ee' : '#10b981') : '#52525b' }
                 })
             })
         })
