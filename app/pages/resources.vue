@@ -46,7 +46,7 @@
                         </div>
                     </div>
 
-                    <!-- Host Metrics -->
+                    <!-- Host Metrics - WITH ERROR INDICATOR IF MISSING -->
                     <div class="space-y-3">
                         <!-- CPU Bar -->
                         <div>
@@ -95,7 +95,7 @@
                                 <span class="text-[10px] font-bold text-white/90 drop-shadow-md">{{ vm.vmid }}</span>
                             </div>
 
-                            <!-- Tooltip with High Contrast (Always White/Light because Heatmap background is always Black) -->
+                            <!-- Tooltip with High Contrast -->
                             <div
                                 class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-white text-zinc-900 border border-zinc-200 rounded-lg p-3 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] text-left">
                                 <div class="flex items-center gap-2 mb-2 pb-2 border-b border-zinc-200">
@@ -153,7 +153,7 @@ type ClusterResource = {
     name?: string
     status?: string
     maxcpu?: number
-    cpu?: number // 0.0 to 1.0 (ratio of maxcpu? or total? Proxmox sends ratio usually)
+    cpu?: number // 0.0 to 1.0
     maxmem?: number
     mem?: number
     uptime?: number
@@ -198,33 +198,33 @@ const fetchData = async () => {
             nodesBasic = nodesListRes.data as any[]
         }
 
-        // 2. Fetch Detailed Stats for EACH Node (to get CPU/RAM)
-        // /nodes endpoint is lightweight and doesn't return metrics. We need /nodes/{node}/status
-        const nodeDetailPromises = nodesBasic
-            .filter((n: any) => n.status === 'online')
-            .map(async (n: any) => {
+        // 2. Fetch Detailed Stats for EACH Node (Sequential for robustness)
+        const detailedNodes = []
+        for (const n of nodesBasic) {
+            if (n.status === 'online') {
                 const statusRes = await proxmoxRequest(`/nodes/${n.node}/status`, 'GET')
                 if (statusRes.success && statusRes.data) {
-                    // Normalize fields: status API returns 'memory' object usually, or flat fields depending on version
-                    // Usually: { memory: { total: X, used: Y }, cpu: 0.1 }
                     const d = statusRes.data as any
-
-                    // Flatten for easier consumption
-                    return {
+                    detailedNodes.push({
                         ...n,
-                        cpu: d.cpu, // 0.05
+                        cpu: d.cpu,
                         mem: d.memory?.used || d.mem || 0,
                         maxmem: d.memory?.total || d.maxmem || 0,
                         uptime: d.uptime
-                    }
+                    })
+                } else {
+                    console.warn(`[Eye of Medina] Fallo status nodo ${n.node}:`, statusRes)
+                    // Push basic node info without stats if fetch fails
+                    detailedNodes.push(n)
                 }
-                return n
-            })
+            } else {
+                detailedNodes.push(n)
+            }
+        }
 
-        const detailedNodes = await Promise.all(nodeDetailPromises)
         rawNodes.value = detailedNodes
 
-    } catch (e) { console.error(e) }
+    } catch (e) { console.error('Error general en fetchData:', e) }
     finally { loading.value = false }
 }
 
@@ -233,7 +233,6 @@ const nodesData = computed<NodeAggregated[]>(() => {
     const nodesMap = new Map<string, NodeAggregated>()
 
     // 1. First Pass: Create entries from authoritative Node List (/nodes)
-    // This source is more reliable for CPU/RAM usage of the host itself.
     rawNodes.value.forEach(node => {
         nodesMap.set(node.node, {
             name: node.node,
@@ -245,7 +244,7 @@ const nodesData = computed<NodeAggregated[]>(() => {
         })
     })
 
-    // 2. Fallback Pass: If /nodes failed or missed something, try to fill from /cluster/resources
+    // 2. Fallback Pass: Fill from /cluster/resources if missing
     rawResources.value.forEach(r => {
         if (r.type === 'node' && !nodesMap.has(r.node)) {
             nodesMap.set(r.node, {
@@ -259,14 +258,13 @@ const nodesData = computed<NodeAggregated[]>(() => {
         }
     })
 
-    // 3. Populate VMs into their respective Nodes
+    // 3. Populate VMs
     rawResources.value.forEach(r => {
         if (r.type === 'qemu' || r.type === 'lxc') {
             const node = nodesMap.get(r.node)
             if (node) {
                 node.vms.push(r)
             } else {
-                // Orphan VM (Node not visible?). Create a placeholder node.
                 nodesMap.set(r.node, {
                     name: r.node,
                     status: 'unknown',
@@ -279,17 +277,14 @@ const nodesData = computed<NodeAggregated[]>(() => {
         }
     })
 
-    // Sort nodes by name
     return Array.from(nodesMap.values()).sort((a, b) => a.name.localeCompare(b.name))
 })
 
-
 // --- Style Helpers ---
-
 const getLoadColorBg = (load: number) => {
-    if (load < 0.3) return 'bg-emerald-500' // Cool
-    if (load < 0.7) return 'bg-amber-500'   // Warm
-    return 'bg-rose-600'                    // Hot
+    if (load < 0.3) return 'bg-emerald-500'
+    if (load < 0.7) return 'bg-amber-500'
+    return 'bg-rose-600'
 }
 
 const getLoadColorText = (load: number) => {
@@ -299,19 +294,13 @@ const getLoadColorText = (load: number) => {
 }
 
 const getVmHeatColor = (vm: ClusterResource) => {
-    if (vm.status !== 'running') return 'bg-zinc-800' // Stopped
-
-    // Calculate heat based on CPU and Memory pressure? 
-    // Usually CPU is the "heat", Memory is "capacity". Let's stick to CPU heat.
+    if (vm.status !== 'running') return 'bg-zinc-800'
     const load = vm.cpu || 0
-    // Proxmox sends CPU as ratio of used cores? Wait, API sends 0.05 for 5% of assigned cores usually.
-    // Let's assume 0-1 range.
-
-    if (load < 0.1) return 'bg-emerald-900/80 border-emerald-700/50' // Very Idle
-    if (load < 0.3) return 'bg-emerald-600 border-emerald-400/50'   // Working
-    if (load < 0.6) return 'bg-amber-500 border-amber-300/50'       // Busy
-    if (load < 0.8) return 'bg-orange-600 border-orange-400/50'     // Heavy
-    return 'bg-rose-600 border-rose-400 animate-pulse'              // Critical
+    if (load < 0.1) return 'bg-emerald-900/80 border-emerald-700/50'
+    if (load < 0.3) return 'bg-emerald-600 border-emerald-400/50'
+    if (load < 0.6) return 'bg-amber-500 border-amber-300/50'
+    if (load < 0.8) return 'bg-orange-600 border-orange-400/50'
+    return 'bg-rose-600 border-rose-400 animate-pulse'
 }
 
 const formatBytes = (bytes: number) => {
@@ -321,5 +310,4 @@ const formatBytes = (bytes: number) => {
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
-
 </script>
