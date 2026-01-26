@@ -82,10 +82,8 @@ const chartOptions = computed<ApexOptions>(() => ({
         tooltip: { enabled: false }
     },
     yaxis: {
-        min: 0,
-        max: 100, // Assuming percentage 0-100
+        // Dynamic scaling
         labels: { show: false }, // Minimalist
-
     },
     grid: {
         show: true,
