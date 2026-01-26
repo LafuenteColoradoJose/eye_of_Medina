@@ -96,11 +96,10 @@
                                 <span class="text-[10px] font-bold text-white/90 drop-shadow-md">{{ vm.vmid }}</span>
                             </div>
 
-                            <!-- Tooltip with High Contrast -->
+                            <!-- Tooltip with High Contrast (Always White/Light because Heatmap background is always Black) -->
                             <div
-                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 border border-zinc-700 dark:border-zinc-300 rounded-lg p-3 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] text-left">
-                                <div
-                                    class="flex items-center gap-2 mb-2 pb-2 border-b border-white/10 dark:border-black/10">
+                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-white text-zinc-900 border border-zinc-200 rounded-lg p-3 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] text-left">
+                                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-zinc-200">
                                     <div class="w-2.5 h-2.5 rounded-full shadow-sm"
                                         :class="vm.status === 'running' ? 'bg-emerald-500' : 'bg-red-500'"></div>
                                     <span class="font-bold text-sm truncate flex-1">{{ vm.name }}</span>
@@ -112,8 +111,8 @@
                                             class="uppercase font-bold">{{ vm.type }}</span></div>
                                     <div class="flex justify-between items-center">
                                         <span class="opacity-70">CPU:</span>
-                                        <span class="px-1.5 rounded bg-white/10 dark:bg-black/10 font-bold">{{ ((vm.cpu
-                                            || 0) * 100).toFixed(1) }}%</span>
+                                        <span class="px-1.5 rounded bg-zinc-100 font-bold border border-zinc-200">{{
+                                            ((vm.cpu || 0) * 100).toFixed(1) }}%</span>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span class="opacity-70">RAM:</span>
@@ -122,7 +121,7 @@
                                 </div>
                                 <!-- Arrow -->
                                 <div
-                                    class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-zinc-900 dark:border-t-zinc-100">
+                                    class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-white">
                                 </div>
                             </div>
                         </div>
@@ -172,6 +171,7 @@ type NodeAggregated = {
 
 const loading = ref(false)
 const rawResources = ref<ClusterResource[]>([])
+const rawNodes = ref<any[]>([])
 
 onMounted(() => {
     restoreSession()
@@ -181,10 +181,20 @@ onMounted(() => {
 const fetchData = async () => {
     loading.value = true
     try {
-        const res = await listVMResources()
-        if (res.success && res.data) {
-            rawResources.value = res.data as ClusterResource[]
+        // Parallel fetch for robustness: Nodes stats + Cluster Resources (VMs)
+        const [clusterRes, nodesRes] = await Promise.all([
+            listVMResources(),
+            listNodes()
+        ])
+
+        if (clusterRes.success && clusterRes.data) {
+            rawResources.value = clusterRes.data as ClusterResource[]
         }
+
+        if (nodesRes.success && nodesRes.data) {
+            rawNodes.value = nodesRes.data as any[]
+        }
+
     } catch (e) { console.error(e) }
     finally { loading.value = false }
 }
@@ -193,9 +203,22 @@ const fetchData = async () => {
 const nodesData = computed<NodeAggregated[]>(() => {
     const nodesMap = new Map<string, NodeAggregated>()
 
-    // 1. First Pass: Find all nodes
+    // 1. First Pass: Create entries from authoritative Node List (/nodes)
+    // This source is more reliable for CPU/RAM usage of the host itself.
+    rawNodes.value.forEach(node => {
+        nodesMap.set(node.node, {
+            name: node.node,
+            status: node.status === 'online' ? 'online' : 'offline',
+            cpuUsage: node.cpu || 0,
+            memUsed: node.mem || 0,
+            memTotal: node.maxmem || 0,
+            vms: []
+        })
+    })
+
+    // 2. Fallback Pass: If /nodes failed or missed something, try to fill from /cluster/resources
     rawResources.value.forEach(r => {
-        if (r.type === 'node') {
+        if (r.type === 'node' && !nodesMap.has(r.node)) {
             nodesMap.set(r.node, {
                 name: r.node,
                 status: r.status === 'online' ? 'online' : 'offline',
@@ -207,18 +230,14 @@ const nodesData = computed<NodeAggregated[]>(() => {
         }
     })
 
-    // If no nodes found in resources (weird privilege issue), fallback could be added here, 
-    // but usually user can see nodes if they can see VMs.
-
-    // 2. Second Pass: Distribute VMs to Nodes
+    // 3. Populate VMs into their respective Nodes
     rawResources.value.forEach(r => {
         if (r.type === 'qemu' || r.type === 'lxc') {
             const node = nodesMap.get(r.node)
             if (node) {
                 node.vms.push(r)
             } else {
-                // VM on a node we didn't see? Add node placeholder
-                // This happens in clusters where you see the VM but node status is separate
+                // Orphan VM (Node not visible?). Create a placeholder node.
                 nodesMap.set(r.node, {
                     name: r.node,
                     status: 'unknown',
