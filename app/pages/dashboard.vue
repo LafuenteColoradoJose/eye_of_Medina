@@ -111,222 +111,261 @@
       </StatsCard>
     </div>
 
-    <!-- VM Status -->
-    <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
-      <h2 class="font-bold text-base text-text mb-4">Estado de VMs</h2>
-      <div class="flex items-center gap-6 flex-1 min-h-[140px]">
-        <!-- Donut Chart -->
-        <div class="relative w-[120px] h-[120px] shrink-0">
-          <ClientOnly>
-            <ApexChart v-if="totalVms > 0" type="donut" width="100%" height="100%" :options="chartVmState.options"
-              :series="chartVmState.series" />
-            <!-- Centered Total Label -->
-            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span class="text-xl font-extrabold text-text leading-none">{{ totalVms }}</span>
-              <span class="text-[10px] text-text-muted uppercase font-bold mt-1">Total</span>
-            </div>
-          </ClientOnly>
-        </div>
-        <!-- Custom Legend -->
-        <div class="flex flex-col gap-2 flex-1 justify-center">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="w-2.5 h-2.5 rounded-full bg-positive shadow-[0_0_8px_rgba(74,222,128,0.4)]"></div>
-              <span class="text-sm font-medium text-text">Running</span>
-            </div>
-            <span class="text-sm font-bold text-text">{{ runningVms }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="w-2.5 h-2.5 rounded-full bg-muted shadow-sm"></div>
-              <span class="text-sm font-medium text-text">Stopped</span>
-            </div>
-            <span class="text-sm font-bold text-text-muted">{{ totalVms - runningVms }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CPU Cluster History (Realtime) -->
-    <div class="bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col relative overflow-hidden">
-      <div class="flex items-center justify-between mb-2 z-10">
-        <h2 class="font-bold text-base text-text">CPU en Tiempo Real</h2>
-        <div class="flex items-center gap-2">
-          <span class="animate-pulse w-2 h-2 rounded-full bg-positive"></span>
-          <span class="text-xs font-mono text-primary font-bold">{{ kpiCpu }}</span>
-        </div>
-      </div>
-      <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
-        <RealtimeChart title="CPU Cluster" :data-point="currentClusterCpuVal" :color="COLORS.primary" :height="160"
-          :max-points="30" />
-      </div>
-    </div>
-  </div>
-
-  <!-- Secondary Charts & Lists -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-    <!-- Pool Distro (New Bar List Design) -->
-    <div class="lg:col-span-1 bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-bold text-base text-text">Distribución por Pool</h2>
-      </div>
-
-      <div class="flex-1 overflow-y-auto max-h-[300px] custom-scrollbar pr-1 space-y-3">
-        <div v-if="chartPool.series.length === 0" class="text-center text-text-muted text-xs py-8 italic">
-          Sin pools creados
-        </div>
-
-        <div v-for="(count, i) in chartPool.series" :key="i" class="group">
-          <div class="flex justify-between text-xs mb-1.5">
-            <span class="font-medium text-text truncate max-w-[70%] group-hover:text-primary transition-colors">
-              {{ chartPool.options.labels[i] }}
-            </span>
-            <div class="flex gap-2">
-              <span class="font-mono text-text-muted">{{ count }} VMs</span>
-              <span class="font-bold text-text">{{ toPercent(count, totalVms) }}</span>
-            </div>
-          </div>
-          <div class="h-1.5 w-full bg-muted-surface rounded-full overflow-hidden">
-            <div class="h-full rounded-full transition-all duration-500"
-              :style="{ width: ((count / totalVms) * 100) + '%', backgroundColor: chartPool.options.colors[i % chartPool.options.colors.length] }">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pools totals logic for chart (kept from original) -->
-    <!-- ... -->
-
-
-    <!-- Top Consumers -->
-    <div class="lg:col-span-2 bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2">
-          <h2 class="font-bold text-base text-text">Top Consumidores</h2>
-          <NuxtLink to="/machines" class="text-[10px] text-primary hover:underline cursor-pointer"
-            title="Ver tabla completa de máquinas">
-            (Analizar todo)
-          </NuxtLink>
-        </div>
-
-        <!-- Mode Toggles -->
-        <div class="flex bg-muted-surface p-0.5 rounded-lg border border-border">
-          <button v-for="mode in ['vm', 'pool', 'cluster']" :key="mode" @click="consumerMode = mode as any"
-            class="px-2 py-0.5 text-[10px] uppercase font-bold rounded-md transition-all"
-            :class="consumerMode === mode ? 'bg-background text-primary shadow-sm' : 'text-text-muted hover:text-text'">
-            {{ mode }}
-          </button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-        <!-- CPU List -->
-        <div class="space-y-2">
-          <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider flex justify-between">
-            <span>Mayor uso de CPU</span>
-            <span class="text-[9px] opacity-70 normal-case">
-              {{ consumerMode === 'vm' ? '% Asignado' : consumerMode === 'pool' ? '% del Pool' : '% del Cluster' }}
-            </span>
-          </h3>
-          <div v-if="topCpuVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
-          <ul v-else class="space-y-1">
-            <li v-for="(vm, i) in topCpuVms" :key="vm.vmid"
-              class="flex items-center justify-between p-1.5 rounded hover:bg-muted-surface transition-colors cursor-default group">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] font-mono text-text-muted w-3">{{ i + 1 }}</span>
-                <div class="flex flex-col">
-                  <span
-                    class="font-medium text-xs text-text group-hover:text-primary transition-colors truncate max-w-[100px]">{{
-                      vmDisplay(vm)
-                    }}</span>
-                  <span class="text-[10px] text-text-muted leading-none">{{ vm.node }}</span>
-                </div>
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- VM Status -->
+      <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
+        <h2 class="font-bold text-base text-text mb-4">Estado de VMs</h2>
+        <div class="flex items-center gap-6 flex-1 min-h-[140px]">
+          <!-- Donut Chart -->
+          <div class="relative w-[120px] h-[120px] shrink-0">
+            <ClientOnly>
+              <ApexChart v-if="totalVms > 0" type="donut" width="100%" height="100%" :options="chartVmState.options"
+                :series="chartVmState.series" />
+              <!-- Centered Total Label -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span class="text-xl font-extrabold text-text leading-none">{{ totalVms }}</span>
+                <span class="text-[10px] text-text-muted uppercase font-bold mt-1">Total</span>
               </div>
+            </ClientOnly>
+          </div>
+          <!-- Custom Legend -->
+          <div class="flex flex-col gap-2 flex-1 justify-center">
+            <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
-                  <div class="h-full bg-primary" :style="{ width: getVmMetric(vm, 'cpu') + '%' }"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-positive shadow-[0_0_8px_rgba(74,222,128,0.4)]"></div>
+                <span class="text-sm font-medium text-text">Running</span>
+              </div>
+              <span class="text-sm font-bold text-text">{{ runningVms }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-muted shadow-sm"></div>
+                <span class="text-sm font-medium text-text">Stopped</span>
+              </div>
+              <span class="text-sm font-bold text-text-muted">{{ totalVms - runningVms }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Storage Global (New) -->
+      <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
+        <h2 class="font-bold text-base text-text mb-4">Almacenamiento (Local)</h2>
+        <div class="flex items-center gap-6 flex-1 min-h-[140px]">
+          <!-- Donut Chart -->
+          <div class="relative w-[120px] h-[120px] shrink-0">
+            <ClientOnly>
+              <ApexChart v-if="nodes.length > 0" type="donut" width="100%" height="100%" :options="chartStorage.options"
+                :series="chartStorage.series" />
+              <!-- Centered Usage Label -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span class="text-xl font-extrabold text-text leading-none">{{ storageMetrics.percent.toFixed(0)
+                  }}%</span>
+                <span class="text-[10px] text-text-muted uppercase font-bold mt-1">Usado</span>
+              </div>
+            </ClientOnly>
+          </div>
+          <!-- Custom Legend -->
+          <div class="flex flex-col gap-2 flex-1 justify-center">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></div>
+                <span class="text-sm font-medium text-text">Ocupado</span>
+              </div>
+              <span class="text-sm font-bold text-text">{{ formatBytes(storageMetrics.used) }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-muted shadow-sm"></div>
+                <span class="text-sm font-medium text-text">Total</span>
+              </div>
+              <span class="text-sm font-bold text-text-muted">{{ formatBytes(storageMetrics.total) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CPU Cluster History (Realtime) -->
+      <div class="bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col relative overflow-hidden">
+        <div class="flex items-center justify-between mb-2 z-10">
+          <h2 class="font-bold text-base text-text">CPU en Tiempo Real</h2>
+          <div class="flex items-center gap-2">
+            <span class="animate-pulse w-2 h-2 rounded-full bg-positive"></span>
+            <span class="text-xs font-mono text-primary font-bold">{{ kpiCpu }}</span>
+          </div>
+        </div>
+        <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
+          <RealtimeChart title="CPU Cluster" :data-point="currentClusterCpuVal" :color="COLORS.primary" :height="160"
+            :max-points="30" />
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+      <!-- Pool Distro (New Bar List Design) -->
+      <div class="lg:col-span-1 bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-bold text-base text-text">Distribución por Pool</h2>
+        </div>
+
+        <div class="flex-1 overflow-y-auto max-h-[300px] custom-scrollbar pr-1 space-y-3">
+          <div v-if="chartPool.series.length === 0" class="text-center text-text-muted text-xs py-8 italic">
+            Sin pools creados
+          </div>
+
+          <div v-for="(count, i) in chartPool.series" :key="i" class="group">
+            <div class="flex justify-between text-xs mb-1.5">
+              <span class="font-medium text-text truncate max-w-[70%] group-hover:text-primary transition-colors">
+                {{ chartPool.options.labels[i] }}
+              </span>
+              <div class="flex gap-2">
+                <span class="font-mono text-text-muted">{{ count }} VMs</span>
+                <span class="font-bold text-text">{{ toPercent(count, totalVms) }}</span>
+              </div>
+            </div>
+            <div class="h-1.5 w-full bg-muted-surface rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500"
+                :style="{ width: ((count / totalVms) * 100) + '%', backgroundColor: chartPool.options.colors[i % chartPool.options.colors.length] }">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pools totals logic for chart (kept from original) -->
+      <!-- ... -->
+
+
+      <!-- Top Consumers -->
+      <div class="lg:col-span-2 bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <h2 class="font-bold text-base text-text">Top Consumidores</h2>
+            <NuxtLink to="/machines" class="text-[10px] text-primary hover:underline cursor-pointer"
+              title="Ver tabla completa de máquinas">
+              (Analizar todo)
+            </NuxtLink>
+          </div>
+
+          <!-- Mode Toggles -->
+          <div class="flex bg-muted-surface p-0.5 rounded-lg border border-border">
+            <button v-for="mode in ['vm', 'pool', 'cluster']" :key="mode" @click="consumerMode = mode as any"
+              class="px-2 py-0.5 text-[10px] uppercase font-bold rounded-md transition-all"
+              :class="consumerMode === mode ? 'bg-background text-primary shadow-sm' : 'text-text-muted hover:text-text'">
+              {{ mode }}
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+          <!-- CPU List -->
+          <div class="space-y-2">
+            <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider flex justify-between">
+              <span>Mayor uso de CPU</span>
+              <span class="text-[9px] opacity-70 normal-case">
+                {{ consumerMode === 'vm' ? '% Asignado' : consumerMode === 'pool' ? '% del Pool' : '% del Cluster' }}
+              </span>
+            </h3>
+            <div v-if="topCpuVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
+            <ul v-else class="space-y-1">
+              <li v-for="(vm, i) in topCpuVms" :key="vm.vmid"
+                class="flex items-center justify-between p-1.5 rounded hover:bg-muted-surface transition-colors cursor-default group">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-mono text-text-muted w-3">{{ i + 1 }}</span>
+                  <div class="flex flex-col">
+                    <span
+                      class="font-medium text-xs text-text group-hover:text-primary transition-colors truncate max-w-[100px]">{{
+                        vmDisplay(vm)
+                      }}</span>
+                    <span class="text-[10px] text-text-muted leading-none">{{ vm.node }}</span>
+                  </div>
                 </div>
-                <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
-                  'cpu'))
+                <div class="flex items-center gap-2">
+                  <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
+                    <div class="h-full bg-primary" :style="{ width: getVmMetric(vm, 'cpu') + '%' }"></div>
+                  </div>
+                  <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
+                    'cpu'))
                   }}</span>
-              </div>
-            </li>
-          </ul>
-        </div>
+                </div>
+              </li>
+            </ul>
+          </div>
 
-        <!-- RAM List -->
-        <div class="space-y-2">
-          <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider flex justify-between">
-            <span>Mayor uso de RAM</span>
-            <span class="text-[9px] opacity-70 normal-case">
-              {{ consumerMode === 'vm' ? '% Asignado' : consumerMode === 'pool' ? '% del Pool' : '% del Cluster' }}
-            </span>
-          </h3>
-          <div v-if="topMemVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
-          <ul v-else class="space-y-1">
-            <li v-for="(vm, i) in topMemVms" :key="vm.vmid"
-              class="flex items-center justify-between p-1.5 rounded hover:bg-muted-surface transition-colors cursor-default group">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] font-mono text-text-muted w-3">{{ i + 1 }}</span>
-                <div class="flex flex-col">
-                  <span
-                    class="font-medium text-xs text-text group-hover:text-primary transition-colors truncate max-w-[100px]">{{
-                      vmDisplay(vm)
-                    }}</span>
-                  <span class="text-[10px] text-text-muted leading-none">{{ vm.node }}</span>
+          <!-- RAM List -->
+          <div class="space-y-2">
+            <h3 class="text-[10px] font-semibold text-text-muted uppercase tracking-wider flex justify-between">
+              <span>Mayor uso de RAM</span>
+              <span class="text-[9px] opacity-70 normal-case">
+                {{ consumerMode === 'vm' ? '% Asignado' : consumerMode === 'pool' ? '% del Pool' : '% del Cluster' }}
+              </span>
+            </h3>
+            <div v-if="topMemVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
+            <ul v-else class="space-y-1">
+              <li v-for="(vm, i) in topMemVms" :key="vm.vmid"
+                class="flex items-center justify-between p-1.5 rounded hover:bg-muted-surface transition-colors cursor-default group">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-mono text-text-muted w-3">{{ i + 1 }}</span>
+                  <div class="flex flex-col">
+                    <span
+                      class="font-medium text-xs text-text group-hover:text-primary transition-colors truncate max-w-[100px]">{{
+                        vmDisplay(vm)
+                      }}</span>
+                    <span class="text-[10px] text-text-muted leading-none">{{ vm.node }}</span>
+                  </div>
                 </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
-                  <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
-                </div>
-                <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
+                <div class="flex items-center gap-2">
+                  <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
+                    <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
+                  </div>
+                  <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
                   }}</span>
-              </div>
-            </li>
-          </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Node Health Grid -->
-  <div class="space-y-4">
-    <h2 class="font-bold text-lg text-text px-1">Estado de Nodos</h2>
-    <div v-if="nodes.length === 0" class="text-text-muted px-1">No hay nodos disponibles</div>
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      <div v-for="n in nodes" :key="n.node"
-        class="bg-card border border-border p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-        <!-- Status Indicator Line -->
-        <div class="absolute left-0 top-0 bottom-0 w-1" :class="n.status === 'online' ? 'bg-positive' : 'bg-danger'">
-        </div>
-
-        <div class="p-2 rounded-full bg-muted-surface shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text">
-            <rect width="8" height="18" x="3" y="3" rx="1" />
-            <rect width="8" height="18" x="13" y="3" rx="1" />
-          </svg>
-        </div>
-
-        <div class="flex-1 min-w-0">
-          <div class="flex justify-between items-center mb-1">
-            <h4 class="font-bold text-sm truncate" :title="n.node">{{ n.node }}</h4>
-            <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border"
-              :class="n.status === 'online' ? 'bg-positive-soft text-positive-strong border-positive/20' : 'bg-danger-soft text-danger-strong border-danger/20'">
-              {{ n.status }}
-            </span>
+    <!-- Node Health Grid -->
+    <div class="space-y-4">
+      <h2 class="font-bold text-lg text-text px-1">Estado de Nodos</h2>
+      <div v-if="nodes.length === 0" class="text-text-muted px-1">No hay nodos disponibles</div>
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div v-for="n in nodes" :key="n.node"
+          class="bg-card border border-border p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <!-- Status Indicator Line -->
+          <div class="absolute left-0 top-0 bottom-0 w-1" :class="n.status === 'online' ? 'bg-positive' : 'bg-danger'">
           </div>
-          <div class="grid grid-cols-2 gap-2 text-xs text-text-muted mt-2">
-            <div class="flex flex-col">
-              <span class="text-[10px] uppercase">CPU</span>
-              <span class="font-mono text-text">{{ toPercent(n.cpu || 0, 1) }}</span>
+
+          <div class="p-2 rounded-full bg-muted-surface shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text">
+              <rect width="8" height="18" x="3" y="3" rx="1" />
+              <rect width="8" height="18" x="13" y="3" rx="1" />
+            </svg>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-center mb-1">
+              <h4 class="font-bold text-sm truncate" :title="n.node">{{ n.node }}</h4>
+              <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border"
+                :class="n.status === 'online' ? 'bg-positive-soft text-positive-strong border-positive/20' : 'bg-danger-soft text-danger-strong border-danger/20'">
+                {{ n.status }}
+              </span>
             </div>
-            <div class="flex flex-col">
-              <span class="text-[10px] uppercase">RAM</span>
-              <span class="font-mono text-text">{{ toPercent(n.mem || 0, n.maxmem || 1) }}</span>
+            <div class="grid grid-cols-2 gap-2 text-xs text-text-muted mt-2">
+              <div class="flex flex-col">
+                <span class="text-[10px] uppercase">CPU</span>
+                <span class="font-mono text-text">{{ toPercent(n.cpu || 0, 1) }}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[10px] uppercase">RAM</span>
+                <span class="font-mono text-text">{{ toPercent(n.mem || 0, n.maxmem || 1) }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -371,7 +410,7 @@ type Pool = { poolid: string; comment?: string }
 const ApexChart = defineAsyncComponent(() => import('vue3-apexcharts'))
 
 // -- Composables --
-const { username, isAuthenticated, proxmoxRequest, restoreSession, getNodeNetworks } = useProxmox()
+const { username, isAuthenticated, proxmoxRequest, restoreSession, getNodeNetworks, listStorages } = useProxmox()
 
 // -- State --
 const loading = ref(false)
@@ -384,7 +423,8 @@ let pollInterval: NodeJS.Timeout | null = null
 const nodes = ref<NodeResource[]>([])
 const vms = ref<VmResource[]>([])
 const pools = ref<Pool[]>([])
-const totalIpZones = ref(0) // -- Lifecycle --
+const totalIpZones = ref(0)
+const storageMetrics = ref({ total: 0, used: 0, percent: 0 }) // -- Lifecycle --
 onMounted(() => {
   restoreSession()
   if (isAuthenticated.value) {
@@ -435,21 +475,63 @@ const loadDashboard = async () => {
       error.value = 'Algunos datos no se pudieron cargar parcial o totalmente.'
     }
 
-    // Cargar redes de forma asíncrona para no bloquear
+    // Secondary Data Loading (Networks & Storage)
     if (nodes.value.length > 0) {
-      const netPromises = nodes.value
-        .filter(n => n.status === 'online')
-        .map(async (n) => {
-          const res = await getNodeNetworks(n.node)
-          if (res.success && Array.isArray(res.data)) {
-            // Contar zonas IP activas (interfaces con dirección L3)
-            return res.data.filter((net: any) => (net.address || net.address6) && net.active).length
-          }
-          return 0
-        })
+      const onlineNodes = nodes.value.filter(n => n.status === 'online')
 
-      const results = await Promise.all(netPromises)
-      totalIpZones.value = results.reduce((sum, count) => sum + count, 0)
+      // 1. Networks (IP Zones)
+      const netPromises = onlineNodes.map(async (n) => {
+        const res = await getNodeNetworks(n.node)
+        if (res.success && Array.isArray(res.data)) {
+          // Contar zonas IP activas (interfaces con dirección L3)
+          return res.data.filter((net: any) => (net.address || net.address6) && net.active).length
+        }
+        return 0
+      })
+
+      // 2. Storage Aggregation
+      const storagePromises = onlineNodes.map(async (n) => {
+        const res = await listStorages(n.node)
+        if (res.success && Array.isArray(res.data)) {
+          // Filter only active & enabled storages to avoid double counting shared ones? 
+          // Proxmox lists shared storage on every node. We should be careful.
+          // Simple approach: active=1. Shared deduplication is hard without cluster-wide storage map.
+          // Visual estimation is enough for dashboard.
+          return res.data.filter((s: any) => s.active === 1)
+        }
+        return []
+      })
+
+      const [netResults, storageResults] = await Promise.all([
+        Promise.all(netPromises),
+        Promise.all(storagePromises)
+      ])
+
+      totalIpZones.value = netResults.reduce((sum, count) => sum + count, 0)
+
+      // Flatten and Aggregate Storage
+      // To avoid double-counting shared storage (like NFS/Ceph mounted on all nodes),
+      // we can map by 'storage' name and take the first occurrence's values (assuming stats are global).
+      const storageMap = new Map<string, { total: number, used: number }>()
+
+      storageResults.flat().forEach((s: any) => {
+        if (!storageMap.has(s.storage)) {
+          storageMap.set(s.storage, { total: s.total || 0, used: s.used || 0 })
+        }
+      })
+
+      let totalBytes = 0
+      let usedBytes = 0
+      for (const vals of storageMap.values()) {
+        totalBytes += vals.total
+        usedBytes += vals.used
+      }
+
+      storageMetrics.value = {
+        total: totalBytes,
+        used: usedBytes,
+        percent: totalBytes > 0 ? (usedBytes / totalBytes) * 100 : 0
+      }
     }
 
     lastRefreshed.value = new Date()
@@ -577,6 +659,14 @@ const toPercent = (value: number, max: number) => {
   return `${((value / max) * 100).toFixed(1)}%`
 }
 
+const formatBytes = (bytes: number) => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+}
+
 // -- Charts Config --
 // Mapped colors from our CSS variables (hardcoded hex matches for Apex)
 const COLORS = {
@@ -585,8 +675,35 @@ const COLORS = {
   positive: '#4ade80', // Green 400
   warning: '#facc15', // Yellow 400
   danger: '#f87171',  // Red 400
-  muted: '#94a3b8'
+  muted: '#94a3b8',
+  info: '#3b82f6' // New color for Storage (Blue)
 }
+
+const chartStorage = computed(() => {
+  const used = Number(storageMetrics.value.percent.toFixed(1))
+  const free = Number((100 - used).toFixed(1))
+
+  return {
+    series: [used, free],
+    options: {
+      chart: { fontFamily: 'inherit', background: 'transparent', foreColor: 'var(--color-text)' },
+      labels: ['Usado', 'Libre'],
+      legend: { show: false },
+      colors: [COLORS.info, COLORS.muted],
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '75%',
+            labels: { show: false }
+          }
+        }
+      },
+      dataLabels: { enabled: false },
+      stroke: { show: false, width: 0 },
+      tooltip: { theme: 'dark', style: { fontSize: '12px' }, y: { formatter: (val) => val + '%' } }
+    } satisfies ApexOptions
+  }
+})
 
 const chartVmState = computed(() => {
   const running = vms.value.filter((vm) => vm.status === 'running').length
