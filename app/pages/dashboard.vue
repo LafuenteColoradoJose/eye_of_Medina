@@ -181,7 +181,7 @@
             <div class="text-center w-full">
               <div class="font-bold text-[10px] text-text truncate">{{ n.node }}</div>
               <div class="text-[9px] text-text-muted scale-90">{{ (nodeStorageMetrics[n.node]?.percent || 0).toFixed(0)
-                }}%
+              }}%
               </div>
             </div>
           </div>
@@ -305,7 +305,7 @@
                   </div>
                   <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
                     'cpu'))
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
             </ul>
@@ -338,7 +338,7 @@
                     <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
                   </div>
                   <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
             </ul>
@@ -482,7 +482,8 @@ const startPolling = () => {
     // 1. Basic Node List (for CPU/RAM)
     const res = await proxmoxRequest('/nodes', 'GET')
     if (res.success) {
-      nodes.value = (res.data || []) as NodeResource[]
+      const rawNodes = (res.data || []) as NodeResource[]
+      nodes.value = rawNodes.sort((a, b) => a.node.localeCompare(b.node))
 
       // 2. Realtime Network Calculation
       // Fetch detailed status for online nodes to get cumulative netin/netout
@@ -532,7 +533,10 @@ const loadDashboard = async () => {
 
     if (vmsRes.success) vms.value = (vmsRes.data || []) as VmResource[]
     if (poolsRes.success) pools.value = (poolsRes.data || []) as Pool[]
-    if (nodesRes.success) nodes.value = (nodesRes.data || []) as NodeResource[]
+    if (nodesRes.success) {
+      const rawNodes = (nodesRes.data || []) as NodeResource[]
+      nodes.value = rawNodes.sort((a, b) => a.node.localeCompare(b.node))
+    }
 
     if (!vmsRes.success || !poolsRes.success || !nodesRes.success) {
       error.value = 'Algunos datos no se pudieron cargar parcial o totalmente.'
