@@ -13,12 +13,7 @@
       <div class="flex items-center gap-3 overflow-hidden whitespace-nowrap">
         <!-- Icono Logo (Siempre visible) -->
         <div class="w-10 h-10 shrink-0 flex items-center justify-center text-primary ml-1">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          <img src="/Logo_Eye_of_Medina.webp" alt="Eye of Medina Logo" class="w-8 h-8 object-contain" />
         </div>
         <!-- Texto Logo (Visible en Hover/Mobile) -->
         <div
