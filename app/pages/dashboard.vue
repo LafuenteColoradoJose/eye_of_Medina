@@ -149,40 +149,40 @@
         </div>
       </div>
 
-      <!-- Storage Global -->
+      <!-- Storage Local (Nodes Equalizer) -->
       <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
         <h2 class="font-bold text-base text-text mb-4">Almacenamiento (Local)</h2>
-        <div class="flex items-center gap-4 flex-1 min-h-[140px]">
-          <!-- Donut Chart -->
-          <div class="relative w-[110px] h-[110px] shrink-0">
-            <ClientOnly>
-              <ApexChart v-if="nodes.length > 0" type="donut" width="100%" height="100%" :options="chartStorage.options"
-                :series="chartStorage.series" />
-              <!-- Centered Usage Label -->
-              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span class="text-xl font-extrabold text-text leading-none">{{ storageMetrics.percent.toFixed(0)
-                  }}%</span>
-                <span class="text-[10px] text-text-muted uppercase font-bold mt-1">Usado</span>
+
+        <div v-if="loading && !hasLoaded" class="flex-1 flex items-center justify-center min-h-[140px]">
+          <span class="animate-pulse text-text-muted text-xs">Cargando datos...</span>
+        </div>
+
+        <div v-else class="flex items-end justify-around gap-3 flex-1 min-h-[140px] px-1 pb-1">
+          <div v-for="n in nodes.filter(n => n.status === 'online')" :key="n.node"
+            class="flex flex-col items-center gap-2 group flex-1">
+
+            <!-- Bar Container -->
+            <div
+              class="relative w-full max-w-[40px] h-[100px] bg-muted-surface rounded-md overflow-hidden flex flex-col-reverse shadow-inner border border-white/5"
+              :title="`${n.node}: ${formatBytes(nodeStorageMetrics[n.node]?.used || 0)} / ${formatBytes(nodeStorageMetrics[n.node]?.total || 0)}`">
+
+              <!-- Fill (Animated) -->
+              <div class="w-full transition-all duration-1000 ease-out relative group-hover:brightness-110"
+                :style="{ height: (nodeStorageMetrics[n.node]?.percent || 0) + '%', backgroundColor: getStorageColor(nodeStorageMetrics[n.node]?.percent || 0) }">
               </div>
-            </ClientOnly>
-          </div>
-          <!-- Custom Legend -->
-          <div class="flex flex-col gap-3 flex-1 justify-center min-w-0 pl-1">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2 min-w-0">
-                <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></div>
-                <span class="text-xs font-medium text-text truncate">Ocupado</span>
+
+              <!-- Grid Overlay (Retro Style) -->
+              <div
+                class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_1px,transparent_1px)] bg-[size:100%_20%] pointer-events-none">
               </div>
-              <span class="text-xs font-bold text-text tabular-nums ml-2 whitespace-nowrap">{{
-                formatBytes(storageMetrics.used) }}</span>
             </div>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2 min-w-0">
-                <div class="w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0 shadow-sm"></div>
-                <span class="text-xs font-medium text-text truncate">Total</span>
+
+            <!-- Labels -->
+            <div class="text-center w-full">
+              <div class="font-bold text-[10px] text-text truncate">{{ n.node }}</div>
+              <div class="text-[9px] text-text-muted scale-90">{{ (nodeStorageMetrics[n.node]?.percent || 0).toFixed(0)
+                }}%
               </div>
-              <span class="text-xs font-bold text-text-muted tabular-nums ml-2 whitespace-nowrap">{{
-                formatBytes(storageMetrics.total) }}</span>
             </div>
           </div>
         </div>
@@ -305,7 +305,7 @@
                   </div>
                   <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
                     'cpu'))
-                  }}</span>
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -338,7 +338,7 @@
                     <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
                   </div>
                   <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
-                  }}</span>
+                    }}</span>
                 </div>
               </li>
             </ul>
@@ -441,6 +441,7 @@ const nodes = ref<NodeResource[]>([])
 const vms = ref<VmResource[]>([])
 const pools = ref<Pool[]>([])
 const totalIpZones = ref(0)
+const nodeStorageMetrics = ref<Record<string, { total: number, used: number, percent: number }>>({})
 const storageMetrics = ref({ total: 0, used: 0, percent: 0 }) // -- Lifecycle --
 onMounted(() => {
   restoreSession()
@@ -551,17 +552,13 @@ const loadDashboard = async () => {
         return 0
       })
 
-      // 2. Storage Aggregation
+      // 2. Storage Aggregation (Per Node & Local Only)
       const storagePromises = onlineNodes.map(async (n) => {
         const res = await listStorages(n.node)
-        if (res.success && Array.isArray(res.data)) {
-          // Filter only active & enabled storages to avoid double counting shared ones? 
-          // Proxmox lists shared storage on every node. We should be careful.
-          // Simple approach: active=1. Shared deduplication is hard without cluster-wide storage map.
-          // Visual estimation is enough for dashboard.
-          return res.data.filter((s: any) => s.active === 1)
+        return {
+          node: n.node,
+          data: (res.success && Array.isArray(res.data)) ? res.data : []
         }
-        return []
       })
 
       const [netResults, storageResults] = await Promise.all([
@@ -571,28 +568,38 @@ const loadDashboard = async () => {
 
       totalIpZones.value = netResults.reduce((sum, count) => sum + count, 0)
 
-      // Flatten and Aggregate Storage
-      // To avoid double-counting shared storage (like NFS/Ceph mounted on all nodes),
-      // we can map by 'storage' name and take the first occurrence's values (assuming stats are global).
-      const storageMap = new Map<string, { total: number, used: number }>()
+      // Calculate Per-Node Local Storage
+      const localMetrics: typeof nodeStorageMetrics.value = {}
+      let globalLocalTotal = 0
+      let globalLocalUsed = 0
 
-      storageResults.flat().forEach((s: any) => {
-        if (!storageMap.has(s.storage)) {
-          storageMap.set(s.storage, { total: s.total || 0, used: s.used || 0 })
+      storageResults.forEach(({ node, data }) => {
+        // Filter: Active AND NOT SHARED (assuming 'local' in name implies local if 'shared' property is missing, strictly respecting 'shared' if present)
+        // Note: PVE API 'storage' object usually has 'shared' (0/1). 
+        const localStorages = data.filter((s: any) =>
+          s.active === 1 && (s.shared === 0 || s.storage.includes('local'))
+        )
+
+        const total = localStorages.reduce((acc: number, s: any) => acc + (s.total || 0), 0)
+        const used = localStorages.reduce((acc: number, s: any) => acc + (s.used || 0), 0)
+
+        localMetrics[node] = {
+          total,
+          used,
+          percent: total > 0 ? (used / total) * 100 : 0
         }
+
+        globalLocalTotal += total
+        globalLocalUsed += used
       })
 
-      let totalBytes = 0
-      let usedBytes = 0
-      for (const vals of storageMap.values()) {
-        totalBytes += vals.total
-        usedBytes += vals.used
-      }
+      nodeStorageMetrics.value = localMetrics
 
+      // Update global metrics just for reference (though not shown in new card)
       storageMetrics.value = {
-        total: totalBytes,
-        used: usedBytes,
-        percent: totalBytes > 0 ? (usedBytes / totalBytes) * 100 : 0
+        total: globalLocalTotal,
+        used: globalLocalUsed,
+        percent: globalLocalTotal > 0 ? (globalLocalUsed / globalLocalTotal) * 100 : 0
       }
     }
 
@@ -739,6 +746,13 @@ const COLORS = {
   danger: '#f87171',  // Red 400
   muted: '#94a3b8',
   info: '#3b82f6' // New color for Storage (Blue)
+}
+
+const getStorageColor = (percent: number) => {
+  if (percent > 85) return COLORS.danger
+  if (percent > 60) return COLORS.warning
+  if (percent > 40) return COLORS.info
+  return COLORS.accent // Teal for low usage
 }
 
 const chartStorage = computed(() => {
