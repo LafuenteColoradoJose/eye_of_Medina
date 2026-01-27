@@ -138,6 +138,14 @@
                             </button>
                         </div>
 
+                        <div class="flex gap-1 bg-background p-1 rounded-lg border border-border">
+                            <button @click="contentType = 'images'; loadContent()"
+                                class="px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
+                                :class="contentType === 'images' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text hover:bg-muted-surface'">
+                                Discos VM
+                            </button>
+                        </div>
+
                         <div class="flex gap-2">
                             <button v-if="canDownload" @click="showDownloadModal = true"
                                 class="px-3 py-1.5 rounded-md bg-white text-black hover:bg-gray-100 font-bold text-xs uppercase tracking-wide flex items-center gap-2 shadow-sm transition-colors">
@@ -203,6 +211,15 @@
                                             class="text-blue-500">
                                             <circle cx="12" cy="12" r="10" />
                                             <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                        <svg v-else-if="contentType === 'images'" xmlns="http://www.w3.org/2000/svg"
+                                            width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            class="text-purple-500">
+                                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                                            <line x1="6" y1="6" x2="6.01" y2="6" />
+                                            <line x1="6" y1="18" x2="6.01" y2="18" />
                                         </svg>
                                         <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -317,7 +334,7 @@ const storages = ref<Storage[]>([])
 const selectedStorage = ref<Storage | null>(null)
 const files = ref<StorageFile[]>([])
 
-const contentType = ref<'iso' | 'vztmpl'>('iso')
+const contentType = ref<'iso' | 'vztmpl' | 'images'>('iso')
 const loading = ref(false)
 const loadingStorages = ref(false)
 const loadingContent = ref(false)
@@ -382,6 +399,7 @@ function selectStorage(store: Storage) {
     // Auto switch tab based on support
     if (supportsContent(store, 'iso') && !supportsContent(store, 'vztmpl')) contentType.value = 'iso'
     if (!supportsContent(store, 'iso') && supportsContent(store, 'vztmpl')) contentType.value = 'vztmpl'
+    if (!supportsContent(store, 'iso') && !supportsContent(store, 'vztmpl') && supportsContent(store, 'images')) contentType.value = 'images'
 
     loadContent()
 }

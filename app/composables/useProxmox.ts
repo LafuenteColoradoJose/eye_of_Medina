@@ -361,13 +361,13 @@ export const useProxmox = () => {
     // Storage & Content
     listStorages: async (node: string) => proxmoxRequest(`/nodes/${encodeURIComponent(node)}/storage`, 'GET'),
 
-    listStorageContent: async (node: string, storage: string, content?: 'iso' | 'vztmpl') => {
+    listStorageContent: async (node: string, storage: string, content?: 'iso' | 'vztmpl' | 'images') => {
       let url = `/nodes/${encodeURIComponent(node)}/storage/${encodeURIComponent(storage)}/content`
       if (content) url += `?content=${content}`
       return proxmoxRequest(url, 'GET')
     },
 
-    downloadUrlToStorage: async (node: string, storage: string, url: string, filename: string, content: 'iso' | 'vztmpl' = 'iso') => {
+    downloadUrlToStorage: async (node: string, storage: string, url: string, filename: string, content: 'iso' | 'vztmpl' | 'images' = 'iso') => {
       return proxmoxRequest(`/nodes/${encodeURIComponent(node)}/storage/${encodeURIComponent(storage)}/download-url`, 'POST', undefined, {
         content,
         filename,
