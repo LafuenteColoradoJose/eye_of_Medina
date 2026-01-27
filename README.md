@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Eye of Medina](public/Logo_Eye_of_Medina.svg)
+![Eye of Medina](public/Logo_Eye_of_Medina.webp)
 
 **Modern Web Dashboard for Proxmox VE Monitoring and Management**
 
@@ -19,7 +19,7 @@
 
 ### Dashboard 2.0
 - **High Density Layout**: 4-column grid optimized for large screens (`KPIs` + `State` + `Storage` + `CPU` + `Network`).
-- **Real-time Metrics**: Live monitoring of **CPU Cluster**, **Global Storage**, and **Network Traffic** (Mbps).
+- **Real-time Metrics**: Live monitoring of **CPU Cluster**, **Per-Node Storage**, and **Network Traffic** (Mbps).
 - **Interactive Charts**: VM status donut, storage capacity, and historical trends.
 - **Top Consumers**: Detailed resource consumption analysis (CPU/RAM) with **VM**, **Pool**, and **Cluster** views.
 - **Node Health**: Health status and metrics for each cluster node.

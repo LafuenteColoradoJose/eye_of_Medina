@@ -89,7 +89,7 @@ Calls to Proxmox are routed through the Nuxt backend:
 - **High Density Layout**: 4-column responsive grid (`State`, `Storage`, `CPU`, `Network`) for large screens.
 - **Real-time Monitoring**:
   - **Network**: Aggregate cluster traffic (Mbps) calculated from node deltas.
-  - **Storage**: Global capacity usage of all local disks.
+  - **Storage**: Capacity usage of local disks per node (Equalizer view).
   - **CPU**: Real-time cluster load chart.
 - **Top Consumers**: Detailed resource consumption analysis (CPU/RAM).
 - **Tasks Drawer**: Slide-out panel with aggregated operation logs.

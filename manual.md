@@ -77,7 +77,7 @@ The dashboard displays a general overview of the cluster status with high densit
 
 ### Main Metrics (Top Row)
 1. **VM Status**: Circular chart showing Running vs Stopped VMs.
-2. **Global Storage**: Total vs Used capacity of all local disks in the cluster.
+2. **Local Storage**: Capacity bars for each node (Local storage only).
 3. **CPU Real-time**: Cluster-wide CPU load graph.
 4. **Network Traffic**: Real-time aggregate bandwidth (Mbps) usage.
 
