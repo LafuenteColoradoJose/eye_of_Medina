@@ -28,7 +28,7 @@
 ### Storage Management (NEW!)
 - **ISO & Templates**: Browse and manage content across all cluster storage.
 - **Download from URL**: Directly download ISOs/Images to Proxmox storage nodes.
-- **Visual Browsing**: Filter by content type (ISO, Backup, CT Template, Snippet).
+- **Visual Browsing**: Filter by content type (ISO, Backup, CT Template, VM Disks, Snippet).
 
 ### Virtual Machine Management
 - **Advanced Filtering**: By name, ID, type, and pool.

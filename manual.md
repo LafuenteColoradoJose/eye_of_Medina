@@ -232,6 +232,7 @@ The new interface prioritizes logical connectivity over cabling:
     - **ISO**: Installation images.
     - **Templates**: LXC container templates.
     - **Backups**: VZDump backup files.
+    - **Discos VM**: Archivos de disco virtual (Raw/Qcow2).
  
  ### Download Content (URL)
  

@@ -96,7 +96,7 @@ Calls to Proxmox are routed through the Nuxt backend:
 - **Node Health**: Grid view of all nodes with status indicators.
 
 ### Storage Management
-- **Unified Browser**: View files (ISOs, Templates, Backups) across all nodes/storages.
+- **Unified Browser**: View files (ISOs, Templates, Backups, VM Disks) across all nodes/storages.
 - **Direct Download**: Feature to download files (e.g., ISOs) from a URL directly to the Proxmox node storage.
 - **Capacity Analysis**: specific visualization of storage usage.
 
