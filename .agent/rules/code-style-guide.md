@@ -59,3 +59,7 @@ Official Documentation Reference:
     State Management: Use useState for SSR-friendly state or Pinia for complex global state.
 
     Code Quality: Keep components small, modular, and reusable. Follow DRY and Clean Code principles.
+
+
+
+HABLAME SIEMPRE EN ESPAÑOL
