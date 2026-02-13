@@ -8,8 +8,13 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
     '@nuxt/image',
-    '@nuxt/test-utils'
+    '@nuxt/test-utils',
+    '@nuxtjs/mcp-toolkit'
   ],
+  mcp: {
+    name: 'Eye of Medina MCP',
+    version: '0.1.0',
+  },
   // Enable WebSocket support for VNC proxy
   nitro: {
     experimental: {
