@@ -1,8 +1,8 @@
 <script setup lang="ts">
-useHead({ title: 'Acceso' })
 import Login from '~/components/login.vue';
+useHead({ title: 'Acceso' })
 
-const { isAuthenticated, restoreSession, username } = useProxmox();
+const { isAuthenticated, restoreSession } = useProxmox();
 const router = useRouter();
 
 const handleRedirect = () => {

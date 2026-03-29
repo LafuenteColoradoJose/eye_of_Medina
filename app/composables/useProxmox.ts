@@ -218,7 +218,7 @@ export const useProxmox = () => {
     try {
       const res = await proxmoxRequest('/access/permissions', 'GET')
       if (res.success && res.data) {
-        userPermissions.value = res.data
+        userPermissions.value = (res.data as Record<string, Record<string, number>>) || {}
       }
       return res
     } catch (e) {

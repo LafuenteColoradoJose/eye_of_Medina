@@ -6,9 +6,11 @@
                 <h1 class="text-3xl font-extrabold tracking-tight text-text">Mapa de Calor & Capacidad</h1>
                 <p class="text-text-muted text-sm mt-1">Análisis de carga en tiempo real para balanceo de recursos</p>
             </div>
-            <button @click="fetchData"
-                class="px-4 py-2 rounded-lg bg-card border border-border text-text hover:bg-muted-surface transition-colors flex items-center gap-2 shadow-sm text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            <button
+class="px-4 py-2 rounded-lg bg-card border border-border text-text hover:bg-muted-surface transition-colors flex items-center gap-2 shadow-sm text-sm"
+                @click="fetchData">
+                <svg
+xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     :class="{ 'animate-spin': loading }">
                     <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -22,22 +24,23 @@
 
         <!-- Heatmap Grid -->
         <div v-if="loading && nodesData.length === 0" class="py-20 flex justify-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"/>
         </div>
 
         <div v-else class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
 
             <!-- Node Card -->
-            <div v-for="node in nodesData" :key="node.name"
+            <div
+v-for="node in nodesData" :key="node.name"
                 class="bg-card border border-border rounded-xl flex flex-col shadow-sm hover:shadow-md transition-shadow">
 
                 <!-- Node Header (Capacity) -->
                 <div class="p-5 border-b border-border/50 bg-muted-surface/30 rounded-t-xl">
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-3 h-3 rounded-full"
-                                :class="node.status === 'online' ? 'bg-positive shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-danger'">
-                            </div>
+                            <div
+class="w-3 h-3 rounded-full"
+                                :class="node.status === 'online' ? 'bg-positive shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-danger'"/>
                             <h2 class="text-xl font-bold text-text">{{ node.name }}</h2>
                         </div>
                         <div
@@ -56,9 +59,10 @@
                                     }}%</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
-                                <div class="h-full rounded-full transition-all duration-500"
+                                <div
+class="h-full rounded-full transition-all duration-500"
                                     :class="getLoadColorBg(node.cpuUsage)"
-                                    :style="{ width: `${Math.min(node.cpuUsage * 100, 100)}%` }"></div>
+                                    :style="{ width: `${Math.min(node.cpuUsage * 100, 100)}%` }"/>
                             </div>
                         </div>
                         <!-- RAM Bar -->
@@ -69,9 +73,9 @@
                                     }}</span>
                             </div>
                             <div class="h-2 w-full bg-background rounded-full overflow-hidden border border-border/30">
-                                <div class="h-full rounded-full bg-blue-500 transition-all duration-500"
-                                    :style="{ width: `${node.memTotal > 0 ? (node.memUsed / node.memTotal) * 100 : 0}%` }">
-                                </div>
+                                <div
+class="h-full rounded-full bg-blue-500 transition-all duration-500"
+                                    :style="{ width: `${node.memTotal > 0 ? (node.memUsed / node.memTotal) * 100 : 0}%` }"/>
                             </div>
                         </div>
                     </div>
@@ -85,7 +89,8 @@
                     </h3>
 
                     <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                        <div v-for="vm in node.vms" :key="vm.vmid"
+                        <div
+v-for="vm in node.vms" :key="vm.vmid"
                             class="aspect-square rounded shadow-sm border border-white/5 relative group cursor-help transition-transform hover:scale-110 hover:z-10"
                             :class="[
                                 getVmHeatColor(vm),
@@ -100,8 +105,9 @@
                             <div
                                 class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-white text-zinc-900 border border-zinc-200 rounded-lg p-3 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] text-left">
                                 <div class="flex items-center gap-2 mb-2 pb-2 border-b border-zinc-200">
-                                    <div class="w-2.5 h-2.5 rounded-full shadow-sm"
-                                        :class="vm.status === 'running' ? 'bg-emerald-500' : 'bg-red-500'"></div>
+                                    <div
+class="w-2.5 h-2.5 rounded-full shadow-sm"
+                                        :class="vm.status === 'running' ? 'bg-emerald-500' : 'bg-red-500'"/>
                                     <span class="font-bold text-sm truncate flex-1">{{ vm.name }}</span>
                                 </div>
                                 <div class="space-y-1.5 text-xs font-mono">
@@ -121,13 +127,13 @@
                                 </div>
                                 <!-- Arrow -->
                                 <div
-                                    class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-white">
-                                </div>
+                                    class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-white"/>
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="node.vms.length === 0"
+                    <div
+v-if="node.vms.length === 0"
                         class="h-full flex items-center justify-center text-text-muted text-xs italic opacity-50">
                         Sin máquinas desplegadas
                     </div>
@@ -143,7 +149,7 @@ import { ref, onMounted, computed } from 'vue'
 
 useHead({ title: 'Heatmap de Recursos' })
 
-const { isAuthenticated, restoreSession, listVMResources, listNodes, proxmoxRequest } = useProxmox()
+const { restoreSession, listVMResources, listNodes, proxmoxRequest } = useProxmox()
 
 // Types
 type ClusterResource = {
@@ -171,7 +177,7 @@ type NodeAggregated = {
 
 const loading = ref(false)
 const rawResources = ref<ClusterResource[]>([])
-const rawNodes = ref<any[]>([])
+const rawNodes = ref<Record<string, unknown>[]>([])
 
 onMounted(() => {
     restoreSession()
@@ -188,7 +194,8 @@ const fetchData = async () => {
         ])
 
         let machines: ClusterResource[] = []
-        let nodesBasic: any[] = []
+        type NodeBasic = { node: string; status?: string }
+        let nodesBasic: NodeBasic[] = []
 
         if (clusterRes.success && clusterRes.data) {
             machines = clusterRes.data as ClusterResource[]
@@ -196,7 +203,7 @@ const fetchData = async () => {
         }
 
         if (nodesListRes.success && nodesListRes.data) {
-            nodesBasic = nodesListRes.data as any[]
+            nodesBasic = nodesListRes.data as NodeBasic[]
         }
 
         // 2. Fetch Detailed Stats for EACH Node (Sequential for robustness)
@@ -205,13 +212,13 @@ const fetchData = async () => {
             if (n.status === 'online') {
                 const statusRes = await proxmoxRequest(`/nodes/${n.node}/status`, 'GET')
                 if (statusRes.success && statusRes.data) {
-                    const d = statusRes.data as any
+                    const d = statusRes.data as Record<string, unknown>
                     detailedNodes.push({
                         ...n,
                         cpu: d.cpu,
-                        mem: d.memory?.used || d.mem || 0,
-                        maxmem: d.memory?.total || d.maxmem || 0,
-                        uptime: d.uptime
+                        mem: Number((d.memory as Record<string, unknown>)?.used) || Number(d.mem) || 0,
+                        maxmem: Number((d.memory as Record<string, unknown>)?.total) || Number(d.maxmem) || 0,
+                        uptime: Number(d.uptime) || 0
                     })
                 } else {
                     console.warn(`[Eye of Medina] Fallo status nodo ${n.node} (Probablemente permisos 403):`, statusRes)

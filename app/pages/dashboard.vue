@@ -14,14 +14,16 @@
         <button
           class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
           :disabled="loading" @click="loadDashboard">
-          <svg v-if="loading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+          <svg
+v-if="loading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
             viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path
+class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          <svg
+v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path d="M3 3v5h5" />
@@ -34,7 +36,8 @@
     </div>
 
     <div v-if="error" class="bg-danger/10 border border-danger/20 text-danger p-4 rounded-lg flex items-center gap-3">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+      <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10" />
         <line x1="12" x2="12" y1="8" y2="12" />
@@ -47,7 +50,8 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <StatsCard label="CPU Cluster" :value="kpiCpu" subtext="Media de uso en nodos">
         <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="18" x="3" y="3" rx="2" />
             <path d="M9 14v4" />
@@ -62,7 +66,8 @@
 
       <StatsCard label="RAM Cluster" :value="kpiRam" subtext="Memoria total asignada">
         <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 19v-3" />
             <path d="M10 19v-3" />
@@ -79,7 +84,8 @@
 
       <StatsCard label="VMs Activas" :value="String(runningVms)" :subtext="`De un total de ${totalVms}`">
         <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
             <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
@@ -91,7 +97,8 @@
 
       <StatsCard label="Pools" :value="String(pools.length)" subtext="Grupos de recursos">
         <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path
               d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 2H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
@@ -101,7 +108,8 @@
 
       <StatsCard label="Zonas IP" :value="String(totalIpZones)" subtext="Interfaces con IP asignada">
         <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" />
             <line x1="2" y1="12" x2="22" y2="12" />
@@ -120,7 +128,8 @@
           <!-- Donut Chart -->
           <div class="relative w-[110px] h-[110px] shrink-0">
             <ClientOnly>
-              <ApexChart v-if="totalVms > 0" type="donut" width="100%" height="100%" :options="chartVmState.options"
+              <ApexChart
+v-if="totalVms > 0" type="donut" width="100%" height="100%" :options="chartVmState.options"
                 :series="chartVmState.series" />
               <!-- Centered Total Label -->
               <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -133,14 +142,14 @@
           <div class="flex flex-col gap-3 flex-1 justify-center min-w-0">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 min-w-0">
-                <div class="w-2.5 h-2.5 rounded-full bg-positive shrink-0 shadow-[0_0_8px_rgba(74,222,128,0.4)]"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-positive shrink-0 shadow-[0_0_8px_rgba(74,222,128,0.4)]"/>
                 <span class="text-xs font-medium text-text truncate">Running</span>
               </div>
               <span class="text-xs font-bold text-text ml-2 whitespace-nowrap">{{ runningVms }}</span>
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 min-w-0">
-                <div class="w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0 shadow-sm"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0 shadow-sm"/>
                 <span class="text-xs font-medium text-text truncate">Stopped</span>
               </div>
               <span class="text-xs font-bold text-text-muted ml-2 whitespace-nowrap">{{ totalVms - runningVms }}</span>
@@ -158,7 +167,8 @@
         </div>
 
         <div v-else class="flex items-end justify-around gap-3 flex-1 min-h-[140px] px-1 pb-1">
-          <div v-for="n in nodes.filter(n => n.status === 'online')" :key="n.node"
+          <div
+v-for="n in nodes.filter(n => n.status === 'online')" :key="n.node"
             class="flex flex-col items-center gap-2 group flex-1">
 
             <!-- Bar Container -->
@@ -167,14 +177,13 @@
               :title="`${n.node}: ${formatBytes(nodeStorageMetrics[n.node]?.used || 0)} / ${formatBytes(nodeStorageMetrics[n.node]?.total || 0)}`">
 
               <!-- Fill (Animated) -->
-              <div class="w-full transition-all duration-1000 ease-out relative group-hover:brightness-110"
-                :style="{ height: (nodeStorageMetrics[n.node]?.percent || 0) + '%', backgroundColor: getStorageColor(nodeStorageMetrics[n.node]?.percent || 0) }">
-              </div>
+              <div
+class="w-full transition-all duration-1000 ease-out relative group-hover:brightness-110"
+                :style="{ height: (nodeStorageMetrics[n.node]?.percent || 0) + '%', backgroundColor: getStorageColor(nodeStorageMetrics[n.node]?.percent || 0) }"/>
 
               <!-- Grid Overlay (Retro Style) -->
               <div
-                class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_1px,transparent_1px)] bg-[size:100%_20%] pointer-events-none">
-              </div>
+                class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_1px,transparent_1px)] bg-[size:100%_20%] pointer-events-none"/>
             </div>
 
             <!-- Labels -->
@@ -193,12 +202,13 @@
         <div class="flex items-center justify-between mb-2 z-10">
           <h2 class="font-bold text-base text-text">CPU en Tiempo Real</h2>
           <div class="flex items-center gap-2">
-            <span class="animate-pulse w-2 h-2 rounded-full bg-positive"></span>
+            <span class="animate-pulse w-2 h-2 rounded-full bg-positive"/>
             <span class="text-xs font-mono text-primary font-bold">{{ kpiCpu }}</span>
           </div>
         </div>
         <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
-          <RealtimeChart title="CPU Cluster" :data-point="currentClusterCpuVal" :color="COLORS.primary" :height="160"
+          <RealtimeChart
+title="CPU Cluster" :data-point="currentClusterCpuVal" :color="COLORS.primary" :height="160"
             :max-points="30" />
         </div>
       </div>
@@ -208,12 +218,13 @@
         <div class="flex items-center justify-between mb-2 z-10">
           <h2 class="font-bold text-base text-text">Red Cluster</h2>
           <div class="flex items-center gap-2">
-            <span class="animate-pulse w-2 h-2 rounded-full bg-accent"></span>
+            <span class="animate-pulse w-2 h-2 rounded-full bg-accent"/>
             <span class="text-xs font-mono text-accent font-bold">{{ currentNetMbps }} Mbps</span>
           </div>
         </div>
         <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
-          <RealtimeChart title="Traffic" :data-point="currentNetMbps" :color="COLORS.accent" :height="160"
+          <RealtimeChart
+title="Traffic" :data-point="currentNetMbps" :color="COLORS.accent" :height="160"
             :max-points="30" />
         </div>
       </div>
@@ -243,9 +254,9 @@
               </div>
             </div>
             <div class="h-1.5 w-full bg-muted-surface rounded-full overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-500"
-                :style="{ width: ((count / totalVms) * 100) + '%', backgroundColor: chartPool.options.colors[i % chartPool.options.colors.length] }">
-              </div>
+              <div
+class="h-full rounded-full transition-all duration-500"
+                :style="{ width: ((count / totalVms) * 100) + '%', backgroundColor: chartPool.options.colors[i % chartPool.options.colors.length] }"/>
             </div>
           </div>
         </div>
@@ -260,7 +271,8 @@
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
             <h2 class="font-bold text-base text-text">Top Consumidores</h2>
-            <NuxtLink to="/machines" class="text-[10px] text-primary hover:underline cursor-pointer"
+            <NuxtLink
+to="/machines" class="text-[10px] text-primary hover:underline cursor-pointer"
               title="Ver tabla completa de máquinas">
               (Analizar todo)
             </NuxtLink>
@@ -268,9 +280,10 @@
 
           <!-- Mode Toggles -->
           <div class="flex bg-muted-surface p-0.5 rounded-lg border border-border">
-            <button v-for="mode in ['vm', 'pool', 'cluster']" :key="mode" @click="consumerMode = mode as any"
-              class="px-2 py-0.5 text-[10px] uppercase font-bold rounded-md transition-all"
-              :class="consumerMode === mode ? 'bg-background text-primary shadow-sm' : 'text-text-muted hover:text-text'">
+            <button
+v-for="mode in ['vm', 'pool', 'cluster']" :key="mode" class="px-2 py-0.5 text-[10px] uppercase font-bold rounded-md transition-all"
+              :class="consumerMode === mode ? 'bg-background text-primary shadow-sm' : 'text-text-muted hover:text-text'"
+              @click="consumerMode = mode as any">
               {{ mode }}
             </button>
           </div>
@@ -287,7 +300,8 @@
             </h3>
             <div v-if="topCpuVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
             <ul v-else class="space-y-1">
-              <li v-for="(vm, i) in topCpuVms" :key="vm.vmid"
+              <li
+v-for="(vm, i) in topCpuVms" :key="vm.vmid"
                 class="flex items-center justify-between p-1.5 rounded hover:bg-muted-surface transition-colors cursor-default group">
                 <div class="flex items-center gap-2">
                   <span class="text-[10px] font-mono text-text-muted w-3">{{ i + 1 }}</span>
@@ -301,7 +315,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
-                    <div class="h-full bg-primary" :style="{ width: getVmMetric(vm, 'cpu') + '%' }"></div>
+                    <div class="h-full bg-primary" :style="{ width: getVmMetric(vm, 'cpu') + '%' }"/>
                   </div>
                   <span class="text-[10px] font-bold text-primary w-8 text-right">{{ formatMetric(getVmMetric(vm,
                     'cpu'))
@@ -321,7 +335,8 @@
             </h3>
             <div v-if="topMemVms.length === 0" class="text-xs text-text-muted italic">Sin datos</div>
             <ul v-else class="space-y-1">
-              <li v-for="(vm, i) in topMemVms" :key="vm.vmid"
+              <li
+v-for="(vm, i) in topMemVms" :key="vm.vmid"
                 class="flex items-center justify-between p-1.5 rounded hover:bg-muted-surface transition-colors cursor-default group">
                 <div class="flex items-center gap-2">
                   <span class="text-[10px] font-mono text-text-muted w-3">{{ i + 1 }}</span>
@@ -335,7 +350,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="w-12 h-1 bg-border rounded-full overflow-hidden">
-                    <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"></div>
+                    <div class="h-full bg-accent" :style="{ width: getVmMetric(vm, 'mem') + '%' }"/>
                   </div>
                   <span class="text-[10px] font-bold text-accent w-8 text-right">{{ formatMetric(getVmMetric(vm, 'mem'))
                   }}</span>
@@ -352,14 +367,15 @@
       <h2 class="font-bold text-lg text-text px-1">Estado de Nodos</h2>
       <div v-if="nodes.length === 0" class="text-text-muted px-1">No hay nodos disponibles</div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <div v-for="n in nodes" :key="n.node"
+        <div
+v-for="n in nodes" :key="n.node"
           class="bg-card border border-border p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
           <!-- Status Indicator Line -->
-          <div class="absolute left-0 top-0 bottom-0 w-1" :class="n.status === 'online' ? 'bg-positive' : 'bg-danger'">
-          </div>
+          <div class="absolute left-0 top-0 bottom-0 w-1" :class="n.status === 'online' ? 'bg-positive' : 'bg-danger'"/>
 
           <div class="p-2 rounded-full bg-muted-surface shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text">
               <rect width="8" height="18" x="3" y="3" rx="1" />
               <rect width="8" height="18" x="13" y="3" rx="1" />
@@ -369,7 +385,8 @@
           <div class="flex-1 min-w-0">
             <div class="flex justify-between items-center mb-1">
               <h4 class="font-bold text-sm truncate" :title="n.node">{{ n.node }}</h4>
-              <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border"
+              <span
+class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border"
                 :class="n.status === 'online' ? 'bg-positive-soft text-positive-strong border-positive/20' : 'bg-danger-soft text-danger-strong border-danger/20'">
                 {{ n.status }}
               </span>
@@ -392,11 +409,11 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'Dashboard' })
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { ApexOptions } from 'apexcharts'
 import StatsCard from '~/components/StatsCard.vue'
 import RealtimeChart from '~/components/RealtimeChart.vue'
+useHead({ title: 'Dashboard' })
 
 // -- Types --
 type VmResource = {
@@ -467,7 +484,7 @@ watch(isAuthenticated, (val) => {
 
 
 // Network State
-const currentKwIn = ref(0) // Used for CPU Realtime actually
+const _currentKwIn = ref(0) // Used for CPU Realtime actually
 const currentNetMbps = ref(0)
 const lastNetState = { time: 0, bytes: 0 }
 
@@ -759,7 +776,7 @@ const getStorageColor = (percent: number) => {
   return COLORS.accent // Teal for low usage
 }
 
-const chartStorage = computed(() => {
+const _chartStorage = computed(() => {
   const used = Number(storageMetrics.value.percent.toFixed(1))
   const free = Number((100 - used).toFixed(1))
 
@@ -803,7 +820,7 @@ const chartVmState = computed(() => {
   }
 })
 
-const chartNodeCpu = computed(() => {
+const _chartNodeCpu = computed(() => {
   const labels = nodes.value.map((n) => n.node)
   const data = nodes.value.map((n) => Number(((n.cpu || 0) * 100).toFixed(1)))
   return {

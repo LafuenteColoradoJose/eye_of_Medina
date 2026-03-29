@@ -16,7 +16,7 @@ type FetchErrorLike = {
   response?: { status?: number; statusMessage?: string }
   statusCode?: number
   message?: string
-  data?: any
+  data?: unknown
   stack?: string
 }
 
@@ -91,7 +91,10 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, status)
 
     // Extraer mensaje de Proxmox (errors object o statusMessage)
-    const proxmoxDetails = e?.data?.errors ?? e?.data ?? e?.response?.statusMessage
+    const proxmoxData = e?.data
+    const proxmoxDetails = proxmoxData && typeof proxmoxData === 'object' && 'errors' in (proxmoxData as Record<string, unknown>)
+      ? (proxmoxData as Record<string, unknown>).errors
+      : proxmoxData ?? e?.response?.statusMessage
 
     return {
       success: false,

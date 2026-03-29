@@ -1,6 +1,7 @@
 <template>
     <div class="h-[600px] w-full border border-border rounded-xl overflow-hidden bg-[#1a1a1a] relative">
-        <VueFlow v-model:nodes="nodes" v-model:edges="edges" :class="{ dark: true }" class="basic-flow"
+        <VueFlow
+v-model:nodes="nodes" v-model:edges="edges" :class="{ dark: true }" class="basic-flow"
             :default-viewport="{ zoom: 1.5 }" :min-zoom="0.2" :max-zoom="4" fit-view-on-init>
             <Background pattern-color="#333" :gap="16" />
             <Controls />
@@ -11,7 +12,7 @@
         <!-- Overlay Loading -->
         <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-black/50 z-10 backdrop-blur-sm">
             <div class="flex flex-col items-center gap-2">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"/>
                 <span class="text-xs text-text-muted font-mono">Generando mapa...</span>
             </div>
         </div>
@@ -64,8 +65,13 @@ const buildTopology = async () => {
 
     try {
         // 1. Fetch Node Networks (Bridges & Ports)
+        // Domain types
+        interface InterfaceInfo { iface: string; type?: string; address?: string }
+        interface VMInfo { vmid: string; name?: string; status?: string; type?: string }
+        type VMConfig = Record<string, unknown>
+
         const netRes = await getNodeNetworks(props.targetNode)
-        const allIfaces = (netRes.success ? netRes.data : []) as any[]
+        const allIfaces = (netRes.success ? netRes.data : []) as InterfaceInfo[]
 
         // Identify Bridges and Physical Ports (Standard Linux Bridge OR Open vSwitch Bridge)
         const bridges = allIfaces.filter(n => n.type === 'bridge' || n.type === 'OVSBridge')
@@ -75,7 +81,10 @@ const buildTopology = async () => {
         // 2. Fetch VMs/LXC on this node
         const clusterRes = await listVMResources()
         const nodeVms = (clusterRes.success ? clusterRes.data : [])
-            .filter((r: any) => r.node === props.targetNode && (r.type === 'qemu' || r.type === 'lxc')) as any[]
+            .filter((r: unknown) => {
+                const item = r as Record<string, unknown>
+                return item.node === props.targetNode && (item.type === 'qemu' || item.type === 'lxc')
+            }) as VMInfo[]
 
         // 3. Fetch VM Configs (Parallel Limit could be needed for large clusters, simplified here)
         // We need to know which bridge each VM is connected to.
@@ -88,7 +97,7 @@ const buildTopology = async () => {
                     name: vm.name,
                     status: vm.status,
                     type: vm.type,
-                    config: (configRes.success ? configRes.data : {}) as Record<string, any>
+                    config: (configRes.success ? configRes.data : {}) as VMConfig
                 }
             })
         )
@@ -97,7 +106,6 @@ const buildTopology = async () => {
 
         const newNodes: Node[] = []
         const newEdges: Edge[] = []
-        let yCounter = 0
 
         // LEVEL 0: Internet / Uplink
         newNodes.push({
@@ -113,7 +121,7 @@ const buildTopology = async () => {
 
         let bridgeY = -50
 
-        bridges.forEach((br, idx) => {
+        bridges.forEach((br) => {
             bridgeY += 150 // Spacing between bridges
 
             // Bridge Node

@@ -9,7 +9,8 @@
             <div class="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
                 <!-- Slot para icono dinámico -->
                 <slot name="icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="lucide lucide-activity">
                         <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
@@ -25,7 +26,8 @@
         <div
             class="absolute -right-6 -bottom-6 opacity-[0.03] text-primary rotate-12 pointer-events-none group-hover:opacity-[0.06] transition-opacity">
             <slot name="icon-bg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="currentColor"
+                <svg
+xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="currentColor"
                     stroke="none">
                     <circle cx="12" cy="12" r="10" />
                 </svg>

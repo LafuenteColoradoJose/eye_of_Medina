@@ -7,14 +7,16 @@
     <form class="mt-4 w-full max-w-md" @submit.prevent="handleLogin">
       <div class="mb-4">
         <label for="proxmox-host" class="block text-sm font-medium">Proxmox Host</label>
-        <input type="text" id="proxmox-host" v-model="proxmoxHost" :placeholder="defaultHost"
-          class="mt-1 block w-full border rounded-md shadow-sm p-2" />
+        <input
+id="proxmox-host" v-model="proxmoxHost" type="text" :placeholder="defaultHost"
+          class="mt-1 block w-full border rounded-md shadow-sm p-2" >
       </div>
 
       <div class="mb-4">
         <label for="username" class="block text-sm font-medium">Username</label>
-        <input type="text" id="username" v-model="username" placeholder="root"
-          class="mt-1 block w-full border rounded-md shadow-sm p-2" />
+        <input
+id="username" v-model="username" type="text" placeholder="root"
+          class="mt-1 block w-full border rounded-md shadow-sm p-2" >
       </div>
 
       <div class="mb-4">
@@ -30,8 +32,9 @@
 
       <div class="mb-4">
         <label for="password" class="block text-sm font-medium">Password</label>
-        <input type="password" id="password" v-model="password"
-          class="mt-1 block w-full border rounded-md shadow-sm p-2" />
+        <input
+id="password" v-model="password" type="password"
+          class="mt-1 block w-full border rounded-md shadow-sm p-2" >
       </div>
 
       <button type="submit" :disabled="loading" class="w-full px-4 py-2 rounded-md btn-primary">

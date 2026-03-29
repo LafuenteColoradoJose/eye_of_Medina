@@ -16,7 +16,8 @@
                 <div class="relative group">
                     <div
                         class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-primary transition-colors pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        <svg
+xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
                             <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
@@ -24,22 +25,26 @@
                             <line x1="6" y1="18" x2="6" y2="18" />
                         </svg>
                     </div>
-                    <select v-model="selectedNode"
+                    <select
+v-model="selectedNode"
                         class="appearance-none pl-12 pr-10 py-2 rounded-lg bg-card border border-border text-text hover:border-primary/50 transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary cursor-pointer min-w-[170px] font-bold text-sm"
                         style="padding-left: 3.5rem">
                         <option v-for="node in nodes" :key="node.node" :value="node.node">{{ node.node }}</option>
                     </select>
                     <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        <svg
+xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m6 9 6 6 6-6" />
                         </svg>
                     </div>
                 </div>
 
-                <button @click="handleRefresh"
+                <button
+@click="handleRefresh"
                     class="px-4 py-2 rounded-lg bg-card border border-border text-text hover:bg-muted-surface transition-colors flex items-center gap-2 shadow-sm text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    <svg
+xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         :class="{ 'animate-spin': loading }">
                         <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -54,17 +59,21 @@
 
         <!-- TABS Navigation -->
         <div class="border-b border-border flex gap-6">
-            <button @click="activeTab = 'list'" class="pb-3 px-1 text-sm font-bold transition-all relative"
+            <button
+@click="activeTab = 'list'" class="pb-3 px-1 text-sm font-bold transition-all relative"
                 :class="activeTab === 'list' ? 'text-primary' : 'text-text-muted hover:text-text'">
                 Resumen / Diagnóstico
-                <div v-if="activeTab === 'list'"
+                <div
+v-if="activeTab === 'list'"
                     class="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"></div>
             </button>
 
-            <button @click="activeTab = 'topology'"
+            <button
+@click="activeTab = 'topology'"
                 class="pb-3 px-1 text-sm font-bold transition-all relative flex items-center gap-2"
                 :class="activeTab === 'topology' ? 'text-primary' : 'text-text-muted hover:text-text'">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                <svg
+xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="18" cy="5" r="3" />
                     <circle cx="6" cy="12" r="3" />
@@ -73,7 +82,8 @@
                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                 </svg>
                 Mapa de Topología
-                <div v-if="activeTab === 'topology'"
+                <div
+v-if="activeTab === 'topology'"
                     class="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"></div>
             </button>
         </div>

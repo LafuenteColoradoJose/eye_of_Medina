@@ -1,7 +1,8 @@
 <!-- eslint-disable vue/html-self-closing -->
 <!-- eslint-disable vue/attributes-order -->
 <template>
-  <div class="p-6 max-w-[1920px] mx-auto space-y-6">
+  <div>
+    <div class="p-6 max-w-[1920px] mx-auto space-y-6">
 
     <!-- Header & Actions -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -10,9 +11,11 @@
         <p class="text-text-muted text-sm mt-1">Gestión y monitorización de instancias QEMU y LXC</p>
       </div>
       <div class="flex gap-3">
-        <button @click="loadInitial"
+        <button
+@click="loadInitial"
           class="px-4 py-2 rounded-lg bg-card border border-border text-text hover:bg-muted-surface transition-colors flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          <svg
+xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             :class="{ 'animate-spin': loadingList }">
             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -23,9 +26,11 @@
           Refrescar
         </button>
         <!-- Protected Action: Only if VM.Allocate or Admin -->
-        <button v-if="canCreate" @click="openCreateModal"
+        <button
+v-if="canCreate" @click="openCreateModal"
           class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong transition-colors flex items-center gap-2 shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          <svg
+xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="16" />
@@ -39,30 +44,35 @@
     <!-- Filters Bar -->
     <div class="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col lg:flex-row gap-4">
       <div class="flex-1 relative">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+        <svg
+xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-        <input v-model="search" placeholder="Buscar por nombre, ID o IP..."
+        <input
+v-model="search" placeholder="Buscar por nombre, ID o IP..."
           class="w-full pl-14 pr-4 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
           style="padding-left: 3.5rem" />
       </div>
       <div class="flex flex-wrap gap-2">
-        <select v-model="filterType"
+        <select
+v-model="filterType"
           class="px-3 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50">
           <option value="all">Todos los tipos</option>
           <option value="qemu">VM (QEMU)</option>
           <option value="lxc">Container (LXC)</option>
         </select>
-        <select v-model="filterStatus"
+        <select
+v-model="filterStatus"
           class="px-3 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50">
           <option value="all">Todos los estados</option>
           <option value="running">Ejecutando</option>
           <option value="stopped">Detenido</option>
         </select>
-        <select v-model="filterPool"
+        <select
+v-model="filterPool"
           class="px-3 py-2 bg-background border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/50">
           <option value="all">Todos los pools</option>
           <option value="none">Sin pool</option>
@@ -75,10 +85,12 @@
     <div v-if="loadingList" class="py-12 flex justify-center text-text-muted">
       <!-- Loading Spinner -->
       <div class="flex flex-col items-center gap-2">
-        <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none"
+        <svg
+class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none"
           viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor"
+          <path
+class="opacity-75" fill="currentColor"
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
           </path>
         </svg>
@@ -86,9 +98,11 @@
       </div>
     </div>
 
-    <div v-else-if="filteredMachines.length === 0"
+    <div
+v-else-if="filteredMachines.length === 0"
       class="py-12 flex flex-col items-center justify-center text-text-muted border-2 border-dashed border-border rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+      <svg
+xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mb-4 opacity-50">
         <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
         <line x1="8" y1="21" x2="16" y2="21" />
@@ -99,15 +113,18 @@
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-      <div v-for="m in filteredMachines" :key="m.vmid"
+      <div
+v-for="m in filteredMachines" :key="m.vmid"
         class="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-all">
         <!-- Card Header -->
         <div class="px-4 py-3 border-b border-border bg-muted-surface/30 flex justify-between items-center">
           <div class="flex items-center gap-3 overflow-hidden">
             <div class="relative shrink-0">
-              <span class="block w-3 h-3 rounded-full"
+              <span
+class="block w-3 h-3 rounded-full"
                 :class="m.status === 'running' ? 'bg-positive' : 'bg-muted'"></span>
-              <span v-if="m.status === 'running'"
+              <span
+v-if="m.status === 'running'"
                 class="absolute -inset-1 rounded-full bg-positive opacity-20 animate-ping"></span>
             </div>
             <div class="flex flex-col min-w-0">
@@ -124,11 +141,13 @@
           </div>
           <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
             <!-- Console: Only if VM.Console -->
-            <button v-if="canOpenConsole(m)" @click="openConsole(m)" :disabled="m.status !== 'running'"
+            <button
+v-if="canOpenConsole(m)" @click="openConsole(m)" :disabled="m.status !== 'running'"
               :title="m.status === 'running' ? 'Abrir Consola' : 'La máquina está apagada'"
               class="p-1.5 rounded-lg transition-colors"
               :class="m.status === 'running' ? 'hover:bg-background text-text-muted hover:text-primary' : 'opacity-40 cursor-not-allowed text-text-muted/50'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              <svg
+xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
                 <line x1="8" y1="21" x2="16" y2="21" />
@@ -136,9 +155,11 @@
               </svg>
             </button>
             <!-- Edit: Only if VM.Config.Options -->
-            <button v-if="canConfigure(m)" @click="openEdit(m)" title="Configuración"
+            <button
+v-if="canConfigure(m)" @click="openEdit(m)" title="Configuración"
               class="p-1.5 rounded-lg hover:bg-background text-text-muted hover:text-warning transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              <svg
+xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3" />
                 <path
@@ -181,37 +202,45 @@
         <div class="px-4 py-3 bg-muted-surface/20 flex justify-between items-center gap-2">
           <!-- Power Controls: Only if VM.PowerMgmt -->
           <div v-if="canManagePower(m)" class="flex gap-2 w-full">
-            <button v-if="m.status !== 'running'" @click="changePowerState(m, 'start')"
+            <button
+v-if="m.status !== 'running'" @click="changePowerState(m, 'start')"
               :disabled="actionLoading === m.vmid"
               class="flex-1 py-1.5 rounded bg-positive/10 text-positive hover:bg-positive/20 text-xs font-bold transition-colors flex justify-center items-center gap-1">
               <svg v-if="actionLoading === m.vmid" class="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                <path fill="currentColor"
+                <path
+fill="currentColor"
                   d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" opacity=".3" />
                 <path fill="currentColor" d="M20 12h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 16 0Z" />
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+              <svg
+v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                 fill="currentColor" stroke="none">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
               Iniciar
             </button>
-            <button v-else @click="changePowerState(m, 'shutdown')" :disabled="actionLoading === m.vmid"
+            <button
+v-else @click="changePowerState(m, 'shutdown')" :disabled="actionLoading === m.vmid"
               class="flex-1 py-1.5 rounded bg-warning/10 text-warning hover:bg-warning/20 text-xs font-bold transition-colors flex justify-center items-center gap-1">
               <svg v-if="actionLoading === m.vmid" class="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                <path fill="currentColor"
+                <path
+fill="currentColor"
                   d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" opacity=".3" />
                 <path fill="currentColor" d="M20 12h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 16 0Z" />
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              <svg
+v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="6" y="4" width="4" height="16" />
                 <rect x="14" y="4" width="4" height="16" />
               </svg>
               Apagar
             </button>
-            <button @click="changePowerState(m, 'stop')" title="Forzar Parada" :disabled="actionLoading === m.vmid"
+            <button
+@click="changePowerState(m, 'stop')" title="Forzar Parada" :disabled="actionLoading === m.vmid"
               class="px-2 rounded bg-danger/10 text-danger hover:bg-danger/20 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              <svg
+xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               </svg>
@@ -228,7 +257,8 @@
 
   <!-- Create Modal and Edit Modal kept but guarded -->
   <!-- CREATE / CLONE MODAL -->
-  <div v-if="showCreateModal"
+  <div
+v-if="showCreateModal"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
     @click.self="closeCreateModal">
     <div
@@ -247,12 +277,14 @@
         </div>
         <!-- Tabs -->
         <div class="flex border-b border-border px-4">
-          <button @click="createMode = 'new'"
+          <button
+@click="createMode = 'new'"
             class="px-4 py-2 text-sm font-bold border-b-2 transition-colors duration-200"
             :class="createMode === 'new' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text'">
             Crear desde Cero
           </button>
-          <button @click="createMode = 'clone'"
+          <button
+@click="createMode = 'clone'"
             class="px-4 py-2 text-sm font-bold border-b-2 transition-colors duration-200"
             :class="createMode === 'clone' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text'">
             Clonar
@@ -262,13 +294,15 @@
 
       <div class="p-6 space-y-4">
         <!-- === TAB 1: NEW MACHINE === -->
-        <form v-if="createMode === 'new'" @submit.prevent="handleCreateNew"
+        <form
+v-if="createMode === 'new'" @submit.prevent="handleCreateNew"
           class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <!-- Node Selection (First step usually) -->
           <div class="col-span-1 md:col-span-2">
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Nodo</label>
-            <select v-model="newForm.node" @change="fetchNodeStorage"
+            <select
+v-model="newForm.node" @change="fetchNodeStorage"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text"
               required>
               <option value="" disabled>Selecciona un nodo...</option>
@@ -279,7 +313,8 @@
           <!-- Type & ID -->
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Tipo</label>
-            <select v-model="newForm.type"
+            <select
+v-model="newForm.type"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text">
               <option value="qemu">VM (QEMU)</option>
               <option value="lxc">Contenedor (LXC)</option>
@@ -287,7 +322,8 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">ID (vmid)</label>
-            <input v-model.number="newForm.vmid" type="number" min="100" placeholder="Ej. 105"
+            <input
+v-model.number="newForm.vmid" type="number" min="100" placeholder="Ej. 105"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text placeholder:text-text-muted/50"
               required />
           </div>
@@ -295,13 +331,15 @@
           <!-- Name & Pool -->
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Nombre</label>
-            <input v-model="newForm.name" type="text" placeholder="Ej. WebServer"
+            <input
+v-model="newForm.name" type="text" placeholder="Ej. WebServer"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text placeholder:text-text-muted/50"
               required />
           </div>
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Pool</label>
-            <select v-model="newForm.pool"
+            <select
+v-model="newForm.pool"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text">
               <option value="">Sin pool</option>
               <option v-for="p in pools" :key="p" :value="p">{{ p }}</option>
@@ -314,7 +352,8 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-text-muted uppercase mb-1">Almacenamiento</label>
-                <select v-model="newForm.isoStorage" @change="fetchContent" :disabled="!newForm.node"
+                <select
+v-model="newForm.isoStorage" @change="fetchContent" :disabled="!newForm.node"
                   class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text disabled:opacity-50">
                   <option value="">Selección...</option>
                   <option v-for="s in availableStorages" :key="s.storage" :value="s.storage">{{ s.storage }} ({{
@@ -324,7 +363,8 @@
               <div>
                 <label class="block text-xs font-bold text-text-muted uppercase mb-1">{{ newForm.type === 'qemu' ?
                   'ISO Image' : 'Template (tar.gz)' }}</label>
-                <select v-model="newForm.isoFile" :disabled="!newForm.isoStorage"
+                <select
+v-model="newForm.isoFile" :disabled="!newForm.isoStorage"
                   class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text disabled:opacity-50">
                   <option value="">Selección...</option>
                   <option v-for="file in availableIsos" :key="file.volid" :value="file.volid">{{
@@ -340,17 +380,20 @@
             <div class="grid grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-bold text-text-muted uppercase mb-1">Memoria (MB)</label>
-                <input v-model.number="newForm.memory" type="number" step="128" min="128"
+                <input
+v-model.number="newForm.memory" type="number" step="128" min="128"
                   class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text" />
               </div>
               <div>
                 <label class="block text-xs font-bold text-text-muted uppercase mb-1">Cores (CPU)</label>
-                <input v-model.number="newForm.cores" type="number" min="1" max="32"
+                <input
+v-model.number="newForm.cores" type="number" min="1" max="32"
                   class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text" />
               </div>
               <div>
                 <label class="block text-xs font-bold text-text-muted uppercase mb-1">Disco (GB)</label>
-                <input v-model.number="newForm.diskSize" type="number" min="1"
+                <input
+v-model.number="newForm.diskSize" type="number" min="1"
                   class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text" />
               </div>
             </div>
@@ -358,7 +401,8 @@
             <!-- Storage for Desk/Rootfs -->
             <div class="mt-4">
               <label class="block text-xs font-bold text-text-muted uppercase mb-1">Almacenamiento de Disco</label>
-              <select v-model="newForm.storage" :disabled="!newForm.node"
+              <select
+v-model="newForm.storage" :disabled="!newForm.node"
                 class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text disabled:opacity-50">
                 <option value="local-lvm">local-lvm (Default)</option>
                 <option v-for="s in availableStorages" :key="s.storage + '_disk'" :value="s.storage">{{ s.storage }}
@@ -368,13 +412,16 @@
           </div>
 
           <div class="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-border">
-            <button type="button" @click="closeCreateModal"
+            <button
+type="button" @click="closeCreateModal"
               class="px-5 py-2.5 rounded-lg border border-border text-text hover:bg-muted-surface font-medium transition-colors">Cancelar</button>
-            <button type="submit" :disabled="saving"
+            <button
+type="submit" :disabled="saving"
               class="px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-strong font-bold transition-colors shadow-lg shadow-primary/20 flex items-center gap-2">
               <svg v-if="saving" class="animate-spin h-4 w-4" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
+                <path
+class="opacity-75" fill="currentColor"
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                 </path>
               </svg>
@@ -387,7 +434,8 @@
         <form v-else @submit.prevent="handleClone" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
             class="col-span-1 md:col-span-2 bg-primary/10 border border-primary/20 text-text p-3 rounded-lg text-sm flex items-start gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            <svg
+xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="text-primary mt-0.5 shrink-0">
               <circle cx="12" cy="12" r="10" />
@@ -399,32 +447,37 @@
           <!-- ... Clone Form Fields (kept from before but cleaned up) ... -->
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Nodo Origen</label>
-            <select v-model="cloneForm.sourceNode"
+            <select
+v-model="cloneForm.sourceNode"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text">
               <option v-for="n in nodes" :key="n.node" :value="n.node">{{ n.node }}</option>
             </select>
           </div>
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">ID Origen</label>
-            <input v-model.number="cloneForm.sourceId" type="number"
+            <input
+v-model.number="cloneForm.sourceId" type="number"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text placeholder:text-text-muted/50"
               required />
           </div>
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Nombre Nuevo</label>
-            <input v-model.number="cloneForm.name" type="text"
+            <input
+v-model.number="cloneForm.name" type="text"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text placeholder:text-text-muted/50"
               required />
           </div>
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Nuevo ID</label>
-            <input v-model.number="cloneForm.newId" type="number"
+            <input
+v-model.number="cloneForm.newId" type="number"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text placeholder:text-text-muted/50"
               required />
           </div>
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Tipo</label>
-            <select v-model="cloneForm.type"
+            <select
+v-model="cloneForm.type"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text">
               <option value="qemu">VM (QEMU)</option>
               <option value="lxc">CT (LXC)</option>
@@ -432,7 +485,8 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Pool</label>
-            <select v-model="cloneForm.pool"
+            <select
+v-model="cloneForm.pool"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text">
               <option value="">Sin pool</option>
               <option v-for="p in pools" :key="p" :value="p">{{ p }}</option>
@@ -440,9 +494,11 @@
           </div>
 
           <div class="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-border">
-            <button type="button" @click="closeCreateModal"
+            <button
+type="button" @click="closeCreateModal"
               class="px-5 py-2.5 rounded-lg border border-border text-text hover:bg-muted-surface font-medium transition-colors">Cancelar</button>
-            <button type="submit" :disabled="saving"
+            <button
+type="submit" :disabled="saving"
               class="px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-strong font-bold transition-colors shadow-lg shadow-primary/20 flex items-center gap-2">
               {{ saving ? 'Clonando...' : 'Clonar' }}
             </button>
@@ -453,7 +509,8 @@
   </div>
 
   <!-- Edit Modal (kept same) -->
-  <div v-if="editingMachine"
+  <div
+v-if="editingMachine"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
     @click.self="closeEdit">
     <div
@@ -463,7 +520,8 @@
           <h2 class="text-xl font-bold text-text">Configurar Máquina</h2>
           <p class="text-xs text-text-muted mt-0.5">ID {{ editingMachine.vmid }}</p>
         </div>
-        <button @click="closeEdit" class="text-text-muted hover:text-text"><svg xmlns="http://www.w3.org/2000/svg"
+        <button @click="closeEdit" class="text-text-muted hover:text-text"><svg
+xmlns="http://www.w3.org/2000/svg"
             width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -474,12 +532,14 @@
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Nombre</label>
-            <input v-model="editForm.name" type="text"
+            <input
+v-model="editForm.name" type="text"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text placeholder:text-text-muted/50" />
           </div>
           <div>
             <label class="block text-xs font-bold text-text-muted uppercase mb-1">Pool</label>
-            <select v-model="editForm.pool"
+            <select
+v-model="editForm.pool"
               class="w-full p-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 text-text">
               <option value="">Sin pool</option>
               <option v-for="p in pools" :key="p" :value="p">{{ p }}</option>
@@ -494,7 +554,8 @@
                 <p class="font-medium text-text">Eliminar esta máquina</p>
                 <p class="text-xs">Irreversible.</p>
               </div>
-              <button @click="handleDelete"
+              <button
+@click="handleDelete"
                 class="px-3 py-1.5 bg-danger hover:bg-danger/90 text-white text-xs font-bold rounded shadow-sm transition-colors">Eliminar</button>
             </div>
           </div>
@@ -504,19 +565,22 @@
         </div>
       </div>
       <div class="p-5 border-t border-border bg-muted-surface/30 flex justify-end gap-3 rounded-b-xl">
-        <button @click="closeEdit"
+        <button
+@click="closeEdit"
           class="px-4 py-2 rounded-lg border border-border text-text hover:bg-muted-surface font-medium transition-colors">Cancelar</button>
-        <button @click="handleUpdate" :disabled="saving"
+        <button
+@click="handleUpdate" :disabled="saving"
           class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-strong font-bold transition-colors">Guardar</button>
       </div>
     </div>
   </div>
 
+  </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
 useHead({ title: 'Máquinas Virtuales' })
-import { ref, computed, onMounted, watch } from 'vue'
 
 // -- Types --
 type Machine = { vmid: number; name?: string; node: string; type: 'qemu' | 'lxc'; status?: string; pool?: string; uptime?: number; cpu?: number; maxcpu?: number; mem?: number; maxmem?: number }
@@ -525,8 +589,7 @@ type CloneForm = { type: 'qemu' | 'lxc'; sourceNode: string; sourceId: number | 
 type NewForm = { node: string; type: 'qemu' | 'lxc'; vmid: number | null; name: string; pool: string; isoStorage: string; isoFile: string; memory: number; cores: number; diskSize: number; storage: string }
 
 // -- Composable --
-const router = useRouter()
-const { isAuthenticated, restoreSession, listVMResources, listPools, listNodes, updateMachineConfig, deleteMachine, cloneMachine, addVmToPool, setMachineStatus, listStorages, listStorageContent, createQemu, createLxc, hasPermission, isClusterAdmin, userPermissions } = useProxmox()
+const { isAuthenticated, restoreSession, listVMResources, listPools, listNodes, updateMachineConfig, deleteMachine, cloneMachine, addVmToPool, setMachineStatus, listStorages, listStorageContent, createQemu, createLxc, hasPermission, isClusterAdmin } = useProxmox()
 
 // -- State --
 const machines = ref<Machine[]>([])
@@ -583,8 +646,8 @@ onUnmounted(() => {
 
 const loadInitial = async () => { await Promise.all([loadMachines(), loadPoolsList(), loadNodesList()]) }
 const loadMachines = async () => { loadingList.value = true; const res = await listVMResources(); loadingList.value = false; if (res.success && res.data) machines.value = (res.data as Machine[]).filter(m => m.type === 'qemu' || m.type === 'lxc') }
-const loadPoolsList = async () => { const res = await listPools(); if (res.data) pools.value = (res.data as any).map((p: any) => p.poolid) }
-const loadNodesList = async () => { const res = await listNodes(); if (res.data) nodes.value = res.data as any }
+const loadPoolsList = async () => { const res = await listPools(); if (res.data) pools.value = (res.data as Record<string, unknown>[]).map((p) => String((p as Record<string, unknown>).poolid)) }
+const loadNodesList = async () => { const res = await listNodes(); if (res.data) nodes.value = (res.data as Record<string, unknown>[]).map(n => ({ node: String(n.node) })) }
 
 // -- Permissions Helpers --
 const canCreate = computed(() => isClusterAdmin.value || hasPermission('VM.Allocate'))

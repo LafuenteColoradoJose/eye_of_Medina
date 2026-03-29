@@ -1,15 +1,18 @@
 <template>
   <div v-if="isRoot" class="flex gap-2 mb-3 px-2">
-    <button @click="toggleGlobalState"
-      class="text-xs px-2.5 py-1.5 bg-card border border-border text-text hover:bg-neutral-100 dark:hover:bg-white/5 rounded-md flex items-center gap-1.5 transition-colors shadow-sm"
-      :title="areAllExpanded ? 'Replegar todo' : 'Desplegar todo'">
-      <svg v-if="!areAllExpanded" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+    <button
+class="text-xs px-2.5 py-1.5 bg-card border border-border text-text hover:bg-neutral-100 dark:hover:bg-white/5 rounded-md flex items-center gap-1.5 transition-colors shadow-sm"
+      :title="areAllExpanded ? 'Replegar todo' : 'Desplegar todo'"
+      @click="toggleGlobalState">
+      <svg
+v-if="!areAllExpanded" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
         class="opacity-70">
         <path d="m7 20 5-5 5 5" />
         <path d="m7 4 5 5 5-5" />
       </svg>
-      <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+      <svg
+v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70">
         <path d="m7 15 5 5 5-5" />
         <path d="m7 9 5-5 5-5" />
@@ -21,20 +24,23 @@
   <ul class="flex flex-col gap-0.5">
     <li v-for="node in nodes" :key="node.id" class="relative">
       <details class="group section-details" :open="node.open">
-        <summary class="flex items-center justify-between p-2 rounded-md cursor-pointer transition-all duration-200 
+        <summary
+class="flex items-center justify-between p-2 rounded-md cursor-pointer transition-all duration-200 
                  hover:bg-primary/5 select-none list-none marker:hidden
                  bg-card border border-transparent hover:border-border/50" @click.prevent="toggleNode(node)">
           <div class="flex items-center gap-2.5 overflow-hidden">
             <!-- Icono de estado -->
             <div
               class="w-5 h-5 flex items-center justify-center rounded-full bg-primary/10 text-primary shrink-0 transition-colors group-hover:bg-primary/20">
-              <svg v-if="node.children && node.children.length" xmlns="http://www.w3.org/2000/svg" width="12"
+              <svg
+v-if="node.children && node.children.length" xmlns="http://www.w3.org/2000/svg" width="12"
                 height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder">
                 <path
                   d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+              <svg
+v-else xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
                 class="lucide lucide-file-key">
                 <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" />
@@ -53,9 +59,11 @@
 
           <div class="flex items-center gap-2">
             <!-- Chevron animado -->
-            <div v-if="node.children && node.children.length"
+            <div
+v-if="node.children && node.children.length"
               class="text-text-muted transition-transform duration-300 ease-out group-open:rotate-90 p-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              <svg
+xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="lucide lucide-chevron-right">
                 <path d="m9 18 6-6-6-6" />
@@ -65,9 +73,11 @@
         </summary>
 
         <!-- Contenido Hijos con Línea Guía -->
-        <div v-if="(node.children && node.children.length) || node.details"
+        <div
+v-if="(node.children && node.children.length) || node.details"
           class="relative ml-[1.1rem] pl-4 border-l border-border/40 my-1">
-          <div v-if="node.details"
+          <div
+v-if="node.details"
             class="mb-2 text-xs text-text-muted bg-neutral-50/50 dark:bg-white/5 p-2 rounded italic selection:bg-primary/20">
             {{ node.details }}
           </div>
@@ -81,17 +91,26 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+// Types
+interface PermissionNode {
+  id: string
+  label: string
+  children?: PermissionNode[]
+  open?: boolean
+  meta?: string
+}
+
 const props = withDefaults(defineProps<{
-  nodes: Array<any>,
+  nodes: PermissionNode[],
   isRoot?: boolean
 }>(), {
   isRoot: false
 })
 
-const nodes = props.nodes || []
+const nodes = props.nodes || [] as PermissionNode[]
 const areAllExpanded = ref(false)
 
-const toggleNode = (node: any) => {
+const toggleNode = (node: PermissionNode) => {
   node.open = !node.open
 }
 
@@ -101,7 +120,7 @@ const toggleGlobalState = () => {
 }
 
 const toggleAll = (expand: boolean) => {
-  const traverse = (list: any[]) => {
+  const traverse = (list: PermissionNode[]) => {
     list.forEach(node => {
       node.open = expand
       if (node.children && node.children.length) {

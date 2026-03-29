@@ -3,16 +3,18 @@
         <!-- Header -->
         <header class="h-10 bg-gray-900 border-b border-gray-700 flex items-center justify-between px-4 shrink-0">
             <h1 class="text-gray-200 font-bold text-sm flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full" :class="connected ? 'bg-green-500' : 'bg-red-500'"></span>
+                <span class="w-2 h-2 rounded-full" :class="connected ? 'bg-green-500' : 'bg-red-500'"/>
                 Consola VM {{ $route.params.id }}
             </h1>
             <div class="flex gap-2">
-                <button @click="sendCtrlAltDel"
-                    class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-xs text-white rounded">
+                <button
+class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-xs text-white rounded"
+                    @click="sendCtrlAltDel">
                     Send Ctrl-Alt-Del
                 </button>
-                <button @click="reconnect"
-                    class="px-2 py-1 bg-indigo-600 hover:bg-indigo-500 text-xs text-white rounded">
+                <button
+class="px-2 py-1 bg-indigo-600 hover:bg-indigo-500 text-xs text-white rounded"
+                    @click="reconnect">
                     Reconectar
                 </button>
             </div>
@@ -20,21 +22,23 @@
 
         <!-- VNC Container -->
         <div ref="vncContainer" class="flex-1 bg-black relative flex items-center justify-center">
-            <div v-if="error"
+            <div
+v-if="error"
                 class="absolute inset-0 flex flex-col gap-4 items-center justify-center text-red-400 bg-black/90 z-10">
                 <p class="text-xl font-bold">{{ error }}</p>
                 <p class="text-sm text-gray-400">Verifica tu sesión e intenta reconectar.</p>
-                <button @click="reconnect"
-                    class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-bold">
+                <button
+class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-bold"
+                    @click="reconnect">
                     Reconectar
                 </button>
             </div>
             <div v-if="loading" class="absolute inset-0 flex items-center justify-center text-indigo-400">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-current"></div>
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-current"/>
                 <span class="ml-2">Conectando a VNC...</span>
             </div>
             <!-- Canvas target for RFB -->
-            <div id="vnc-canvas" class="w-full h-full"></div>
+            <div id="vnc-canvas" class="w-full h-full"/>
         </div>
     </div>
 </template>
@@ -54,7 +58,15 @@ const type = (route.query.type as 'qemu' | 'lxc') || 'qemu'
 const loading = ref(true)
 const connected = ref(false)
 const error = ref('')
-let rfb: any = null
+type RFBLike = {
+    disconnect?: () => void
+    sendCtrlAltDel?: () => void
+    addEventListener?: (ev: string, cb: (...args: unknown[]) => void) => void
+    scaleViewport?: boolean
+    resizeSession?: boolean
+    focus?: () => void
+}
+let rfb: RFBLike | null = null
 
 const connectVNC = async () => {
     loading.value = true
@@ -67,9 +79,9 @@ const connectVNC = async () => {
             throw new Error('No se pudo obtener el ticket VNC: ' + res.message)
         }
 
-        const data = res.data as any
-        const ticket = data.ticket
-        const port = data.port
+        const data = res.data as Record<string, unknown>
+        const ticket = String(data.ticket)
+        const port = Number(data.port)
 
         // 2. Build proxy WebSocket URL
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
@@ -90,7 +102,7 @@ const connectVNC = async () => {
         const url = `${protocol}://${window.location.host}/_ws/vnc?${params.toString()}`
 
         // 3. Import noVNC dynamically
-        // @ts-ignore
+        // @ts-expect-error dynamic import of CDN bundle
         const module = await import('https://esm.sh/@novnc/novnc@1.5.0/lib/rfb.js?bundle')
         const RFB = module.default
 
@@ -110,14 +122,16 @@ const connectVNC = async () => {
             rfb.focus()
         })
 
-        rfb.addEventListener("disconnect", (e: any) => {
+        rfb.addEventListener?.("disconnect", (e: unknown) => {
             connected.value = false
             loading.value = false
-            error.value = e.detail?.clean ? "Desconectado." : "Conexión perdida."
+            const detail = (e as Record<string, unknown>)?.detail as Record<string, unknown> | undefined
+            error.value = detail?.clean ? "Desconectado." : "Conexión perdida."
         })
 
-    } catch (e: any) {
-        error.value = e.message || 'Error de conexión'
+    } catch (err: unknown) {
+        if (err instanceof Error) error.value = err.message
+        else error.value = 'Error de conexión'
         loading.value = false
     }
 }
@@ -128,7 +142,7 @@ const sendCtrlAltDel = () => {
 
 const reconnect = () => {
     if (rfb) {
-        try { rfb.disconnect() } catch { }
+        try { rfb.disconnect?.() } catch (err) { console.debug('rfb.disconnect failed', err) }
     }
     rfb = null
     connectVNC()
@@ -140,7 +154,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (rfb) {
-        try { rfb.disconnect() } catch { }
+        try { rfb.disconnect?.() } catch (err) { console.debug('rfb.disconnect failed', err) }
     }
 })
 </script>

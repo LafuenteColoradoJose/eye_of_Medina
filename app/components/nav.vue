@@ -4,7 +4,8 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <!-- Main Container -->
-  <nav class="group fixed z-40 md:sticky md:top-0 h-screen bg-surface border-r border-border flex flex-col transition-all duration-300 ease-in-out
+  <nav
+class="group fixed z-40 md:sticky md:top-0 h-screen bg-surface border-r border-border flex flex-col transition-all duration-300 ease-in-out
            w-64 md:w-20 md:hover:w-64"
     :class="{ '-translate-x-full md:translate-x-0': !isOpen, 'translate-x-0 shadow-2xl': isOpen }">
     <!-- Header / Logo -->
@@ -23,9 +24,11 @@
       </div>
 
       <!-- Close Button (MOBILE ONLY - Hidden on md+) -->
-      <button class="md:hidden text-text-muted hover:text-text p-2 bg-surface-strong rounded-md"
+      <button
+class="md:hidden text-text-muted hover:text-text p-2 bg-surface-strong rounded-md"
         @click="isOpen = false">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 6 6 18" />
           <path d="M6 6 18 18" />
@@ -39,7 +42,8 @@
       <!-- Menu Items -->
       <ul class="flex flex-col gap-1 px-2">
         <li v-for="item in items" :key="item.to">
-          <NuxtLink :to="item.to"
+          <NuxtLink
+:to="item.to"
             class="flex items-center h-12 px-3 rounded-lg text-text-muted hover:bg-white/5 hover:text-primary transition-colors relative group/item"
             active-class="bg-primary/10 text-primary font-medium" @click="closeOnNavigate">
             <!-- Icon Wrappper -->
@@ -71,7 +75,8 @@
           class="flex items-center h-12 px-3 rounded-lg text-text-muted hover:bg-white/5 hover:text-primary transition-colors w-full relative group/item"
           @click="openTasksDrawer" title="Tareas Recientes">
           <div class="w-6 h-6 shrink-0 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 2v4" />
               <path d="M16 2v4" />
@@ -95,7 +100,8 @@
           class="flex items-center h-12 px-3 rounded-lg text-text-muted hover:bg-white/5 hover:text-primary transition-colors w-full relative group/item"
           @click="toggleTheme">
           <div class="w-6 h-6 shrink-0 flex items-center justify-center">
-            <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            <svg
+v-if="isDark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="5" />
               <path d="M12 1v2" />
@@ -107,7 +113,8 @@
               <path d="M4.22 19.78l1.42-1.42" />
               <path d="M18.36 5.64l1.42-1.42" />
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            <svg
+v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>
@@ -127,7 +134,8 @@
           class="flex items-center h-12 px-3 rounded-lg text-danger hover:bg-danger/10 transition-colors mt-1 w-full relative group/item"
           @click="handleLogout">
           <div class="w-6 h-6 shrink-0 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
@@ -150,14 +158,17 @@
   <!-- Mobile Overlay & Toggle -->
   <div class="md:hidden">
     <!-- Overlay -->
-    <div v-if="isOpen" class="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm transition-opacity"
+    <div
+v-if="isOpen" class="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm transition-opacity"
       @click="isOpen = false"></div>
 
     <!-- Toggle Button (Visible only when closed) -->
-    <button v-if="!isOpen"
+    <button
+v-if="!isOpen"
       class="fixed top-4 left-4 z-30 p-2 bg-surface border border-border rounded-md shadow-lg text-text"
       @click="isOpen = true">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      <svg
+xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" x2="21" y1="6" y2="6" />
         <line x1="3" x2="21" y1="12" y2="12" />
@@ -169,6 +180,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, h, watch } from 'vue'
+import type { VNodeChild } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -195,7 +207,7 @@ const IconDatabase = h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: 20, 
 interface MenuItem {
   to: string
   label: string
-  icon: any
+  icon: VNodeChild
 }
 
 const items = computed(() => {
@@ -260,10 +272,7 @@ const toggleTheme = () => {
   }
 }
 
-// Mobile Toggle (kept for completeness if needed by template)
-const toggle = () => {
-  isOpen.value = !isOpen.value
-}
+// removed unused `toggle` helper (template manipulates `isOpen` directly)
 
 const closeOnNavigate = () => {
   if (window.innerWidth < 768) isOpen.value = false

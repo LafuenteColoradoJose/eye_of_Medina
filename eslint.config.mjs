@@ -2,5 +2,10 @@
 import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
-  // Your custom configs here
+  {
+    // Custom rules: warn when `any` is used so it can be fixed progressively
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn'
+    }
+  }
 )

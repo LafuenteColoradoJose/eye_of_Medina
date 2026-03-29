@@ -13,9 +13,11 @@
     <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
 
       <!-- Error Alert -->
-      <div v-if="error"
+      <div
+v-if="error"
         class="col-span-1 md:col-span-2 p-4 bg-red-500/10 border border-red-500/50 text-red-500 rounded-lg flex items-center gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        <svg
+xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" x2="12" y1="8" y2="12" />
@@ -50,7 +52,8 @@
         <button @click="showRaw" class="px-3 py-2 rounded btn-muted w-full sm:w-auto">Ver raw ACLs</button>
       </div>
 
-      <pre v-if="raw"
+      <pre
+v-if="raw"
         class="col-span-1 md:col-span-2 mt-2 code-surface p-2 rounded max-h-64 overflow-auto text-xs whitespace-pre-wrap wrap-break-word">{{ JSON.stringify(acls, null, 2) }}</pre>
     </div>
   </div>

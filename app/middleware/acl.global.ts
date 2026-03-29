@@ -1,11 +1,11 @@
-export default defineNuxtRouteMiddleware(async (to) => {
+export default defineNuxtRouteMiddleware(async (to: { path: string }) => {
   // No ejecutar en SSR para evitar errores de hidratación
   if (import.meta.server) return
 
   // Permitir libremente la página de login/landing
   if (to.path === '/' || to.path === '/index') return
 
-  const { isAuthenticated, username, hasPermission, hasPermissionAnywhere, getUserPermissions, isClusterAdmin } = useProxmox()
+  const { isAuthenticated, hasPermission, hasPermissionAnywhere, getUserPermissions, isClusterAdmin } = useProxmox()
 
   if (!isAuthenticated.value) return navigateTo('/')
 

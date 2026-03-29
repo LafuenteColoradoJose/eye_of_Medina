@@ -14,16 +14,26 @@
 
 import { WebSocket } from 'ws'
 
+// Minimal peer shape used by the WebSocket handler
+type PeerLike = {
+    id: string
+    request?: {
+        url?: string
+    }
+    send?: (data: Buffer) => void
+    close?: (code?: number, reason?: string) => void
+}
+
 // Store for Proxmox WebSocket connections indexed by peer id
 const proxmoxConnections = new Map<string, WebSocket>()
 
 export default defineWebSocketHandler({
-    async open(peer) {
+    async open(peer: PeerLike) {
         // Get URL from peer.request
-        const reqUrl = (peer as any).request?.url || ''
+        const reqUrl = (peer as PeerLike).request?.url || ''
 
         if (!reqUrl) {
-            peer.close(1008, 'Cannot parse request URL')
+            peer.close?.(1008, 'Cannot parse request URL')
             return
         }
 
@@ -37,7 +47,7 @@ export default defineWebSocketHandler({
         const authToken = fullUrl.searchParams.get('authToken')
 
         if (!node || !vmid || !port || !vncticket || !authToken) {
-            peer.close(1008, 'Missing required parameters')
+            peer.close?.(1008, 'Missing required parameters')
             return
         }
 
@@ -70,19 +80,19 @@ export default defineWebSocketHandler({
             // Handle Proxmox -> Client messages
             proxmoxWs.on('message', (data: Buffer) => {
                 try {
-                    peer.send(data)
+                    peer.send?.(data)
                 } catch {
                     // Client disconnected
                 }
             })
 
             proxmoxWs.on('error', () => {
-                peer.close(1011, 'Proxmox connection error')
+                peer.close?.(1011, 'Proxmox connection error')
             })
 
             proxmoxWs.on('close', () => {
                 proxmoxConnections.delete(peer.id)
-                peer.close()
+                peer.close?.()
             })
 
             // Wait for Proxmox connection
@@ -93,19 +103,25 @@ export default defineWebSocketHandler({
 
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error'
-            peer.close(1011, message)
+            peer.close?.(1011, message)
         }
     },
 
-    message(peer, message) {
+    message(peer: PeerLike, message: unknown) {
         // Forward message from client to Proxmox
         const proxmoxWs = proxmoxConnections.get(peer.id)
-        if (proxmoxWs && proxmoxWs.readyState === WebSocket.OPEN) {
-            proxmoxWs.send(message.rawData as Buffer)
+        if (!proxmoxWs || proxmoxWs.readyState !== WebSocket.OPEN) return
+
+        const m = message as Record<string, unknown>
+        const raw = m?.rawData as Buffer | undefined
+        try {
+            if (raw) proxmoxWs.send(raw)
+        } catch (err) {
+            console.debug('forward to proxmox failed', err)
         }
     },
 
-    close(peer) {
+    close(peer: PeerLike) {
         const proxmoxWs = proxmoxConnections.get(peer.id)
         if (proxmoxWs) {
             proxmoxWs.close()
@@ -113,7 +129,7 @@ export default defineWebSocketHandler({
         }
     },
 
-    error(peer) {
+    error(peer: PeerLike) {
         const proxmoxWs = proxmoxConnections.get(peer.id)
         if (proxmoxWs) {
             proxmoxWs.close()

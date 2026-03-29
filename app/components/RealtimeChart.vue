@@ -1,7 +1,8 @@
 <template>
     <div class="w-full h-full min-h-[150px]">
         <ClientOnly>
-            <component :is="apexchart" v-if="apexchart" ref="chartRef" :type="type" :height="height"
+            <component
+:is="apexchart" v-if="apexchart" ref="chartRef" :type="type" :height="height"
                 :options="chartOptions" :series="series" />
         </ClientOnly>
     </div>
@@ -10,8 +11,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, shallowRef } from 'vue'
 import type { ApexOptions } from 'apexcharts'
+import type { Component } from 'vue'
 
-const apexchart = shallowRef<any>(null)
+const apexchart = shallowRef<Component | null>(null)
 
 onMounted(async () => {
     if (typeof window !== 'undefined') {

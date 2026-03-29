@@ -1,18 +1,15 @@
 {
   // https://nuxt.com/docs/guide/concepts/typescript
-  "files": [],
-  "references": [
-    {
-      "path": "./.nuxt/tsconfig.app.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.server.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.shared.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.node.json"
-    }
-  ]
+  "compilerOptions": {
+     "strict": true,
+     "esModuleInterop": true,
+     "skipLibCheck": true,
+     "moduleResolution": "bundler",
+     "module": "esnext",
+     "target": "es2020",
+     "lib": ["es2020", "dom"],
+     "types": ["node"]
+  },
+  "include": ["app/**/*", "server/**/*", "*.ts", "*.js", "*.d.ts"],
+  "exclude": ["node_modules", ".nuxt"]
 }

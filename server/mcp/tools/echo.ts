@@ -5,7 +5,7 @@ export default defineMcpTool({
   inputSchema: {
     message: z.string().describe('The message to echo back'),
   },
-  handler: async ({ message }) => {
+  handler: async ({ message }: { message: string }) => {
     return {
       content: [{
         type: 'text',

@@ -1,11 +1,12 @@
 <template>
     <div v-if="loading && networks.length === 0" class="py-20 flex justify-center text-text-muted">
-        <svg class="animate-spin h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none"
+        <svg
+class="animate-spin h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none"
             viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path
+class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
         </svg>
     </div>
 
@@ -15,7 +16,8 @@
         <section v-if="ipInterfaces.length > 0" class="space-y-4">
             <h2
                 class="text-sm font-bold text-text-muted uppercase tracking-wider flex items-center gap-2 border-b border-border pb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                <svg
+xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="text-blue-500">
                     <circle cx="12" cy="12" r="10" />
@@ -27,12 +29,12 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <div v-for="net in ipInterfaces" :key="net.iface"
+                <div
+v-for="net in ipInterfaces" :key="net.iface"
                     class="bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
 
                     <!-- Active indicator stripe -->
-                    <div class="absolute top-0 left-0 w-1.5 h-full" :class="net.active ? 'bg-positive' : 'bg-danger'">
-                    </div>
+                    <div class="absolute top-0 left-0 w-1.5 h-full" :class="net.active ? 'bg-positive' : 'bg-danger'"/>
 
                     <div class="p-5 space-y-4 pl-7">
                         <!-- Header with Name & Comment -->
@@ -40,7 +42,8 @@
                             <div>
                                 <h3 class="font-bold text-lg text-text flex items-center gap-2">
                                     {{ net.comments || 'Red Sin Nombre' }}
-                                    <span v-if="!net.comments"
+                                    <span
+v-if="!net.comments"
                                         class="text-xs font-normal text-text-muted font-mono bg-muted-surface px-1.5 py-0.5 rounded">{{
                                             net.iface }}</span>
                                 </h3>
@@ -56,28 +59,33 @@
                         <!-- IP Addresses (The Hero Element) -->
                         <div class="space-y-3">
                             <!-- IPv4 -->
-                            <div v-if="net.address" @click="copyToClipboard(net.address)"
-                                class="flex flex-col sm:flex-row sm:items-center justify-between bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 cursor-pointer hover:bg-blue-500/20 transition-colors group/ip relative gap-3">
+                            <div
+v-if="net.address" class="flex flex-col sm:flex-row sm:items-center justify-between bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 cursor-pointer hover:bg-blue-500/20 transition-colors group/ip relative gap-3"
+                                @click="copyToClipboard(net.address)">
                                 <div class="flex items-center gap-3 w-full overflow-hidden">
                                     <div
                                         class="w-8 h-8 rounded bg-blue-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm shadow-blue-500/20">
                                         v4</div>
                                     <div class="min-w-0 flex-1">
-                                        <div class="font-mono font-bold text-lg text-text relative z-10 w-full truncate"
+                                        <div
+class="font-mono font-bold text-lg text-text relative z-10 w-full truncate"
                                             :title="net.address">
                                             {{ net.address.split('/')[0] }}<span
-                                                class="text-text-muted/70 text-base font-normal"
-                                                v-if="net.address.includes('/')">/{{ net.address.split('/')[1]
-                                                }}</span><span class="text-text-muted/70 text-base font-normal"
-                                                v-else-if="net.cidr && net.cidr.includes('/')">/{{
+                                                v-if="net.address.includes('/')"
+                                                class="text-text-muted/70 text-base font-normal">/{{ net.address.split('/')[1]
+                                                }}</span><span
+v-else-if="net.cidr && net.cidr.includes('/')"
+                                                class="text-text-muted/70 text-base font-normal">/{{
                                                     net.cidr.split('/')[1] }}</span><span
-                                                class="text-text-muted/70 text-base font-normal"
-                                                v-else-if="net.cidr && !net.cidr.includes('.')">/{{ net.cidr
+                                                v-else-if="net.cidr && !net.cidr.includes('.')"
+                                                class="text-text-muted/70 text-base font-normal">/{{ net.cidr
                                                 }}</span>
                                         </div>
-                                        <div v-if="net.gateway"
+                                        <div
+v-if="net.gateway"
                                             class="text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                            <svg
+xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round" class="opacity-70">
                                                 <path d="M5 12h14" />
@@ -87,7 +95,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                <svg
+xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
                                     class="text-text-muted opacity-0 group-hover/ip:opacity-100 transition-opacity shrink-0 hidden sm:block">
@@ -97,20 +106,23 @@
                             </div>
 
                             <!-- IPv6 -->
-                            <div v-if="net.address6" @click="copyToClipboard(net.address6)"
-                                class="flex flex-col sm:flex-row sm:items-center justify-between bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 cursor-pointer hover:bg-purple-500/20 transition-colors group/ip gap-3">
+                            <div
+v-if="net.address6" class="flex flex-col sm:flex-row sm:items-center justify-between bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 cursor-pointer hover:bg-purple-500/20 transition-colors group/ip gap-3"
+                                @click="copyToClipboard(net.address6)">
                                 <div class="flex items-center gap-3 w-full overflow-hidden">
                                     <div
                                         class="w-8 h-8 rounded bg-purple-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm shadow-purple-500/20">
                                         v6</div>
                                     <div class="min-w-0 flex-1">
-                                        <div class="font-mono font-bold text-sm text-text truncate"
+                                        <div
+class="font-mono font-bold text-sm text-text truncate"
                                             :title="net.address6">
                                             {{ net.address6 }}
                                         </div>
                                     </div>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                <svg
+xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
                                     class="text-text-muted opacity-0 group-hover/ip:opacity-100 transition-opacity shrink-0 hidden sm:block">
@@ -127,10 +139,12 @@
                             <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
                                 <!-- Physical Ports -->
                                 <template v-if="getDeepPorts(net).length > 0">
-                                    <div v-for="port in getDeepPorts(net)" :key="port"
+                                    <div
+v-for="port in getDeepPorts(net)" :key="port"
                                         class="flex items-center gap-1 bg-muted-surface border border-border rounded px-1.5 py-0.5 whitespace-nowrap">
-                                        <div class="w-1.5 h-1.5 rounded-full"
-                                            :class="isPortActive(port) ? 'bg-positive' : 'bg-danger'"></div>
+                                        <div
+class="w-1.5 h-1.5 rounded-full"
+                                            :class="isPortActive(port) ? 'bg-positive' : 'bg-danger'"/>
                                         <span class="font-mono text-xs text-text">{{ port }}</span>
                                     </div>
                                 </template>
@@ -139,7 +153,8 @@
                                 </template>
 
                                 <!-- Arrow -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                <svg
+xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round" class="text-text-muted shrink-0">
                                     <path d="M5 12h14" />
@@ -163,7 +178,8 @@
         <section class="space-y-4">
             <h2
                 class="text-sm font-bold text-text-muted uppercase tracking-wider flex items-center gap-2 border-b border-border pb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                <svg
+xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="text-warning">
                     <path d="M4 14a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4v7m7-4-3 4-3-4" />
@@ -172,13 +188,15 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div v-for="net in nonIpInterfaces" :key="net.iface"
+                <div
+v-for="net in nonIpInterfaces" :key="net.iface"
                     class="bg-card/50 border border-border rounded-lg p-4 flex flex-col justify-between hover:bg-card transition-colors">
 
                     <div class="flex justify-between items-start mb-2">
                         <div class="flex items-center gap-3">
-                            <div class="w-2 h-2 rounded-full" :class="net.active ? 'bg-positive' : 'bg-danger'"
-                                :title="net.active ? 'Active' : 'Down'"></div>
+                            <div
+class="w-2 h-2 rounded-full" :class="net.active ? 'bg-positive' : 'bg-danger'"
+                                :title="net.active ? 'Active' : 'Down'"/>
                             <h4 class="font-bold text-text font-mono">{{ net.iface }}</h4>
                         </div>
                         <span
@@ -190,7 +208,8 @@
                     <div v-if="net.bridge_ports || net.slaves" class="mt-2">
                         <span class="text-[10px] text-text-muted mb-1 block">Puertos:</span>
                         <div class="flex flex-wrap gap-1">
-                            <span v-for="port in splitPorts(net.bridge_ports || net.slaves)" :key="port"
+                            <span
+v-for="port in splitPorts(net.bridge_ports || net.slaves)" :key="port"
                                 class="text-xs font-mono bg-muted-surface px-1 rounded border border-border/50 text-text">
                                 {{ port }}
                             </span>
