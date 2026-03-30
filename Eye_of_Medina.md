@@ -13,8 +13,9 @@ Technical guide for integrating the application with Proxmox VE: authentication,
 5. [Composable useProxmox()](#composable-useproxmox)
 6. [Used Proxmox Endpoints](#used-proxmox-endpoints)
 7. [Permission Best Practices](#permission-best-practices)
-8. [Troubleshooting](#troubleshooting)
-9. [Resources](#resources)
+8. [Testing Architecture](#testing-architecture)
+9. [Troubleshooting](#troubleshooting)
+10. [Resources](#resources)
 
 ---
 
@@ -308,6 +309,26 @@ Path: /pool/{pool-name} or /vms/{vmid}
 2. **Avoid using `root@pam`** in production.
 3. **Enable Privilege Separation** on tokens to limit scope.
 4. **Document granted permissions** for auditing.
+
+---
+
+## Testing Architecture
+
+To maintain high stability, Eye of Medina is equipped with an integrated testing environment. 
+Tests are split into two main layers that allow validating both isolated logic operations and complete Proxmox flows safely.
+
+### 1. End-to-End (E2E) with Playwright
+Validates full user journeys, interacting with the real DOM and mimicking user actions.
+- Located in: `tests/e2e/`
+- **Protected Routes**: We continuously test that unauthenticated users attempting to access protected dashboards (like `/dashboard`, `/machines`) are properly caught by the Nuxt Middleware and redirected to `/login`.
+- **Nuxt Test Utils**: Leveraging `@nuxt/test-utils/playwright` to automatically boot the server and handle the routing context transparently.
+
+### 2. Unit & Coverage with Vitest
+Tests individual components, formatters, and `useProxmox` composables in an isolated environment.
+- Located in: `tests/unit/`
+- Environment: `happy-dom` provides a lightweight browser simulation.
+- **Coverage (V8)**: Generates reports (`npm run test:coverage`) pointing accurately out of all your `.vue` and `.ts` files which branches/functions still need tests.
+- *Note:* The Vitest configuration (`vitest.config.ts`) explicitly excludes E2E files to avoid environment collisions.
 
 ---
 

@@ -131,6 +131,32 @@ eye_of_Medina/
 
 ---
 
+## 🧪 Testing
+
+The project includes a comprehensive testing suite ensuring code quality and regression prevention:
+
+### E2E Testing (Playwright)
+End-to-end tests simulating real user interactions across the application.
+```bash
+# Run tests in CLI
+npm run test:e2e
+
+# Open Playwright UI interactive mode
+npm run test:e2e:ui
+```
+
+### Unit Testing & Coverage (Vitest)
+Fast unit tests testing individual components and Vue composables, powered by Vitest and happy-dom.
+```bash
+# Run unit tests
+npm run test
+
+# Run tests and generate V8 coverage report (view in /coverage/index.html)
+npm run test:coverage
+```
+
+---
+
 ## 🔐 Authentication
 
 ### API Token (Recommended)
