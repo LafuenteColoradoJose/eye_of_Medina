@@ -6,6 +6,7 @@ export default defineVitestConfig({
     include: ['tests/unit/**/*.spec.ts'], // Ignorar los de Playwright (E2E)
     coverage: {
       provider: 'v8',
+      all: true,
       reporter: ['text', 'json', 'html'],
       include: ['app/**/*.vue', 'app/composables/**/*.ts', 'server/**/*.ts'],
       exclude: ['node_modules', 'dist', '.nuxt']
