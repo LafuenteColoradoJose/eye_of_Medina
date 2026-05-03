@@ -8,8 +8,8 @@ export default defineVitestConfig({
       provider: 'v8',
       all: true,
       reporter: ['text', 'json', 'html'],
-      include: ['app/**/*.vue', 'app/composables/**/*.ts', 'server/**/*.ts'],
-      exclude: ['node_modules', 'dist', '.nuxt']
+      include: ['**/*.vue', 'composables/**/*.ts', 'utils/**/*.ts', 'server/**/*.ts'],
+      exclude: ['node_modules', 'dist', '.nuxt', 'tests']
     }
   }
 })

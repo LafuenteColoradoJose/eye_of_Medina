@@ -349,7 +349,6 @@ Tests individual components, formatters, and `useProxmox` composables in an isol
 
 - ✅ Verify connectivity to port 8006.
 - ✅ Check if `pveproxy` is active: `systemctl status pveproxy`.
-- ✅ Check if `pveproxy` is active: `systemctl status pveproxy`.
 - ✅ Review user/token permissions on the resources.
 
 ### Missing Host Metrics (CPU/RAM 0%)

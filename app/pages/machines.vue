@@ -696,7 +696,6 @@ const filteredMachines = computed(() => {
 const modalTitle = computed(() => createMode.value === 'new' ? 'Crear Nueva Máquina' : 'Clonar Existente')
 
 const toPercent = (v: any, m: any) => (v && m) ? Math.round((v / m) * 100) + '%' : '0%'
-const formatUptime = (s: any) => s ? (Math.floor(s / 86400) + 'd ' + Math.floor((s % 86400) / 3600) + 'h') : '—'
 
 const changePowerState = async (m: Machine, a: any) => {
   if (!canManagePower(m)) return alert('No tienes permisos de energía sobre esta máquina.')

@@ -1,12 +1,7 @@
 import { describe, it, expect } from 'vitest'
 
-// En una app real de Nuxt, si tu función tuviera un "export", podríamos importarla:
-// import { formatUptime } from '@/app/utils/formatters'
-// Como está declarada internamente en machines.vue por ahora, testeamos la lógica análoga:
+import { formatUptime } from '../../app/utils/formatters'
 
-const formatUptime = (s: number | null | undefined) => {
-  return s ? (Math.floor(s / 86400) + 'd ' + Math.floor((s % 86400) / 3600) + 'h') : '—'
-}
 
 describe('Lógica de Formateo de Uptime', () => {
   it('debería devolver "—" si se le pasa nulo o indefinido', () => {
