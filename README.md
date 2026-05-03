@@ -13,6 +13,12 @@
 
 </div>
 
+<br>
+
+<p align="center">
+  <img src="public/screenshots/01_dashboard.png" alt="Eye of Medina - Main Dashboard" width="100%" style="border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+</p>
+
 ---
 
 ## ✨ Features
@@ -26,6 +32,11 @@
 - **Task Log (Tasks Drawer)**: Sliding side panel with real-time cluster task history.
 
 ### Storage Management (NEW!)
+
+<p align="center">
+  <img src="public/screenshots/04_storage.png" alt="Eye of Medina - Storage Management" width="100%" style="border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+</p>
+
 - **ISO & Templates**: Browse and manage content across all cluster storage.
 - **Download from URL**: Directly download ISOs/Images to Proxmox storage nodes.
 - **Visual Browsing**: Filter by content type (ISO, Backup, CT Template, VM Disks, Snippet).
@@ -38,6 +49,11 @@
 - **Secure Deletion**: With double confirmation.
 
 ### 🖥️ Integrated VNC Console (NEW!)
+
+<p align="center">
+  <img src="public/screenshots/02_vnc_console.png" alt="Eye of Medina - VNC Console" width="100%" style="border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+</p>
+
 - **Direct Console Access**: Connect to VMs and containers directly from the browser.
 - **Server-side WebSocket Proxy**: Secure connection without requiring a separate Proxmox session.
 - **noVNC based**: Full keyboard and mouse support.
@@ -45,6 +61,11 @@
 - **Auto-reconnect**: Semantic handling of connection drops.
 
 ### Network Management
+
+<p align="center">
+  <img src="public/screenshots/03_network.png" alt="Eye of Medina - Network Management" width="100%" style="border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+</p>
+
 - **Smart IP Zones**: Visualization of L3 Networks with active IPs.
 - **Visual IP Cards**: interactive cards for IPv4/IPv6 with "Click-to-Copy".
 - **Physical Hierarchy**: Visual path from logical interface to physical cable.
