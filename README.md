@@ -211,8 +211,19 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ---
 
+## 👨‍💻 Author
+
+**José Lafuente Colorado**  
+<small>
+🌐 [joselafuente.dev](https://www.joselafuente.dev) &nbsp;·&nbsp;
+🐙 [GitHub](https://github.com/LafuenteColoradoJose) &nbsp;·&nbsp;
+💼 [LinkedIn](https://www.linkedin.com/in/joselafuentecolorado)
+</small>
+
+---
+
 <div align="center">
 
-**Developed with ❤️ for the Proxmox community**
+<small>**Developed with ❤️ for the Proxmox community**</small>
 
 </div>

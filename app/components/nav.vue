@@ -36,6 +36,20 @@ xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fi
       </button>
     </div>
 
+    <!-- Author & Credits (Hidden when collapsed on Desktop) -->
+    <div class="px-4 py-3 shrink-0 border-b border-white/5 flex flex-col gap-1 text-[10px] text-text-muted opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap">
+      <a href="https://www.iesmedinaazahara.es/" target="_blank" rel="noreferrer noopener" class="hover:text-primary transition-colors">IES Medina Azahara © 2025</a>
+      <div class="flex items-center gap-1">
+        <span>Desarrollado por</span>
+        <a href="https://www.joselafuente.dev" target="_blank" rel="noreferrer noopener" class="text-primary hover:underline font-bold">José Lafuente</a>
+      </div>
+      <div class="flex items-center gap-2 mt-0.5 font-medium">
+        <a href="https://github.com/LafuenteColoradoJose" target="_blank" rel="noreferrer noopener" class="hover:text-primary transition-colors">GitHub</a>
+        <span>·</span>
+        <a href="https://www.linkedin.com/in/joselafuentecolorado" target="_blank" rel="noreferrer noopener" class="hover:text-primary transition-colors">LinkedIn</a>
+      </div>
+    </div>
+
     <!-- Scrollable Content -->
     <div class="flex-1 flex flex-col py-4 overflow-y-auto overflow-x-hidden gap-1 custom-scrollbar">
 
