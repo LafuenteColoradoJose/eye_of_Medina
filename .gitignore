@@ -24,3 +24,6 @@ logs
 !.env.example
 app/coverage/
 test-results/
+
+# Spanish translations of documentation
+*.ES.md

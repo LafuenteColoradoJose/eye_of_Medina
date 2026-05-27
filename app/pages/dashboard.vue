@@ -201,12 +201,12 @@ class="w-full transition-all duration-1000 ease-out relative group-hover:brightn
       <div class="bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col relative overflow-hidden">
         <div class="flex items-center justify-between mb-2 z-10">
           <h2 class="font-bold text-base text-text">CPU en Tiempo Real</h2>
-          <div class="flex items-center gap-2">
-            <span class="animate-pulse w-2 h-2 rounded-full bg-positive"/>
-            <span class="text-xs font-mono text-primary font-bold">{{ kpiCpu }}</span>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-text-muted uppercase font-bold">Media:</span>
+            <span class="text-sm font-mono text-text font-bold">{{ kpiCpu }}</span>
           </div>
         </div>
-        <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
+        <div class="flex-1 min-h-[140px] -mx-2 -mb-2 mt-4">
           <RealtimeChart
 title="CPU Cluster" :data-point="currentClusterCpuVal" :color="COLORS.primary" :height="160"
             :max-points="30" />
@@ -217,12 +217,12 @@ title="CPU Cluster" :data-point="currentClusterCpuVal" :color="COLORS.primary" :
       <div class="bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col relative overflow-hidden">
         <div class="flex items-center justify-between mb-2 z-10">
           <h2 class="font-bold text-base text-text">Red Cluster</h2>
-          <div class="flex items-center gap-2">
-            <span class="animate-pulse w-2 h-2 rounded-full bg-accent"/>
-            <span class="text-xs font-mono text-accent font-bold">{{ currentNetMbps }} Mbps</span>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-text-muted uppercase font-bold">Total:</span>
+            <span class="text-sm font-mono text-text font-bold">{{ totalNetMbps }} Mbps</span>
           </div>
         </div>
-        <div class="flex-1 min-h-[140px] -mx-2 -mb-2">
+        <div class="flex-1 min-h-[140px] -mx-2 -mb-2 mt-4">
           <RealtimeChart
 title="Traffic" :data-point="currentNetMbps" :color="COLORS.accent" :height="160"
             :max-points="30" />
@@ -485,8 +485,11 @@ watch(isAuthenticated, (val) => {
 
 // Network State
 const _currentKwIn = ref(0) // Used for CPU Realtime actually
-const currentNetMbps = ref(0)
-const lastNetState = { time: 0, bytes: 0 }
+const currentNetMbps = ref<Record<string, number>>({})
+const lastNetState = ref<Record<string, { time: number, bytes: number }>>({})
+const totalNetMbps = computed(() => {
+  return Object.values(currentNetMbps.value).reduce((sum, val) => sum + val, 0).toFixed(2)
+})
 
 // ... (Lifecycle hooks)
 
@@ -503,33 +506,47 @@ const startPolling = () => {
       nodes.value = rawNodes.sort((a, b) => a.node.localeCompare(b.node))
 
       // 2. Realtime Network Calculation
-      // Fetch detailed status for online nodes to get cumulative netin/netout
-      const onlineNodes = nodes.value.filter(n => n.status === 'online')
-      if (onlineNodes.length > 0) {
-        const statusPromises = onlineNodes.map(n => proxmoxRequest(`/nodes/${n.node}/status`, 'GET'))
-        const statuses = await Promise.all(statusPromises)
+      const clusterRes = await proxmoxRequest('/cluster/resources?type=vm', 'GET')
+      if (clusterRes.success && clusterRes.data) {
+        const vms = clusterRes.data as VmResource[]
+        const now = Date.now()
+        const newNetMbps: Record<string, number> = {}
 
-        let totalBytes = 0
-        statuses.forEach((s) => {
-          if (s.success && s.data) {
-            // netin + netout (cumulative bytes)
-            const d = s.data as any
-            totalBytes += (d.netin || 0) + (d.netout || 0)
+        // Initialize cumulative byte counters for each node
+        const nodeBytes: Record<string, number> = {}
+        nodes.value.forEach(n => nodeBytes[n.node] = 0)
+
+        // Sum netin + netout for all VMs on each node
+        vms.forEach(vm => {
+          if (vm.status === 'running' && vm.node) {
+            nodeBytes[vm.node] += (vm.netin || 0) + (vm.netout || 0)
           }
         })
 
-        const now = Date.now()
-        if (lastNetState.time > 0 && totalBytes >= lastNetState.bytes) {
-          const timeDiff = (now - lastNetState.time) / 1000 // Seconds
-          const bytesDiff = totalBytes - lastNetState.bytes
-          if (timeDiff > 0) {
-            const bitsPerSecond = (bytesDiff * 8) / timeDiff
-            currentNetMbps.value = Number((bitsPerSecond / 1_000_000).toFixed(2)) // Mbps
-          }
-        }
+        nodes.value.forEach(n => {
+          const nodeName = n.node
+          const nodeTotalBytes = nodeBytes[nodeName]
 
-        lastNetState.time = now
-        lastNetState.bytes = totalBytes
+          if (!lastNetState.value[nodeName]) {
+            lastNetState.value[nodeName] = { time: 0, bytes: 0 }
+          }
+
+          const lastState = lastNetState.value[nodeName]
+          if (lastState.time > 0 && nodeTotalBytes >= lastState.bytes) {
+            const timeDiff = (now - lastState.time) / 1000
+            const bytesDiff = nodeTotalBytes - lastState.bytes
+            if (timeDiff > 0) {
+              const bitsPerSecond = (bytesDiff * 8) / timeDiff
+              newNetMbps[nodeName] = Number((bitsPerSecond / 1_000_000).toFixed(2))
+            }
+          } else {
+             newNetMbps[nodeName] = 0
+          }
+
+          lastNetState.value[nodeName] = { time: now, bytes: nodeTotalBytes }
+        })
+
+        currentNetMbps.value = { ...currentNetMbps.value, ...newNetMbps }
       }
     }
   }, 3000)
@@ -636,9 +653,12 @@ const loadDashboard = async () => {
 
 // -- Computed Metrics --
 const currentClusterCpuVal = computed(() => {
-  if (!nodes.value.length) return 0
-  const avg = nodes.value.reduce((sum, n) => sum + (n.cpu || 0), 0) / nodes.value.length
-  return Number((avg * 100).toFixed(1))
+  if (!nodes.value.length) return {}
+  const res: Record<string, number> = {}
+  nodes.value.forEach(n => {
+    res[n.node] = Number(((n.cpu || 0) * 100).toFixed(1))
+  })
+  return res
 })
 
 // -- Computed Metrics --
