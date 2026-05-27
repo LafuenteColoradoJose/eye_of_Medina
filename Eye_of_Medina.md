@@ -121,9 +121,10 @@ Calls to Proxmox are routed through the Nuxt backend:
 - **Granular Heatmap**: Interactive grid showing individual VM load (CPU) with color-coded alerts (Green -> Red).
 
 ### Network Topology
-- **Interactive Map**: Visual graph `[Physical Node] -> [Bridge/Bond] -> [IP/CIDR]`.
-- **Smart Addressing**: Focuses on Layer 3 (IP Zones) rather than raw interfaces.
-- **Visual Aids**: Distinction between IPv4/IPv6, click-to-copy IPs, and intuitive tree layout.
+- **Interactive Vue Flow Map**: Advanced visual graph `[Physical Node] -> [Bridge/Bond] -> [CT/VM]`.
+- **Minimap and Zoom**: Visual control to explore large networks fluidly.
+- **Collapsible Nodes (Grid Layout)**: Smart grouping of VMs by bridge with a grid layout to prevent visual clutter.
+- **Real-time Filters**: Name/ID search and automatic hiding of offline machines directly on the canvas.
 
 ### Identity Management
 - **Pools**: Logically grouped resources.

@@ -67,9 +67,10 @@
 </p>
 
 - **Smart IP Zones**: Visualization of L3 Networks with active IPs.
-- **Visual IP Cards**: interactive cards for IPv4/IPv6 with "Click-to-Copy".
-- **Physical Hierarchy**: Visual path from logical interface to physical cable.
-- **Node Visualization**: Separation between Addressing (L3) and Infrastructure (L2/L1).
+- **Visual IP Cards**: Interactive cards for IPv4/IPv6 with "Click to copy" option.
+- **Interactive Topology Map**: Advanced visual canvas (Vue Flow) with minimap and zoom controls.
+- **Smart Network Grid**: Collapsible nodes grouped by bridge to keep the interface clean.
+- **Search & Filtering**: Interactive filtering to hide offline machines and real-time search.
 
 ### Identity & Access Management (IAM)
 - **Pools, Groups, Users, Roles, and ACLs Management**.
