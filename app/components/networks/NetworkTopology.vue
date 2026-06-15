@@ -8,7 +8,8 @@
                 <input 
                     v-model="searchQuery" 
                     type="text" 
-                    class="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text focus:outline-none focus:border-primary transition-colors" 
+                    style="padding-left: 2.5rem;"
+                    class="w-full bg-background border border-border rounded-lg pr-3 py-2 text-sm text-text focus:outline-none focus:border-primary transition-colors" 
                     placeholder="Buscar VM por nombre o ID..."
                 >
             </div>
@@ -209,6 +210,8 @@ const updateLayout = () => {
             })
 
             const totalVms = connectedVms.length
+            const activeVmsCount = connectedVms.filter(vm => vm.status === 'running').length
+            const hasActivity = activeVmsCount > 0
 
             // Apply filters
             if (hideOffline.value) {
@@ -236,12 +239,20 @@ const updateLayout = () => {
 
             // Bridge Node
             const expandIcon = isExpanded ? '[-]' : '[+]'
+            const statusIcon = hasActivity ? '🟢' : '⚪'
+
             newNodes.push({
                 id: br.iface,
-                label: `${br.iface} ${expandIcon}\n(${totalVms} VMs)`,
+                label: `${br.iface} ${expandIcon}\n(${statusIcon} ${activeVmsCount}/${totalVms} activas)`,
                 position: { x: LAYER_WIDTH, y: bridgeY },
                 data: { isBridge: true, bridgeId: br.iface },
-                style: { background: '#1e293b', color: '#e2e8f0', borderColor: '#475569', width: '180px', cursor: 'pointer' },
+                style: { 
+                    background: '#1e293b', 
+                    color: '#e2e8f0', 
+                    borderColor: hasActivity ? '#10b981' : '#475569', 
+                    width: '180px', 
+                    cursor: 'pointer' 
+                },
                 sourcePosition: Position.Right,
                 targetPosition: Position.Left,
             })
@@ -251,8 +262,8 @@ const updateLayout = () => {
                 id: `e-uplink-${br.iface}`,
                 source: 'uplink',
                 target: br.iface,
-                animated: true,
-                style: { stroke: '#64748b' }
+                animated: hasActivity,
+                style: { stroke: hasActivity ? '#3b82f6' : '#475569' }
             })
 
             // Place VMs in a grid ONLY if expanded
