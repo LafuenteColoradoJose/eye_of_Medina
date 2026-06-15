@@ -125,6 +125,7 @@ Calls to Proxmox are routed through the Nuxt backend:
 - **Minimap and Zoom**: Visual control to explore large networks fluidly.
 - **Collapsible Nodes (Grid Layout)**: Smart grouping of VMs by bridge with a grid layout to prevent visual clutter.
 - **Real-time Filters**: Name/ID search and automatic hiding of offline machines directly on the canvas.
+- **Visual Status Indicators**: Traffic lights and animated edges that instantly show network activity on bridges without expanding them.
 
 ### Identity Management
 - **Pools**: Logically grouped resources.

@@ -68,7 +68,7 @@
 
 - **Smart IP Zones**: Visualization of L3 Networks with active IPs.
 - **Visual IP Cards**: Interactive cards for IPv4/IPv6 with "Click to copy" option.
-- **Interactive Topology Map**: Advanced visual canvas (Vue Flow) with minimap and zoom controls.
+- **Interactive Topology Map**: Advanced visual canvas (Vue Flow) with minimap, zoom, and animated status indicators.
 - **Smart Network Grid**: Collapsible nodes grouped by bridge to keep the interface clean.
 - **Search & Filtering**: Interactive filtering to hide offline machines and real-time search.
 
